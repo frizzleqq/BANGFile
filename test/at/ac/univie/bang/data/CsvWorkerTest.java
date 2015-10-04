@@ -10,8 +10,8 @@ import org.junit.Assert;
 
 public class CsvWorkerTest {
 	
-	private static String CSV_FILE = "test/resources/4_col_no_h.csv";
-	private static String CSV_FILE_HEADER = "test/resources/4_col_h.csv";
+	private static final String CSV_FILE = "test/resources/4_col_no_h.csv";
+	private static final String CSV_FILE_HEADER = "test/resources/4_col_h.csv";
 
 	@Test
 	public void testGetRecords() {
@@ -71,12 +71,12 @@ public class CsvWorkerTest {
 			Assert.fail();
 		}
 		
-		int[] x = new int[]{1,2,3,4};
-		assertArrayEquals(x, csv.readTuple());
+		float[] x = new float[]{0.1F,0.2F,0.3F,0.4F};
+		assertArrayEquals(x, csv.readTuple(), 0);
 		assertEquals(1, csv.getCurPosition(), 0);
 		
-		x = new int[]{5,6,7,8};
-		assertArrayEquals(x, csv.readTuple());
+		x = new float[]{0.5F,0.6F,0.7F,0.8F};
+		assertArrayEquals(x, csv.readTuple(), 0);
 		assertEquals(2, csv.getCurPosition(), 0);
 	}
 	
@@ -90,12 +90,12 @@ public class CsvWorkerTest {
 			Assert.fail();
 		}
 		
-		int[] x = new int[]{1,2,3,4};
-		assertArrayEquals(x, csv.readTuple());
+		float[] x = new float[]{0.1F,0.2F,0.3F,0.4F};
+		assertArrayEquals(x, csv.readTuple(), 0);
 		assertEquals(1, csv.getCurPosition(), 0);
 		
-		x = new int[]{5,6,7,8};
-		assertArrayEquals(x, csv.readTuple());
+		x = new float[]{0.5F,0.6F,0.7F,0.8F};
+		assertArrayEquals(x, csv.readTuple(), 0);
 		assertEquals(2, csv.getCurPosition(), 0);
 	}
 	

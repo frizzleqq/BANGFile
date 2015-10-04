@@ -126,19 +126,19 @@ public class CsvWorker implements DataWorker {
 	}
 
 	@Override
-	public int[] readTuple() {
+	public float[] readTuple() {
 		if (current_position >= records)
 			return null;
 		
-		int[] tuple = null;
+		float[] tuple = null;
 		try {
 			String line = br.readLine();
 			current_position++;
 			String[] string_tuple = csv.parseLine(line);
-			tuple = new int[string_tuple.length];
+			tuple = new float[string_tuple.length];
 			for(int i=0; i<string_tuple.length; i++)
 			{
-				tuple[i] = Integer.parseInt(string_tuple[i]);
+				tuple[i] = Float.parseFloat(string_tuple[i].replace(',', '.'));
 			}
 		}catch (IOException e) {
 			e.printStackTrace();

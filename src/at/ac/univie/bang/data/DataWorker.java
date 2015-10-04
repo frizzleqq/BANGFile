@@ -8,6 +8,6 @@ public interface DataWorker {
 	
 	public int getCurPosition();
 	
-	public int[] readTuple();
+	public float[] readTuple();
 
 }

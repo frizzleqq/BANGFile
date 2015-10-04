@@ -21,9 +21,12 @@ public class CliMain {
 	private static char delimiter = ';';
 	private static boolean header = false;
 	private static int bucketsize = 17;
-	private static int neighbourhood = 10000;;
+	private static int neighbourhood = 0;
 	private static int clusterPercent = 50;
 	private static boolean bangAlias = false;
+	
+	private static final int ERR_EXCEPTION = 1;
+	private static final int ERR_PARAM = 2;
 
 	private static void parse_options(String[] args) {
 
@@ -62,20 +65,18 @@ public class CliMain {
 		if (cmd.hasOption("s"))
 			bucketsize = Integer.parseInt(cmd.getOptionValue("s"));
 			if (bucketsize < 4){
-				System.out.println("Using minimum 'bucketsize' value 4.");
-				bucketsize = 4;
+				System.err.println("'bucketsize' has to be at least 4");
+				System.exit(ERR_PARAM);
 			}
 
 		if (cmd.hasOption("n"))
 			neighbourhood = Integer.parseInt(cmd.getOptionValue("n"));
-		else
-			neighbourhood = 10000; // TODO: dimension -1
 
 		if (cmd.hasOption("c")) {
 			clusterPercent = Integer.parseInt(cmd.getOptionValue("s"));
 			if (clusterPercent < 0 || clusterPercent > 100) {
 				System.err.println("ClusterPercent has to be between 0 and 100.");
-				System.exit(1);
+				System.exit(ERR_PARAM);
 			}
 		}
 
@@ -96,18 +97,24 @@ public class CliMain {
 		int dimension = data.getDimensions();
 		if (dimension == 0){
 			System.err.println("Could not determine dimensions of provided data.");
-			System.exit(1);
+			System.exit(ERR_EXCEPTION);
+		} else if (dimension < 2){
+			System.err.println("Could not determine at least 2 dimensions.");
+			System.exit(ERR_EXCEPTION);
 		}
 		int records = data.getRecords();
 		if (records == 0){
 			System.err.println("Could not determine amount of records of provided data.");
-			System.exit(1);
+			System.exit(ERR_EXCEPTION);
 		}
+		if (neighbourhood == 0)
+			neighbourhood = dimension - 1;
 		
-		int[] tuple;
+		float[] tuple;
 		for(int i = 0; i < records; i++){
 			tuple = data.readTuple();
 			System.out.println(Arrays.toString(tuple));
+			
 		}
 		
 	}
@@ -123,7 +130,7 @@ public class CliMain {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			System.err.println(e.getMessage());
-			System.exit(1);
+			System.exit(ERR_EXCEPTION);
 		}
 		
 		readData(data);
