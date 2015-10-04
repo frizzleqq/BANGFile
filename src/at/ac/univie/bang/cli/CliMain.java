@@ -1,4 +1,4 @@
-package at.ac.univie.bang;
+package at.ac.univie.bang.cli;
 
 import java.io.IOException;
 import java.util.Arrays;
