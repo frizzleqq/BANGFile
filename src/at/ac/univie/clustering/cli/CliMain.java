@@ -12,6 +12,8 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.SystemUtils;
 import org.junit.Test;
 
+import at.ac.univie.clustering.Clustering;
+import at.ac.univie.clustering.bang.BangClustering;
 import at.ac.univie.clustering.data.CsvWorker;
 import at.ac.univie.clustering.data.DataWorker;
 
@@ -119,41 +121,28 @@ public class CliMain {
 			System.err.println("Could not determine at least 2 dimensions.");
 			System.exit(ERR_EXCEPTION);
 		}
+		//TODO: is records really needed information at start?
 		int records = data.getRecords();
 		if (records == 0){
 			System.err.println("Could not determine amount of records of provided data.");
 			System.exit(ERR_EXCEPTION);
 		}
 		
-		//Clustering cluster = null;
+		Clustering cluster = null;
 		
-		//cluster = new BangClustering(data, dimension, records);
+		cluster = new BangClustering(dimension);
 		//bucketsize, clusterPercent, bangAlias, neighbourhood -> constructor or method?
 		
 		//this should go to BangClustering
 		if (neighbourhood == 0)
 			neighbourhood = dimension - 1;
-		
-		float[] tuple;
-		int record = 0;
-		// TODO: catch NumberFormatException,
-		while((tuple = data.readTuple()) != null){
-			if (tuple.length != dimension){
-				System.err.println(Arrays.toString(tuple));
-				System.err.printf("Tuple-dimension [%d] differs from predetermined dimension [%d].\n", tuple.length, dimension);
-				System.exit(ERR_EXCEPTION);
-			}
-			for (float f : tuple)
-		        if (f < 0 || f > 1){
-					System.err.println(Arrays.toString(tuple));
-					System.err.printf("Incorrect tuple value found [%f].\n", f);
-					System.exit(ERR_EXCEPTION);
-		        }
-			record++;
-			
-			System.out.printf("%d/%d\n", record, records);
-			System.out.println(Arrays.toString(tuple));
-			
+
+		try {
+			cluster.readData(data);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			System.err.println(e.getMessage());
+			System.exit(ERR_EXCEPTION);
 		}
 
 	}
