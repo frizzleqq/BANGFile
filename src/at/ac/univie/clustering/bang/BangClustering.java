@@ -20,7 +20,6 @@ public class BangClustering implements Clustering {
 
 		grids = new int[dimension + 1]; // grid[0] = dummy
 		Arrays.fill(grids, 0);
-
 	}
 
 	public void readData(DataWorker data) throws Exception {
