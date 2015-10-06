@@ -1,4 +1,4 @@
-package at.ac.univie.bang.data;
+package at.ac.univie.clustering.data;
 
 public interface DataWorker {
 	

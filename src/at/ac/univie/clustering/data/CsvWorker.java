@@ -1,4 +1,4 @@
-package at.ac.univie.bang.data;
+package at.ac.univie.clustering.data;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -136,7 +136,7 @@ public class CsvWorker implements DataWorker {
 			current_position++;
 			String[] string_tuple = csv.parseLine(line);
 			tuple = new float[string_tuple.length];
-			for(int i=0; i<string_tuple.length; i++)
+			for(int i=0; i < string_tuple.length; i++)
 			{
 				tuple[i] = Float.parseFloat(string_tuple[i].replace(',', '.'));
 			}
