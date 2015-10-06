@@ -1,9 +1,9 @@
-package at.ac.univie.clustering.bang;
+package at.ac.univie.clustering.method.bang;
 
 import java.util.Arrays;
 
-import at.ac.univie.clustering.Clustering;
 import at.ac.univie.clustering.data.DataWorker;
+import at.ac.univie.clustering.method.Clustering;
 
 public class BangClustering implements Clustering {
 
@@ -48,6 +48,7 @@ public class BangClustering implements Clustering {
 	private void insertTuple(float[] tuple) {
 
 		int region = mapRegion(tuple);
+		System.out.println(region);
 
 	}
 

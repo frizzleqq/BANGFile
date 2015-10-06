@@ -1,4 +1,4 @@
-package at.ac.univie.clustering;
+package at.ac.univie.clustering.method;
 
 import at.ac.univie.clustering.data.DataWorker;
 

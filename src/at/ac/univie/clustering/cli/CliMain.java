@@ -12,10 +12,10 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.SystemUtils;
 import org.junit.Test;
 
-import at.ac.univie.clustering.Clustering;
-import at.ac.univie.clustering.bang.BangClustering;
 import at.ac.univie.clustering.data.CsvWorker;
 import at.ac.univie.clustering.data.DataWorker;
+import at.ac.univie.clustering.method.Clustering;
+import at.ac.univie.clustering.method.bang.BangClustering;
 
 public class CliMain {
 	
