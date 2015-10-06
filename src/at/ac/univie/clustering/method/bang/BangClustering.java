@@ -48,7 +48,7 @@ public class BangClustering implements Clustering {
 	private void insertTuple(float[] tuple) {
 
 		int region = mapRegion(tuple);
-		System.out.println(region);
+		System.out.printf("Region: %d\n", region);
 
 	}
 

@@ -16,7 +16,6 @@ public class CsvWorkerTest {
 	private static final String CSV_FILE_HEADER = "test/resources/4_col_h.csv";
 	private static final String CSV_FILE_CHAR = "test/resources/char_value.csv";
 	private static final String CSV_FILE_NULL = "test/resources/null_value.csv";
-	private static final String CSV_FILE_DIM = "test/resources/wrong_dim.csv";
 	
 	@Test
 	public void testGetRecords() {
