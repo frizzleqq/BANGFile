@@ -35,7 +35,7 @@ public class CliMain {
 		options.addOption("f", true, "filename");
 		options.addOption("d", true, "delimiter");
 		options.addOption(null,"header", false, "header");
-		options.addOption("s", true, "bucketsize");
+		options.addOption("s", true, "bucketsize (max population)");
 		options.addOption("n", true, "neighbourhood");
 		options.addOption("c", true, "cluster-percent");
 		options.addOption("a", false, "alias");
@@ -127,7 +127,7 @@ public class CliMain {
 		
 		Clustering cluster = null;
 		
-		cluster = new BangClustering(dimension);
+		cluster = new BangClustering(dimension, bucketsize);
 		//bucketsize, clusterPercent, bangAlias, neighbourhood -> constructor or method?
 		
 		//this should go to BangClustering

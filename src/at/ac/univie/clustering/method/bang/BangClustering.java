@@ -9,17 +9,24 @@ public class BangClustering implements Clustering {
 
 	private int dimension = 0;
 	private int records = 0;
+	private int bucketsize = 0;
 	private int[] levels = null;
 	private int[] grids = null;
+	private DirectoryEntry bangFile;
 
-	public BangClustering(int dimension) {
+	public BangClustering(int dimension, int bucketsize) {
 		this.dimension = dimension;
+		this.bucketsize = bucketsize;
 
 		levels = new int[dimension + 1]; // level[0] = sum level[i]
 		Arrays.fill(levels, 0);
 
 		grids = new int[dimension + 1]; // grid[0] = dummy
 		Arrays.fill(grids, 0);
+		
+		// create root of bang file
+		bangFile = new DirectoryEntry();
+		bangFile.setRegion(new TupleRegion(0, 0));
 	}
 	
 	public void setLevels(int[] levels) {
@@ -58,14 +65,16 @@ public class BangClustering implements Clustering {
 		int region = mapRegion(tuple);
 		System.out.printf("Region: %d\n", region);
 		
-		/*if ((dir_ptr = find_region(region,level[0])) == NULL)
-	    {
-	        xerror("System-Error in <find_region>");
-	    }
-	    else
-	    {*/
 		
-		//find_region(region, levels[0]);
+		DirectoryEntry dirEntry = findRegion(region, levels[0]);
+		if (dirEntry != null){
+			System.err.println("Could not find directory entry.");
+		}
+		
+		/*if (dirEntry.getRegion().getPopulation() < bucketsize){
+			
+		}*/
+		
 	}
 
 	public int mapRegion(float[] tuple) {
@@ -91,5 +100,41 @@ public class BangClustering implements Clustering {
 			}
 		}
 		return region;
+	}
+	
+	public DirectoryEntry findRegion(int region, int level){
+		DirectoryEntry tupleTmp = null;
+				
+		while (level > 0){
+			level--;
+			
+			//if bit set, right
+			if ((region & 1) != 0){
+				tupleTmp = bangFile.getRight();
+			}else{
+				tupleTmp = bangFile.getLeft();
+			}
+			
+			if (tupleTmp == null){
+				break;
+			}
+			
+			bangFile = tupleTmp;
+			region = region >> 1;
+		}
+	    /* lowest (smallest possible) region reached
+	       now it must be tested, if empty dir_entry
+	       if empty -> go back until a valid entry found
+	    */
+		while ((bangFile.getRegion() == null) && (bangFile.getBack() != null)){
+			// because root has no back, we also check region (which is initialized for root)
+			bangFile = bangFile.getBack();
+		}
+		
+		if (bangFile.getRegion() != null){
+			return bangFile;
+		}else{
+			return null;
+		}
 	}
 }
