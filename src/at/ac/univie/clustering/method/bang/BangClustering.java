@@ -21,6 +21,14 @@ public class BangClustering implements Clustering {
 		grids = new int[dimension + 1]; // grid[0] = dummy
 		Arrays.fill(grids, 0);
 	}
+	
+	public void setLevels(int[] levels) {
+		this.levels = levels;
+	}
+
+	public void setGrids(int[] grids) {
+		this.grids = grids;
+	}
 
 	public void readData(DataWorker data) throws Exception {
 		float[] tuple;
@@ -45,14 +53,22 @@ public class BangClustering implements Clustering {
 		}
 	}
 
-	private void insertTuple(float[] tuple) {
+	public void insertTuple(float[] tuple) {
 
 		int region = mapRegion(tuple);
 		System.out.printf("Region: %d\n", region);
-
+		
+		/*if ((dir_ptr = find_region(region,level[0])) == NULL)
+	    {
+	        xerror("System-Error in <find_region>");
+	    }
+	    else
+	    {*/
+		
+		//find_region(region, levels[0]);
 	}
 
-	private int mapRegion(float[] tuple) {
+	public int mapRegion(float[] tuple) {
 		int region = 0;
 
 		// placement in scale
