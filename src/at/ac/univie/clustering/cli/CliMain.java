@@ -109,30 +109,20 @@ public class CliMain {
 			System.exit(ERR_EXCEPTION);
 		}
 		
-		// checking preconditions
-		int dimension = data.getDimensions();
-		if (dimension == 0){
-			System.err.println("Could not determine dimensions of provided data.");
-			System.exit(ERR_EXCEPTION);
-		} else if (dimension < 2){
-			System.err.println("Could not determine at least 2 dimensions.");
-			System.exit(ERR_EXCEPTION);
-		}
-		//TODO: is records really needed information at start?
-		int records = data.getRecords();
-		if (records == 0){
-			System.err.println("Could not determine amount of records of provided data.");
-			System.exit(ERR_EXCEPTION);
-		}
+
 		
 		Clustering cluster = null;
 		
-		cluster = new BangClustering(dimension, bucketsize);
-		//bucketsize, clusterPercent, bangAlias, neighbourhood -> constructor or method?
+		cluster = new BangClustering(data, bucketsize);
+		//TODO: bucketsize, clusterPercent, bangAlias, neighbourhood -> constructor or method?
 		
-		//this should go to BangClustering
-		if (neighbourhood == 0)
-			neighbourhood = dimension - 1;
+		//TODO: this should go to BangClustering
+		//if (neighbourhood == 0)
+		//	neighbourhood = dimension - 1;
+		
+		System.out.println("Dimensions: " + cluster.getDimension());
+		
+		System.out.println("Tuples: " + cluster.getTuples() + "\n");
 
 		try {
 			cluster.readData(data);
@@ -141,6 +131,8 @@ public class CliMain {
 			System.err.println(e.getMessage());
 			System.exit(ERR_EXCEPTION);
 		}
+		
+		System.out.println("\n" + cluster);
 
 	}
 }

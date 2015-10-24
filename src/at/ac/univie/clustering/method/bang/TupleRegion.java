@@ -1,12 +1,15 @@
 package at.ac.univie.clustering.method.bang;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class TupleRegion {
 	
 	private int population = 0;
 	private int region;
 	private int level;
 	private float density = 0;
-	private float[] tuple = null;
+	private List<float[]> tupleList = new ArrayList<float[]>();
 	private TupleRegion alias = null;
 	
 	public TupleRegion(int region, int level) {
@@ -46,20 +49,26 @@ public class TupleRegion {
 		this.density = density;
 	}
 
-	public float[] getTuple() {
-		return tuple;
-	}
-
-	public void setTuple(float[] tuple) {
-		this.tuple = tuple;
-	}
-
 	public TupleRegion getAlias() {
 		return alias;
 	}
 
 	public void setAlias(TupleRegion alias) {
 		this.alias = alias;
+	}
+	
+	public List<float[]> getTupleList(){
+		return tupleList;
+	}
+
+	/**
+	 * 
+	 * @param tuple
+	 */
+	public void insertTuple(float[] tuple) {
+		
+		tupleList.add(tuple);
+		population++;
 	}
 	
 }

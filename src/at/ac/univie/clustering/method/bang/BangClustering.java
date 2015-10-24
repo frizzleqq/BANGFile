@@ -5,18 +5,46 @@ import java.util.Arrays;
 import at.ac.univie.clustering.data.DataWorker;
 import at.ac.univie.clustering.method.Clustering;
 
+/**
+ * @author Florian Fritz
+ *
+ */
 public class BangClustering implements Clustering {
 
+	private DataWorker data = null;
+	private int tuples = 0;
 	private int dimension = 0;
-	private int records = 0;
+	private int tuplesRead = 0;
 	private int bucketsize = 0;
 	private int[] levels = null;
 	private int[] grids = null;
 	private DirectoryEntry bangFile;
 
-	public BangClustering(int dimension, int bucketsize) {
-		this.dimension = dimension;
+	/**
+	 * @param dimension
+	 * @param bucketsize
+	 */
+	public BangClustering(DataWorker data, int bucketsize) {
+		
+		this.data = data;
 		this.bucketsize = bucketsize;
+		
+		dimension = this.data.getDimensions();
+		tuples = this.data.getRecords();
+		
+		//TODO: throw exceptions instead of system exit
+		if (dimension == 0){
+			System.err.println("Could not determine dimensions of provided data.");
+			System.exit(1);
+		} else if (dimension < 2){
+			System.err.println("Could not determine at least 2 dimensions.");
+			System.exit(1);
+		}
+		
+		if (tuples == 0){
+			System.err.println("Could not determine amount of records of provided data.");
+			System.exit(1);
+		}
 
 		levels = new int[dimension + 1]; // level[0] = sum level[i]
 		Arrays.fill(levels, 0);
@@ -27,57 +55,106 @@ public class BangClustering implements Clustering {
 		// create root of bang file
 		bangFile = new DirectoryEntry();
 		bangFile.setRegion(new TupleRegion(0, 0));
+		
 	}
 	
-	public void setLevels(int[] levels) {
-		this.levels = levels;
+	@Override
+	public int getDimension() {
+		return dimension;
+	}
+	
+	@Override
+	public int getTuples() {
+		return tuples;
 	}
 
-	public void setGrids(int[] grids) {
-		this.grids = grids;
+	@Override
+	public int getTuplesRead() {
+		return tuplesRead;
 	}
 
+	/* (non-Javadoc)
+	 * @see at.ac.univie.clustering.method.Clustering#readData(at.ac.univie.clustering.data.DataWorker)
+	 */
 	public void readData(DataWorker data) throws Exception {
 		float[] tuple;
+		
 		// TODO: NumberFormatException will be lost in Exception
 		while ((tuple = data.readTuple()) != null) {
+			
 			if (tuple.length != dimension) {
 				System.err.println(Arrays.toString(tuple));
 				throw new Exception(String.format("Tuple-dimension [%d] differs from predetermined dimension [%d].\n",
 						tuple.length, dimension));
 			}
-			for (float f : tuple)
+			
+			for (float f : tuple){
 				if (f < 0 || f > 1) {
 					System.err.println(Arrays.toString(tuple));
 					throw new Exception(String.format("Incorrect tuple value found [%f].\n", f));
 				}
-			records++;
-
+			}
+			
+			tuplesRead++;
 			this.insertTuple(tuple);
 
-			System.out.printf("%d: ", records);
+			System.out.printf("%d: ", tuplesRead);
 			System.out.println(Arrays.toString(tuple));
+			
 		}
+		
 	}
 
-	public void insertTuple(float[] tuple) {
+	/**
+	 * @param tuple
+	 */
+	private void insertTuple(float[] tuple) {
 
 		int region = mapRegion(tuple);
 		System.out.printf("Region: %d\n", region);
 		
 		
 		DirectoryEntry dirEntry = findRegion(region, levels[0]);
-		if (dirEntry != null){
+		if (dirEntry == null){
 			System.err.println("Could not find directory entry.");
 		}
 		
-		/*if (dirEntry.getRegion().getPopulation() < bucketsize){
+		if (dirEntry.getRegion().getPopulation() < bucketsize){
+			dirEntry.getRegion().insertTuple(tuple);
+		} else{
+			DirectoryEntry enclosingRegion = dirEntry.getBack();
 			
-		}*/
-		
+			// find the enclosing region
+			while(enclosingRegion != null && enclosingRegion.getRegion() == null){
+				enclosingRegion = enclosingRegion.getBack();
+			}
+			
+			if (enclosingRegion == null){
+				// enclosing region not found (possible if outermost region)
+				splitRegion(dirEntry);
+			} else{
+				if (!redistribute(dirEntry, enclosingRegion)){
+					region = mapRegion(tuple);
+					
+					dirEntry = findRegion(region, levels[0]);
+					if (dirEntry == null){
+						System.err.println("Could not find directory entry.");
+					}
+					
+					splitRegion(dirEntry);
+				}
+			}
+			
+			// try inserting tuple into new structure
+			insertTuple(tuple);
+		}
 	}
 
-	public int mapRegion(float[] tuple) {
+	/**
+	 * @param tuple
+	 * @return
+	 */
+	private int mapRegion(float[] tuple) {
 		int region = 0;
 
 		// placement in scale
@@ -102,16 +179,22 @@ public class BangClustering implements Clustering {
 		return region;
 	}
 	
-	public DirectoryEntry findRegion(int region, int level){
+	
+	/**
+	 * @param region
+	 * @param level
+	 * @return
+	 */
+	private DirectoryEntry findRegion(int region, int level){
 		DirectoryEntry tupleTmp = null;
 				
 		while (level > 0){
 			level--;
 			
-			//if bit set, right
+			//if bit set, go right
 			if ((region & 1) != 0){
 				tupleTmp = bangFile.getRight();
-			}else{
+			} else{
 				tupleTmp = bangFile.getLeft();
 			}
 			
@@ -122,6 +205,7 @@ public class BangClustering implements Clustering {
 			bangFile = tupleTmp;
 			region = region >> 1;
 		}
+		
 	    /* lowest (smallest possible) region reached
 	       now it must be tested, if empty dir_entry
 	       if empty -> go back until a valid entry found
@@ -137,4 +221,40 @@ public class BangClustering implements Clustering {
 			return null;
 		}
 	}
+	
+	/**
+	 * 
+	 * @param dirEntry
+	 */
+	private void splitRegion(DirectoryEntry dirEntry){
+		// TODO
+	}
+	
+	/**
+	 * 
+	 * @param dirEntry
+	 * @param enclosingRegion
+	 * @return
+	 */
+	private boolean redistribute(DirectoryEntry tupleRegion, DirectoryEntry enclosingRegion) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public String toString() {
+		String bangString = "";
+		
+		bangString += "Region: " + bangFile.getRegion().getRegion();
+		bangString += "\nLevel: " + bangFile.getRegion().getLevel();
+		bangString += "\nPopulation: " + bangFile.getRegion().getPopulation();
+		
+		bangString += "\nTuples: ";
+		for (float[] tuple : bangFile.getRegion().getTupleList()){
+			bangString += "\n\t" + Arrays.toString(tuple);
+		}
+		
+		return bangString;
+	}	
+	
 }

@@ -34,6 +34,12 @@ public class CsvWorker implements DataWorker {
 	 * filename; this.delimiter = '#'; this.header = header; }
 	 */
 
+	/**
+	 * @param filename
+	 * @param delimiter
+	 * @param header
+	 * @throws IOException
+	 */
 	public CsvWorker(String filename, char delimiter, boolean header) throws IOException {
 		this.filename = filename;
 		this.delimiter = delimiter;
@@ -53,6 +59,9 @@ public class CsvWorker implements DataWorker {
 		dimensions = countDimensions();
 	}
 
+	/**
+	 * @return
+	 */
 	private boolean fileExists() {
 		File f = new File(filename);
 		if (f.exists() && !f.isDirectory())
@@ -61,6 +70,9 @@ public class CsvWorker implements DataWorker {
 			return false;
 	}
 
+	/**
+	 * @return
+	 */
 	private boolean fileReadable() {
 		File f = new File(filename);
 
@@ -73,11 +85,17 @@ public class CsvWorker implements DataWorker {
 		return true;
 	}
 
+	/* (non-Javadoc)
+	 * @see at.ac.univie.clustering.data.DataWorker#getRecords()
+	 */
 	@Override
 	public int getRecords() {
 		return records;
 	}
 
+	/**
+	 * @return
+	 */
 	public int countRecords() {
 		int linenumber = 0;
 		try {
@@ -98,11 +116,17 @@ public class CsvWorker implements DataWorker {
 		return linenumber;
 	}
 
+	/* (non-Javadoc)
+	 * @see at.ac.univie.clustering.data.DataWorker#getDimensions()
+	 */
 	@Override
 	public int getDimensions() {
 		return dimensions;
 	}
 
+	/**
+	 * @return
+	 */
 	public int countDimensions() {
 		int dimensions = 0;
 		try {
@@ -120,11 +144,17 @@ public class CsvWorker implements DataWorker {
 		return dimensions;
 	}
 
+	/* (non-Javadoc)
+	 * @see at.ac.univie.clustering.data.DataWorker#getCurPosition()
+	 */
 	@Override
 	public int getCurPosition() {
 		return current_position;
 	}
 
+	/* (non-Javadoc)
+	 * @see at.ac.univie.clustering.data.DataWorker#readTuple()
+	 */
 	@Override
 	public float[] readTuple() {
 		if (current_position >= records)
