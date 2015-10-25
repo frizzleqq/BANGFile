@@ -50,7 +50,7 @@ public class CsvWorkerTest {
 			e.printStackTrace();
 			Assert.fail();
 		}
-		assertEquals(4, csv.getDimensions(), 0);
+		assertEquals(4, csv.getDimension(), 0);
 	}
 	
 	@Test
@@ -62,7 +62,7 @@ public class CsvWorkerTest {
 			e.printStackTrace();
 			Assert.fail();
 		}
-		assertEquals(4, csv.getDimensions(), 0);
+		assertEquals(4, csv.getDimension(), 0);
 	}
 	
 	@Test

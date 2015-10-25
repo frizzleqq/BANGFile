@@ -60,6 +60,10 @@ public class TupleRegion {
 	public List<float[]> getTupleList(){
 		return tupleList;
 	}
+	
+	public void setTupleList(List<float[]> tupleList){
+		this.tupleList = tupleList;
+	}
 
 	/**
 	 * 
@@ -69,6 +73,11 @@ public class TupleRegion {
 		
 		tupleList.add(tuple);
 		population++;
+	}
+	
+	public void clearTupleList(){
+		tupleList.clear();
+		population = 0;
 	}
 	
 }

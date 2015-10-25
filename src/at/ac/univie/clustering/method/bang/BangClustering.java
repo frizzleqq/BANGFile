@@ -2,7 +2,6 @@ package at.ac.univie.clustering.method.bang;
 
 import java.util.Arrays;
 
-import at.ac.univie.clustering.data.DataWorker;
 import at.ac.univie.clustering.method.Clustering;
 
 /**
@@ -11,10 +10,8 @@ import at.ac.univie.clustering.method.Clustering;
  */
 public class BangClustering implements Clustering {
 
-	private DataWorker data = null;
-	private int tuples = 0;
+	private int tuplesCount = 0;
 	private int dimension = 0;
-	private int tuplesRead = 0;
 	private int bucketsize = 0;
 	private int[] levels = null;
 	private int[] grids = null;
@@ -23,28 +20,13 @@ public class BangClustering implements Clustering {
 	/**
 	 * @param dimension
 	 * @param bucketsize
+	 * @param tuplesCount this may not be useful in Clustering
 	 */
-	public BangClustering(DataWorker data, int bucketsize) {
+	public BangClustering(int dimension, int bucketsize, int tuplesCount) {
 		
-		this.data = data;
+		this.dimension = dimension;
 		this.bucketsize = bucketsize;
-		
-		dimension = this.data.getDimensions();
-		tuples = this.data.getRecords();
-		
-		//TODO: throw exceptions instead of system exit
-		if (dimension == 0){
-			System.err.println("Could not determine dimensions of provided data.");
-			System.exit(1);
-		} else if (dimension < 2){
-			System.err.println("Could not determine at least 2 dimensions.");
-			System.exit(1);
-		}
-		
-		if (tuples == 0){
-			System.err.println("Could not determine amount of records of provided data.");
-			System.exit(1);
-		}
+		this.tuplesCount = tuplesCount;
 
 		levels = new int[dimension + 1]; // level[0] = sum level[i]
 		Arrays.fill(levels, 0);
@@ -62,53 +44,14 @@ public class BangClustering implements Clustering {
 	public int getDimension() {
 		return dimension;
 	}
+
+	@Override
+	public int getTuplesCount() {
+		return tuplesCount;
+	}	
 	
 	@Override
-	public int getTuples() {
-		return tuples;
-	}
-
-	@Override
-	public int getTuplesRead() {
-		return tuplesRead;
-	}
-
-	/* (non-Javadoc)
-	 * @see at.ac.univie.clustering.method.Clustering#readData(at.ac.univie.clustering.data.DataWorker)
-	 */
-	public void readData(DataWorker data) throws Exception {
-		float[] tuple;
-		
-		// TODO: NumberFormatException will be lost in Exception
-		while ((tuple = data.readTuple()) != null) {
-			
-			if (tuple.length != dimension) {
-				System.err.println(Arrays.toString(tuple));
-				throw new Exception(String.format("Tuple-dimension [%d] differs from predetermined dimension [%d].\n",
-						tuple.length, dimension));
-			}
-			
-			for (float f : tuple){
-				if (f < 0 || f > 1) {
-					System.err.println(Arrays.toString(tuple));
-					throw new Exception(String.format("Incorrect tuple value found [%f].\n", f));
-				}
-			}
-			
-			tuplesRead++;
-			this.insertTuple(tuple);
-
-			System.out.printf("%d: ", tuplesRead);
-			System.out.println(Arrays.toString(tuple));
-			
-		}
-		
-	}
-
-	/**
-	 * @param tuple
-	 */
-	private void insertTuple(float[] tuple) {
+	public void insertTuple(float[] tuple) {
 
 		int region = mapRegion(tuple);
 		System.out.printf("Region: %d\n", region);
@@ -228,8 +171,109 @@ public class BangClustering implements Clustering {
 	 */
 	private void splitRegion(DirectoryEntry dirEntry){
 		// TODO
+		DirectoryEntry sparse = null;
+		DirectoryEntry dense = null;
+		
+		buddySplit(dirEntry);
+		
+		//clear previous region of tuples (not necessary since we overwrite it anyway)
+		//dirEntry.getRegion().clearTupleList();
+		
+		if (dirEntry.getLeft().getRegion().getPopulation() < dirEntry.getRight().getRegion().getPopulation()){
+			sparse = dirEntry.getLeft();
+			dense = dirEntry.getRight();
+		}else{
+			sparse = dirEntry.getRight();
+			dense = dirEntry.getLeft();
+		}
+		
+		dirEntry.getRegion().setPopulation(sparse.getRegion().getPopulation());
+		dirEntry.getRegion().setTupleList(sparse.getRegion().getTupleList());
+		
+		//dense = checkTree(dense);
+		
+		//redistribute(dense, dirEntry);
+		//checkTree(dirEntry);
+		
+		
 	}
 	
+	/**
+	 * Split a region into 2 regions called "left" and "right".
+	 * The level of these new regions is increased by 1 compared to the old
+	 * region. Tuples are then inserted again, to move them into the new
+	 * regions.
+	 * 
+	 * @param dirEntry Directory-Entry to buddy-split
+	 * @return true if successful, false if not
+	 */
+	private boolean buddySplit(DirectoryEntry dirEntry) {
+		// TODO Auto-generated method stub
+		boolean result = false;
+		
+		DirectoryEntry left = null;
+		DirectoryEntry right = null;
+		
+		if (dirEntry.getLeft() != null){
+			left = dirEntry.getLeft();
+		} else{
+			left = new DirectoryEntry();
+			
+			dirEntry.setLeft(left);
+			left.setBack(dirEntry);
+		}
+		
+		/*
+		 * left region of dirEntry, direntry is "Back" of left
+		 * left region number = back region number
+		 * left region level = back level + 1
+		 * 
+		 * back (0, 0) -> left (0, 1)
+		 * back (3, 2) -> left (3, 3)
+		 */
+		left.setRegion(new TupleRegion(dirEntry.getRegion().getRegion(),
+				dirEntry.getRegion().getLevel() + 1));
+		
+		if (dirEntry.getRight() != null){
+			right = dirEntry.getRight();
+		} else{
+			right = new DirectoryEntry();
+			
+			dirEntry.setRight(right);
+			right.setBack(dirEntry);
+		}
+		
+		/*
+		 * right region of dirEntry, direntry is "Back" of right
+		 * right region number = back region number + 1 Bit as MSB
+		 * right region level = back level + 1
+		 * 
+		 * back (0, 0) -> right (1, 1)
+		 * back (3, 2) -> right (7, 3)
+		 */
+		right.setRegion(new TupleRegion(dirEntry.getRegion().getRegion() + (1 << dirEntry.getRegion().getLevel()),
+				dirEntry.getRegion().getLevel() + 1));
+		
+		//check if max depth
+		if (dirEntry.getRegion().getLevel() == levels[0]){
+			increaseGridLevel();
+			result = true;
+		}
+		
+		//Insert all tuples of directory again, since they should now be in
+		//either left or right.
+		for(float[] tuple : dirEntry.getRegion().getTupleList()){
+			insertTuple(tuple);
+		}
+		
+		return result;
+	}
+
+	private void increaseGridLevel() {
+		levels[(levels[0]%dimension) + 1] += 1;
+		levels[0] += 1;
+	}
+
 	/**
 	 * 
 	 * @param dirEntry
@@ -255,6 +299,6 @@ public class BangClustering implements Clustering {
 		}
 		
 		return bangString;
-	}	
+	}
 	
 }

@@ -16,7 +16,7 @@ public class CsvWorker implements DataWorker {
 	private char delimiter;
 	private boolean header;
 	private int records = 0;
-	private int dimensions = 0;
+	private int dimension = 0;
 	
 	private int current_position;
 	
@@ -56,7 +56,7 @@ public class CsvWorker implements DataWorker {
 			br.readLine();
 		
 		records = countRecords();
-		dimensions = countDimensions();
+		dimension = countDimension();
 	}
 
 	/**
@@ -120,15 +120,15 @@ public class CsvWorker implements DataWorker {
 	 * @see at.ac.univie.clustering.data.DataWorker#getDimensions()
 	 */
 	@Override
-	public int getDimensions() {
-		return dimensions;
+	public int getDimension() {
+		return dimension;
 	}
 
 	/**
 	 * @return
 	 */
-	public int countDimensions() {
-		int dimensions = 0;
+	public int countDimension() {
+		int dimension = 0;
 		try {
 			CSVParser csv = new CSVParser(delimiter);
 			BufferedReader br = new BufferedReader(new FileReader(filename));
@@ -137,11 +137,11 @@ public class CsvWorker implements DataWorker {
 			if (header)
 				line = br.readLine(); // maybe file has unusual header
 			br.close();
-			dimensions = csv.parseLine(line).length;
+			dimension = csv.parseLine(line).length;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return dimensions;
+		return dimension;
 	}
 
 	/* (non-Javadoc)

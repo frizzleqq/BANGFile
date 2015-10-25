@@ -14,7 +14,7 @@ public interface DataWorker {
 	/**
 	 * @return
 	 */
-	public int getDimensions();
+	public int getDimension();
 	
 	/**
 	 * @return
@@ -22,6 +22,7 @@ public interface DataWorker {
 	public int getCurPosition();
 	
 	/**
+	 * 
 	 * @return
 	 */
 	public float[] readTuple();

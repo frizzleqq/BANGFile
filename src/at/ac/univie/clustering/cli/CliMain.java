@@ -1,6 +1,7 @@
 package at.ac.univie.clustering.cli;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -93,8 +94,7 @@ public class CliMain {
 		formatter.printHelp("Bang", header, options, footer, true);
 		System.exit(0);
 	}
-
-
+	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		parse_options(args);
@@ -109,11 +109,27 @@ public class CliMain {
 			System.exit(ERR_EXCEPTION);
 		}
 		
-
+		int dimension = data.getDimension();
+		int tuplesCount = data.getRecords();
 		
+		//TODO: throw exceptions instead of system exit
+		if (dimension == 0){
+			System.err.println("Could not determine dimensions of provided data.");
+			System.exit(1);
+		} else if (dimension < 2){
+			System.err.println("Could not determine at least 2 dimensions.");
+			System.exit(1);
+		}
+		
+		if (tuplesCount == 0){
+			System.err.println("Could not determine amount of records of provided data.");
+			System.exit(1);
+		}
+		
+
 		Clustering cluster = null;
 		
-		cluster = new BangClustering(data, bucketsize);
+		cluster = new BangClustering(dimension, bucketsize, tuplesCount);
 		//TODO: bucketsize, clusterPercent, bangAlias, neighbourhood -> constructor or method?
 		
 		//TODO: this should go to BangClustering
@@ -122,14 +138,38 @@ public class CliMain {
 		
 		System.out.println("Dimensions: " + cluster.getDimension());
 		
-		System.out.println("Tuples: " + cluster.getTuples() + "\n");
+		System.out.println("Tuples: " + cluster.getTuplesCount() + "\n");
 
-		try {
-			cluster.readData(data);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			System.err.println(e.getMessage());
-			System.exit(ERR_EXCEPTION);
+		int tuplesRead = 0;
+		float[] tuple;
+		
+		/* TODO: 	- NumberFormatException should be handled
+		 * 			- should be caught in DataWorker?
+		 * 			- force range 0 - 1? or change to readFloat / readInt etc.
+		 * 			- add bool called "normalize"?
+		 */
+		while ((tuple = data.readTuple()) != null) {
+			
+			if (tuple.length != data.getDimension()) {
+				System.err.println(Arrays.toString(tuple));
+				System.err.println(String.format("Tuple-dimension [%d] differs from predetermined dimension [%d].\n",
+						tuple.length, data.getDimension()));
+				System.exit(ERR_EXCEPTION);
+			}
+			
+			for (float f : tuple){
+				if (f < 0 || f > 1) {
+					System.err.println(Arrays.toString(tuple));
+					System.err.println(String.format("Incorrect tuple value found [%f].\n", f));
+					System.exit(ERR_EXCEPTION);
+				}
+			}
+			
+			cluster.insertTuple(tuple);
+
+			System.out.printf("%d: ", tuplesRead);
+			System.out.println(Arrays.toString(tuple));
+			
 		}
 		
 		System.out.println("\n" + cluster);
