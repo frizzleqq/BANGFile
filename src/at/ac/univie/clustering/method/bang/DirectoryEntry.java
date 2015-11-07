@@ -39,4 +39,21 @@ public class DirectoryEntry {
 		this.region = region;
 	}
 
+	@Override
+	public String toString() {
+		String dirString = "DirectoryEntry:";
+		if(region != null){
+			dirString += "\n" +region;
+		}else{
+			dirString += "\n\tEmpty Region.";
+		}
+		if(left != null){
+			dirString += "\n" + left;
+		}
+		if (right != null){
+			dirString += "\n" + right;
+		}
+		return dirString + "\n";
+	}
+
 }

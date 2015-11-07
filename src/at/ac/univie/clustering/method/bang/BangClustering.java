@@ -1,6 +1,9 @@
 package at.ac.univie.clustering.method.bang;
 
+import java.lang.reflect.Array;
 import java.util.Arrays;
+
+import javax.sound.midi.SoundbankResource;
 
 import at.ac.univie.clustering.method.Clustering;
 
@@ -20,10 +23,11 @@ public class BangClustering implements Clustering {
 	/**
 	 * @param dimension
 	 * @param bucketsize
-	 * @param tuplesCount this may not be useful in Clustering
+	 * @param tuplesCount
+	 *            this may not be useful in Clustering
 	 */
 	public BangClustering(int dimension, int bucketsize, int tuplesCount) {
-		
+
 		this.dimension = dimension;
 		this.bucketsize = bucketsize;
 		this.tuplesCount = tuplesCount;
@@ -33,13 +37,13 @@ public class BangClustering implements Clustering {
 
 		grids = new int[dimension + 1]; // grid[0] = dummy
 		Arrays.fill(grids, 0);
-		
+
 		// create root of bang file
 		bangFile = new DirectoryEntry();
 		bangFile.setRegion(new TupleRegion(0, 0));
-		
+
 	}
-	
+
 	@Override
 	public int getDimension() {
 		return dimension;
@@ -48,46 +52,45 @@ public class BangClustering implements Clustering {
 	@Override
 	public int getTuplesCount() {
 		return tuplesCount;
-	}	
-	
+	}
+
 	@Override
 	public void insertTuple(float[] tuple) {
 
 		int region = mapRegion(tuple);
-		System.out.printf("Region: %d\n", region);
-		
-		
+
 		DirectoryEntry dirEntry = findRegion(region, levels[0]);
-		if (dirEntry == null){
+		if (dirEntry == null) {
 			System.err.println("Could not find directory entry.");
 		}
-		
-		if (dirEntry.getRegion().getPopulation() < bucketsize){
+
+		if (dirEntry.getRegion().getPopulation() < bucketsize) {
 			dirEntry.getRegion().insertTuple(tuple);
-		} else{
+		} else {
 			DirectoryEntry enclosingRegion = dirEntry.getBack();
-			
+
 			// find the enclosing region
-			while(enclosingRegion != null && enclosingRegion.getRegion() == null){
+			while (enclosingRegion != null && enclosingRegion.getRegion() == null) {
+				System.out.println("move 1 region back");
 				enclosingRegion = enclosingRegion.getBack();
 			}
-			
-			if (enclosingRegion == null){
+
+			if (enclosingRegion == null) {
 				// enclosing region not found (possible if outermost region)
 				splitRegion(dirEntry);
-			} else{
-				if (!redistribute(dirEntry, enclosingRegion)){
+			} else {
+				if (!redistribute(dirEntry, enclosingRegion)) {
 					region = mapRegion(tuple);
-					
+
 					dirEntry = findRegion(region, levels[0]);
-					if (dirEntry == null){
+					if (dirEntry == null) {
 						System.err.println("Could not find directory entry.");
 					}
-					
+
 					splitRegion(dirEntry);
 				}
 			}
-			
+
 			// try inserting tuple into new structure
 			insertTuple(tuple);
 		}
@@ -100,19 +103,19 @@ public class BangClustering implements Clustering {
 	private int mapRegion(float[] tuple) {
 		int region = 0;
 
-		// placement in scale
+		// find placement in scale
 		for (int i = 1; i <= dimension; i++) {
 			grids[i] = (int) (tuple[i - 1] * (1 << levels[i]));
 		}
-		
+
 		int i = 0, j = 0, count = 0, offset = 1;
-		
+
 		for (int k = 0; count < levels[0]; k++) {
 			i = (k % dimension) + 1; // index starts with 1
-			j = k / dimension; // j ... from 0 to levels[i] - 1 */
+			j = k / dimension; // j ... from 0 to levels[i] - 1
 
 			if (j < levels[i]) {
-				if ((grids[i] & (1 << (levels[i] - j - 1))) != 0){
+				if ((grids[i] & (1 << (levels[i] - j - 1))) != 0) {
 					region += offset; // bit set - add power of 2
 				}
 				offset *= 2;
@@ -121,184 +124,326 @@ public class BangClustering implements Clustering {
 		}
 		return region;
 	}
-	
-	
+
 	/**
+	 * go backwards through levels to find left or right for the tuple
+	 * 
 	 * @param region
 	 * @param level
 	 * @return
 	 */
-	private DirectoryEntry findRegion(int region, int level){
+	private DirectoryEntry findRegion(int region, int level) {
+		DirectoryEntry tupleReg = bangFile;
 		DirectoryEntry tupleTmp = null;
-				
-		while (level > 0){
+
+		while (level > 0) {
 			level--;
-			
-			//if bit set, go right
-			if ((region & 1) != 0){
-				tupleTmp = bangFile.getRight();
-			} else{
-				tupleTmp = bangFile.getLeft();
+
+			// if bit set, go right
+			if ((region & 1) != 0) {
+				tupleTmp = tupleReg.getRight();
+			} else {
+				tupleTmp = tupleReg.getLeft();
 			}
-			
-			if (tupleTmp == null){
+
+			if (tupleTmp == null) {
 				break;
 			}
-			
-			bangFile = tupleTmp;
+
+			tupleReg = tupleTmp;
 			region = region >> 1;
 		}
-		
-	    /* lowest (smallest possible) region reached
-	       now it must be tested, if empty dir_entry
-	       if empty -> go back until a valid entry found
-	    */
-		while ((bangFile.getRegion() == null) && (bangFile.getBack() != null)){
-			// because root has no back, we also check region (which is initialized for root)
-			bangFile = bangFile.getBack();
+
+		/*
+		 * lowest (smallest possible) region reached now it must be tested, if
+		 * empty dir_entry if empty -> go back until a valid entry found
+		 */
+		while ((tupleReg.getRegion() == null) && (tupleReg.getBack() != null)) {
+			// because root has no back, we also check region (which is
+			// initialized for root)
+			tupleReg = tupleReg.getBack();
 		}
-		
-		if (bangFile.getRegion() != null){
-			return bangFile;
-		}else{
+
+		if (tupleReg.getRegion() != null) {
+			return tupleReg;
+		} else {
 			return null;
 		}
 	}
-	
+
 	/**
-	 * 
+	 * Managing the buddy split
 	 * @param dirEntry
 	 */
-	private void splitRegion(DirectoryEntry dirEntry){
-		// TODO
+	private void splitRegion(DirectoryEntry dirEntry) {
 		DirectoryEntry sparse = null;
 		DirectoryEntry dense = null;
-		
+
 		buddySplit(dirEntry);
-		
-		//clear previous region of tuples (not necessary since we overwrite it anyway)
-		//dirEntry.getRegion().clearTupleList();
-		
-		if (dirEntry.getLeft().getRegion().getPopulation() < dirEntry.getRight().getRegion().getPopulation()){
+
+		// clear previous region of tuples (not necessary since we overwrite it
+		// later)
+		// dirEntry.getRegion().clearTupleList();
+
+		if (dirEntry.getLeft().getRegion().getPopulation() < dirEntry.getRight().getRegion().getPopulation()) {
 			sparse = dirEntry.getLeft();
 			dense = dirEntry.getRight();
-		}else{
+		} else {
 			sparse = dirEntry.getRight();
 			dense = dirEntry.getLeft();
 		}
-		
+
 		dirEntry.getRegion().setPopulation(sparse.getRegion().getPopulation());
 		dirEntry.getRegion().setTupleList(sparse.getRegion().getTupleList());
-		
-		//dense = checkTree(dense);
-		
-		//redistribute(dense, dirEntry);
-		//checkTree(dirEntry);
-		
-		
+
+		// TODO: we should probably set both to null, since it redistributes?
+		// make sure that nothing underneath is cleared
+		if (sparse.getLeft() == null && sparse.getRight() == null) {
+			if (dirEntry.getLeft().getRegion().getPopulation() < dirEntry.getRight().getRegion().getPopulation()) {
+				dirEntry.setLeft(null);
+			} else {
+				dirEntry.setRight(null);
+			}
+		}
+
+		dense = checkTree(dense);
+
+		redistribute(dense, dirEntry);
+		checkTree(dirEntry);
+
 	}
-	
+
 	/**
-	 * Split a region into 2 regions called "left" and "right".
-	 * The level of these new regions is increased by 1 compared to the old
-	 * region. Tuples are then inserted again, to move them into the new
-	 * regions.
+	 * Split a region into 2 buddy-regions called "left" and "right". The level
+	 * of these new regions is increased by 1 compared to the old region. Tuples
+	 * are then inserted again, to move them into the new regions.
 	 * 
-	 * @param dirEntry Directory-Entry to buddy-split
+	 * @param dirEntry
+	 *            Directory-Entry to buddy-split
 	 * @return true if successful, false if not
 	 */
 	private boolean buddySplit(DirectoryEntry dirEntry) {
-		// TODO Auto-generated method stub
 		boolean result = false;
-		
+
 		DirectoryEntry left = null;
 		DirectoryEntry right = null;
-		
-		if (dirEntry.getLeft() != null){
+
+		/*
+		 * left region of dirEntry, direntry is "Back" of left left region
+		 * number = back region number left region level = back level + 1
+		 * 
+		 * back (0, 0) -> left (0, 1) back (3, 2) -> left (3, 3)
+		 */
+		if (dirEntry.getLeft() != null) {
 			left = dirEntry.getLeft();
-		} else{
+		} else {
 			left = new DirectoryEntry();
-			
+
 			dirEntry.setLeft(left);
 			left.setBack(dirEntry);
 		}
-		
+
+		left.setRegion(new TupleRegion(dirEntry.getRegion().getRegion(), dirEntry.getRegion().getLevel() + 1));
+
 		/*
-		 * left region of dirEntry, direntry is "Back" of left
-		 * left region number = back region number
-		 * left region level = back level + 1
+		 * right region of dirEntry, direntry is "Back" of right right region
+		 * number = back region number + 1 Bit as MSB right region level = back
+		 * level + 1
 		 * 
-		 * back (0, 0) -> left (0, 1)
-		 * back (3, 2) -> left (3, 3)
+		 * back (0, 0) -> right (1, 1) back (3, 2) -> right (7, 3)
 		 */
-		left.setRegion(new TupleRegion(dirEntry.getRegion().getRegion(),
-				dirEntry.getRegion().getLevel() + 1));
-		
-		if (dirEntry.getRight() != null){
+		if (dirEntry.getRight() != null) {
 			right = dirEntry.getRight();
-		} else{
+		} else {
 			right = new DirectoryEntry();
-			
+
 			dirEntry.setRight(right);
 			right.setBack(dirEntry);
 		}
-		
-		/*
-		 * right region of dirEntry, direntry is "Back" of right
-		 * right region number = back region number + 1 Bit as MSB
-		 * right region level = back level + 1
-		 * 
-		 * back (0, 0) -> right (1, 1)
-		 * back (3, 2) -> right (7, 3)
-		 */
+
 		right.setRegion(new TupleRegion(dirEntry.getRegion().getRegion() + (1 << dirEntry.getRegion().getLevel()),
 				dirEntry.getRegion().getLevel() + 1));
-		
-		//check if max depth
-		if (dirEntry.getRegion().getLevel() == levels[0]){
+
+		// check if max depth
+		if (dirEntry.getRegion().getLevel() == levels[0]) {
 			increaseGridLevel();
 			result = true;
 		}
-		
-		//Insert all tuples of directory again, since they should now be in
-		//either left or right.
-		for(float[] tuple : dirEntry.getRegion().getTupleList()){
+
+		// Insert all tuples of directory again, since they should now be in
+		// either left or right.
+		for (float[] tuple : dirEntry.getRegion().getTupleList()) {
 			insertTuple(tuple);
 		}
 		
+		//here dirEntry still has everything as duplicate
+
 		return result;
 	}
 
-	private void increaseGridLevel() {
-		levels[(levels[0]%dimension) + 1] += 1;
-		levels[0] += 1;
+	/**
+	 * Check if directory entry should be buddy. If directory entry has one
+	 * follow up, make the entry the buddy of it. This will be done over
+	 * multiple levels if necessary via recursion.
+	 * 
+	 * @param dirEntry
+	 *            that will be made a buddy of its follow up
+	 * @return dirEntry with new structure
+	 */
+	private DirectoryEntry checkTree(DirectoryEntry dirEntry) {
+		DirectoryEntry tmpEntry = new DirectoryEntry();
+
+		if (dirEntry.getLeft() != null && dirEntry.getLeft().getRegion() != null) {
+			// move entry 'down' to right
+			if (dirEntry.getRight() != null) {
+				if (dirEntry.getRight().getRegion() != null) {
+					System.err.println("Directory Entry already has 'left' and 'right'.");
+					return dirEntry;
+				}
+			}
+
+			tmpEntry.setBack(dirEntry);
+			dirEntry.setRight(tmpEntry);
+
+			dirEntry.getRight().setRegion(
+					new TupleRegion(dirEntry.getRegion().getRegion() + (1 << dirEntry.getRegion().getLevel()),
+							dirEntry.getRegion().getLevel() + 1));
+			dirEntry.getRight().getRegion().setPopulation(dirEntry.getRegion().getPopulation());
+			dirEntry.getRight().getRegion().setTupleList(dirEntry.getRegion().getTupleList());
+
+			dirEntry.setRegion(null);
+			dirEntry = checkTree(dirEntry.getRight());
+
+		} else if (dirEntry.getRight() != null && dirEntry.getRight().getRegion() != null) {
+			// move entry 'down' to left
+			if (dirEntry.getLeft() != null) {
+				if (dirEntry.getLeft().getRegion() != null) {
+					System.err.println("Directory Entry already has 'left' and 'right'.");
+					return dirEntry;
+				}
+			}
+
+			tmpEntry.setBack(dirEntry);
+			dirEntry.setLeft(tmpEntry);
+
+			dirEntry.getLeft()
+					.setRegion(new TupleRegion(dirEntry.getRegion().getRegion(), dirEntry.getRegion().getLevel() + 1));
+			dirEntry.getLeft().getRegion().setPopulation(dirEntry.getRegion().getPopulation());
+			dirEntry.getLeft().getRegion().setTupleList(dirEntry.getRegion().getTupleList());
+
+			dirEntry.setRegion(null);
+			dirEntry = checkTree(dirEntry.getLeft());
+		}
+
+		return dirEntry;
 	}
 
 	/**
 	 * 
-	 * @param dirEntry
-	 * @param enclosingRegion
+	 * @param tupleEntry
+	 * @param enclosingEntry
 	 * @return
 	 */
-	private boolean redistribute(DirectoryEntry tupleRegion, DirectoryEntry enclosingRegion) {
-		// TODO Auto-generated method stub
-		return false;
+	private boolean redistribute(DirectoryEntry tupleEntry, DirectoryEntry enclosingEntry) {
+		int sparsePop, densePop;
+		DirectoryEntry sparseEntry, denseEntry;
+
+		boolean inc = buddySplit(tupleEntry);
+
+		int enclosingPop = enclosingEntry.getRegion().getPopulation();
+		int leftPop = tupleEntry.getLeft().getRegion().getPopulation();
+		int rightPop = tupleEntry.getRight().getRegion().getPopulation();
+
+		if (leftPop < rightPop) {
+			sparsePop = leftPop;
+			sparseEntry = tupleEntry.getLeft();
+
+			densePop = rightPop;
+			denseEntry = tupleEntry.getRight();
+		} else {
+			sparsePop = rightPop;
+			sparseEntry = tupleEntry.getRight();
+
+			densePop = leftPop;
+			denseEntry = tupleEntry.getLeft();
+		}
+		// TODO: left oder right löschen
+
+		// check if distribution is possible
+		if (enclosingPop < rightPop) {
+			tupleEntry.setRegion(null);
+
+			// merge enclosing with sparse
+			for (float[] tuple : sparseEntry.getRegion().getTupleList()) {
+				enclosingEntry.getRegion().insertTuple(tuple);
+			}
+
+			sparseEntry.setRegion(null);
+
+			if (sparseEntry.getLeft() == null && sparseEntry.getRight() == null) {
+				if (leftPop < rightPop) {
+					tupleEntry.setLeft(null);
+				} else {
+					tupleEntry.setRight(null);
+				}
+			}
+
+
+			denseEntry = checkTree(denseEntry);
+
+			if (enclosingEntry.getRegion().getPopulation() < densePop) {
+				redistribute(denseEntry, enclosingEntry);
+			}
+			
+			return true;
+			
+		} else {
+
+			if (inc) {
+				decreaseGridLevel();
+			}
+			
+			//first line redundant probably
+			//tupleEntry.getLeft().getRegion().setTupleList(null);
+			tupleEntry.getLeft().setRegion(null);
+			
+			if (tupleEntry.getLeft().getLeft() == null && tupleEntry.getLeft().getRight() == null){
+				tupleEntry.setLeft(null);
+			}
+			
+			tupleEntry.getRight().getRegion().setTupleList(null);
+			tupleEntry.getRight().setRegion(null);
+			
+			if (tupleEntry.getRight().getLeft() == null && tupleEntry.getRight().getRight() == null){
+				tupleEntry.setRight(null);
+			}
+			
+			return false;
+		}
+
+	}
+
+	private void increaseGridLevel() {
+		levels[(levels[0] % dimension) + 1] += 1;
+		levels[0] += 1;
+	}
+
+	private void decreaseGridLevel() {
+		levels[((levels[0] - 1) % dimension) + 1] -= 1;
+		levels[0] -= 1;
 	}
 
 	@Override
 	public String toString() {
-		String bangString = "";
+		String bangString = "Bang-File:";
 		
-		bangString += "Region: " + bangFile.getRegion().getRegion();
-		bangString += "\nLevel: " + bangFile.getRegion().getLevel();
-		bangString += "\nPopulation: " + bangFile.getRegion().getPopulation();
+		bangString += "\n\tDimension: " + dimension;
+		bangString += "\n\tBucketSize: " + bucketsize;
+		bangString += "\n\tTuples: " + tuplesCount + "\n\n";
 		
-		bangString += "\nTuples: ";
-		for (float[] tuple : bangFile.getRegion().getTupleList()){
-			bangString += "\n\t" + Arrays.toString(tuple);
-		}
-		
+		bangString += bangFile;
+
 		return bangString;
 	}
-	
+
 }

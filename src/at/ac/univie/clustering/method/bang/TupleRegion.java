@@ -1,6 +1,7 @@
 package at.ac.univie.clustering.method.bang;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class TupleRegion {
@@ -78,6 +79,23 @@ public class TupleRegion {
 	public void clearTupleList(){
 		tupleList.clear();
 		population = 0;
+	}
+	
+	@Override
+	public String toString() {
+		String regString = "TupleRegion:";
+		regString += "\n\tRegion: " + region;
+		regString += "\n\tPopulation: " + population;
+		regString += "\n\tLevel: " + level;
+		regString += "\n\tDensity: " + density;
+		regString += "\n\tAlias: " + alias;
+		
+		regString += "\n\tTuples: ";
+		for (float[] tuple : tupleList) {
+			regString += "\n\t\t" + Arrays.toString(tuple);
+		}
+		
+		return regString;
 	}
 	
 }
