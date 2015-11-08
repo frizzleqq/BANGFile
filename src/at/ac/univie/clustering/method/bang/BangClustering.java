@@ -54,6 +54,9 @@ public class BangClustering implements Clustering {
 		return tuplesCount;
 	}
 
+	/**
+	 * TODO
+	 */
 	@Override
 	public void insertTuple(float[] tuple) {
 
@@ -97,6 +100,8 @@ public class BangClustering implements Clustering {
 	}
 
 	/**
+	 * TODO
+	 * 
 	 * @param tuple
 	 * @return
 	 */
@@ -126,6 +131,7 @@ public class BangClustering implements Clustering {
 	}
 
 	/**
+	 * TODO
 	 * go backwards through levels to find left or right for the tuple
 	 * 
 	 * @param region
@@ -172,7 +178,15 @@ public class BangClustering implements Clustering {
 	}
 
 	/**
-	 * Managing the buddy split
+	 * Manage the split of the region and the following redistribution.
+	 * 
+	 * The split of a region is done via a Buddy-Split.
+	 * Afterwards we check whether the region-tree is correct, in which
+	 * we move regions down one or more levels if they should be a buddy of a following
+	 * region.
+	 * 
+	 * Afterwards we redistribute tuples in the new tree.
+	 * 
 	 * @param dirEntry
 	 */
 	private void splitRegion(DirectoryEntry dirEntry) {
@@ -181,10 +195,7 @@ public class BangClustering implements Clustering {
 
 		buddySplit(dirEntry);
 
-		// clear previous region of tuples (not necessary since we overwrite it
-		// later)
-		// dirEntry.getRegion().clearTupleList();
-
+		// determine which region has a higher population
 		if (dirEntry.getLeft().getRegion().getPopulation() < dirEntry.getRight().getRegion().getPopulation()) {
 			sparse = dirEntry.getLeft();
 			dense = dirEntry.getRight();
@@ -196,8 +207,6 @@ public class BangClustering implements Clustering {
 		dirEntry.getRegion().setPopulation(sparse.getRegion().getPopulation());
 		dirEntry.getRegion().setTupleList(sparse.getRegion().getTupleList());
 
-		// TODO: we should probably set both to null, since it redistributes?
-		// make sure that nothing underneath is cleared
 		if (sparse.getLeft() == null && sparse.getRight() == null) {
 			if (dirEntry.getLeft().getRegion().getPopulation() < dirEntry.getRight().getRegion().getPopulation()) {
 				dirEntry.setLeft(null);
@@ -214,13 +223,17 @@ public class BangClustering implements Clustering {
 	}
 
 	/**
-	 * Split a region into 2 buddy-regions called "left" and "right". The level
-	 * of these new regions is increased by 1 compared to the old region. Tuples
-	 * are then inserted again, to move them into the new regions.
+	 * When a region is split, the 2 resulting regions are considered "buddies".
 	 * 
-	 * @param dirEntry
-	 *            Directory-Entry to buddy-split
-	 * @return true if successful, false if not
+	 * The region is split into 2 buddy-regions called "left" and "right".
+	 * The level of these new regions is increased by 1 compared to the old region.
+	 * The regionnumber of left is the same as the original region while the regionnumber
+	 * of right is increased via an added MSB.
+	 * 
+	 * Tuples are then moved from the original region to the new regions in the new level.
+	 * 
+	 * @param dirEntry Directory-Entry to perform buddy-split on
+	 * @return true if successfully done on max depth region
 	 */
 	private boolean buddySplit(DirectoryEntry dirEntry) {
 		boolean result = false;
@@ -229,10 +242,11 @@ public class BangClustering implements Clustering {
 		DirectoryEntry right = null;
 
 		/*
-		 * left region of dirEntry, direntry is "Back" of left left region
-		 * number = back region number left region level = back level + 1
+		 * left region of dirEntry, direntry is "back" of left
+		 * left region-number = back region-number
+		 * left level = back level + 1
 		 * 
-		 * back (0, 0) -> left (0, 1) back (3, 2) -> left (3, 3)
+		 * i.e.: back (0, 0) -> left (0, 1) or back (3, 2) -> left (3, 3)
 		 */
 		if (dirEntry.getLeft() != null) {
 			left = dirEntry.getLeft();
@@ -246,9 +260,9 @@ public class BangClustering implements Clustering {
 		left.setRegion(new TupleRegion(dirEntry.getRegion().getRegion(), dirEntry.getRegion().getLevel() + 1));
 
 		/*
-		 * right region of dirEntry, direntry is "Back" of right right region
-		 * number = back region number + 1 Bit as MSB right region level = back
-		 * level + 1
+		 * right region of dirEntry, direntry is "Back" of right
+		 * right region-number = back region-number + 1 Bit as MSB
+		 * right level = back level + 1
 		 * 
 		 * back (0, 0) -> right (1, 1) back (3, 2) -> right (7, 3)
 		 */
@@ -264,7 +278,7 @@ public class BangClustering implements Clustering {
 		right.setRegion(new TupleRegion(dirEntry.getRegion().getRegion() + (1 << dirEntry.getRegion().getLevel()),
 				dirEntry.getRegion().getLevel() + 1));
 
-		// check if max depth
+		// check if region was in max depth, then increase the grid levels
 		if (dirEntry.getRegion().getLevel() == levels[0]) {
 			increaseGridLevel();
 			result = true;
@@ -276,25 +290,24 @@ public class BangClustering implements Clustering {
 			insertTuple(tuple);
 		}
 		
-		//here dirEntry still has everything as duplicate
+		dirEntry.getRegion().clearTupleList();
 
 		return result;
 	}
 
 	/**
-	 * Check if directory entry should be buddy. If directory entry has one
-	 * follow up, make the entry the buddy of it. This will be done over
-	 * multiple levels if necessary via recursion.
+	 * Check if region should be buddy of region underneath. If region has only one
+	 * follow up, make the region the buddy of it. This will be done over
+	 * multiple levels if necessary.
 	 * 
-	 * @param dirEntry
-	 *            that will be made a buddy of its follow up
-	 * @return dirEntry with new structure
+	 * @param dirEntry Directory-Entry that will be made a buddy of its follow up if possible
+	 * @return dirEntry
 	 */
 	private DirectoryEntry checkTree(DirectoryEntry dirEntry) {
 		DirectoryEntry tmpEntry = new DirectoryEntry();
 
 		if (dirEntry.getLeft() != null && dirEntry.getLeft().getRegion() != null) {
-			// move entry 'down' to right
+			// move entry down to right
 			if (dirEntry.getRight() != null) {
 				if (dirEntry.getRight().getRegion() != null) {
 					System.err.println("Directory Entry already has 'left' and 'right'.");
@@ -315,7 +328,7 @@ public class BangClustering implements Clustering {
 			dirEntry = checkTree(dirEntry.getRight());
 
 		} else if (dirEntry.getRight() != null && dirEntry.getRight().getRegion() != null) {
-			// move entry 'down' to left
+			// move entry down to left
 			if (dirEntry.getLeft() != null) {
 				if (dirEntry.getLeft().getRegion() != null) {
 					System.err.println("Directory Entry already has 'left' and 'right'.");
@@ -339,6 +352,7 @@ public class BangClustering implements Clustering {
 	}
 
 	/**
+	 * TODO
 	 * 
 	 * @param tupleEntry
 	 * @param enclosingEntry
@@ -367,13 +381,12 @@ public class BangClustering implements Clustering {
 			densePop = leftPop;
 			denseEntry = tupleEntry.getLeft();
 		}
-		// TODO: left oder right löschen
 
-		// check if distribution is possible
-		if (enclosingPop < rightPop) {
+		// check if distribution is possible, otherwise undo buddy split
+		if (enclosingPop < densePop) {
 			tupleEntry.setRegion(null);
 
-			// merge enclosing with sparse
+			// merge the enclosing region with the sparse region
 			for (float[] tuple : sparseEntry.getRegion().getTupleList()) {
 				enclosingEntry.getRegion().insertTuple(tuple);
 			}
@@ -381,6 +394,9 @@ public class BangClustering implements Clustering {
 			sparseEntry.setRegion(null);
 
 			if (sparseEntry.getLeft() == null && sparseEntry.getRight() == null) {
+				// If sparse region has no follow up then we clear it, otherwise it serves as connection
+				
+				// setting sparse to null does not set left/right to null...
 				if (leftPop < rightPop) {
 					tupleEntry.setLeft(null);
 				} else {
@@ -388,7 +404,13 @@ public class BangClustering implements Clustering {
 				}
 			}
 
-
+			// If the dense region has a follow up we move it down as a buddy
+	        /*	  o                   o
+	               \                   \
+	                D         ===>      o
+	                 \                 / \
+	                  N               D   N
+         	*/
 			denseEntry = checkTree(denseEntry);
 
 			if (enclosingEntry.getRegion().getPopulation() < densePop) {
@@ -398,12 +420,14 @@ public class BangClustering implements Clustering {
 			return true;
 			
 		} else {
-
+			// we undo the buddy split by clearing left and right
+			
+			// confirm buddySplit was done, then decrease grid levels
 			if (inc) {
 				decreaseGridLevel();
 			}
 			
-			//first line redundant probably
+			// clear left and right regions
 			//tupleEntry.getLeft().getRegion().setTupleList(null);
 			tupleEntry.getLeft().setRegion(null);
 			
@@ -411,7 +435,7 @@ public class BangClustering implements Clustering {
 				tupleEntry.setLeft(null);
 			}
 			
-			tupleEntry.getRight().getRegion().setTupleList(null);
+			//tupleEntry.getRight().getRegion().setTupleList(null);
 			tupleEntry.getRight().setRegion(null);
 			
 			if (tupleEntry.getRight().getLeft() == null && tupleEntry.getRight().getRight() == null){
