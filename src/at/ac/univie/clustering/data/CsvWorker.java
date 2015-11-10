@@ -173,26 +173,29 @@ public class CsvWorker implements DataWorker {
 	 * @see at.ac.univie.clustering.data.DataWorker#readTuple()
 	 */
 	@Override
-	public float[] readTuple() throws IOException {
+	public float[] readTuple() throws IOException, NumberFormatException {
 		float[] tuple = null;
+		
+		current_position++;
 
 		String line = br.readLine();
-		if(line.isEmpty()){
+		
+		if(current_position > nTuple){
 			return null;
 		}
 		
-		current_position++;
-		
 		String[] stringTuple = csv.parseLine(line);
-		if (stringTuple.length != dimension) {
-			throw new IOException("ERROR: Tuple with differeng dimension than originally determined at line "
-					+ current_position + ".");
-		}
-
+		
 		tuple = new float[stringTuple.length];
 		for (int i = 0; i < stringTuple.length; i++) {
 			tuple[i] = Float.parseFloat(stringTuple[i].replace(',', '.'));
 		}
+		
+		if (tuple.length != dimension) {
+			throw new IOException("ERROR: Tuple with differeng dimension than originally determined at line "
+					+ current_position + ".");
+		}
+		
 		return tuple;
 	}
 

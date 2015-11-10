@@ -101,7 +101,7 @@ public class CliMain {
 	 * @param data
 	 * @throws Exception
 	 */
-	public static void readData(Clustering cluster, DataWorker data) throws Exception {
+	public static void readData(Clustering cluster, DataWorker data) throws IOException, NumberFormatException {
 		int tuplesRead = 0;
 		float[] tuple;
 
@@ -182,12 +182,14 @@ public class CliMain {
 		
 		try {
 			readData(cluster, data);
-		} catch (Exception e) {
-			System.err.println(e.getMessage());
+		} catch (IOException e) {
+			System.err.println("Problem while reading file: " + e.getMessage());
+			System.exit(ERR_EXCEPTION);
+		} catch (NumberFormatException e){
+			System.err.println("ERROR: Wrong format of data: " + e.getMessage());
 			System.exit(ERR_EXCEPTION);
 		}
 
-		
 		System.out.println("\n" + cluster);
 
 	}
