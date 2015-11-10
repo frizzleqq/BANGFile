@@ -19,7 +19,7 @@ public class CliMain {
 
 	private static Options options = new Options();
 
-	private static String filename = "src/resources/test.csv";
+	private static String filename = "src/resources/test2d.csv";
 	private static char delimiter = ';';
 	private static boolean header = false;
 	private static int bucketsize = 17;
@@ -152,7 +152,7 @@ public class CliMain {
 		}
 		
 		int dimension = data.getDimension();
-		int tuplesCount = data.getRecords();
+		int tuplesCount = data.getnTuple();
 		
 		//TODO: throw exceptions instead of system exit
 		if (dimension == 0){

@@ -47,11 +47,13 @@ public class DirectoryEntry {
 		}else{
 			dirString += "\n\tEmpty Region.";
 		}
+		dirString += "\nLeft: ";
 		if(left != null){
-			dirString += "\n" + left;
+			dirString += left;
 		}
+		dirString += "\nRight: ";
 		if (right != null){
-			dirString += "\n" + right;
+			dirString += right;
 		}
 		return dirString + "\n";
 	}

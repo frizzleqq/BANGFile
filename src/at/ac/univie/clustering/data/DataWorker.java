@@ -1,5 +1,7 @@
 package at.ac.univie.clustering.data;
 
+import java.io.IOException;
+
 /**
  * @author Fritzi
  *
@@ -9,7 +11,7 @@ public interface DataWorker {
 	/**
 	 * @return
 	 */
-	public int getRecords();
+	public int getnTuple();
 	
 	/**
 	 * @return
@@ -25,6 +27,6 @@ public interface DataWorker {
 	 * 
 	 * @return
 	 */
-	public float[] readTuple();
+	public float[] readTuple() throws IOException;
 
 }

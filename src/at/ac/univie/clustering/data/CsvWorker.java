@@ -2,6 +2,7 @@ package at.ac.univie.clustering.data;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.LineNumberReader;
@@ -11,15 +12,19 @@ import java.nio.file.Files;
 import com.opencsv.CSVParser;
 
 public class CsvWorker implements DataWorker {
+	
+	/*
+	 * TODO: class-wide reader instance, use instance to determine current position,
+	 * tests!,
+	 */
 
 	private String filename;
 	private char delimiter;
 	private boolean header;
-	private int records = 0;
+	private int nTuple = 0;
 	private int dimension = 0;
-	
 	private int current_position;
-	
+
 	private CSVParser csv;
 	private BufferedReader br;
 
@@ -49,14 +54,35 @@ public class CsvWorker implements DataWorker {
 			throw new IOException("Could not find file with provided filename.");
 		if (!fileReadable())
 			throw new IOException("File with provided filename is not readable.");
-		
+
+		dimension = countDimension();
+		nTuple = countTuples();
+
 		csv = new CSVParser(delimiter);
 		br = new BufferedReader(new FileReader(filename));
-		if(header)
+		if (header)
 			br.readLine();
-		
-		records = countRecords();
-		dimension = countDimension();
+
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see at.ac.univie.clustering.data.DataWorker#getDimensions()
+	 */
+	@Override
+	public int getDimension() {
+		return dimension;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see at.ac.univie.clustering.data.DataWorker#getnTuple()
+	 */
+	@Override
+	public int getnTuple() {
+		return nTuple;
 	}
 
 	/**
@@ -85,49 +111,36 @@ public class CsvWorker implements DataWorker {
 		return true;
 	}
 
-	/* (non-Javadoc)
-	 * @see at.ac.univie.clustering.data.DataWorker#getRecords()
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see at.ac.univie.clustering.data.DataWorker#countTuples()
 	 */
-	@Override
-	public int getRecords() {
-		return records;
-	}
+	private int countTuples() throws IOException {
+		int nTuple = 0;
 
-	/**
-	 * @return
-	 */
-	public int countRecords() {
-		int linenumber = 0;
-		try {
-			File file = new File(filename);
-			FileReader fr = new FileReader(file);
-			LineNumberReader lnr = new LineNumberReader(fr);
+		File file = new File(filename);
+		FileReader fr = new FileReader(file);
+		LineNumberReader lnr = new LineNumberReader(fr);
+		String line;
 
-			while (lnr.readLine() != null) {
-				linenumber++;
+		while ((line = lnr.readLine()) != null) {
+			if (line.isEmpty()) {
+				break;
 			}
-			lnr.close();
-		} catch (IOException e) {
-			e.printStackTrace();
+			nTuple++;
 		}
+		lnr.close();
 
-		if (this.header && linenumber > 0)
-			linenumber -= 1;
-		return linenumber;
-	}
-
-	/* (non-Javadoc)
-	 * @see at.ac.univie.clustering.data.DataWorker#getDimensions()
-	 */
-	@Override
-	public int getDimension() {
-		return dimension;
+		if (this.header && nTuple > 0)
+			nTuple -= 1;
+		return nTuple;
 	}
 
 	/**
 	 * @return
 	 */
-	public int countDimension() {
+	private int countDimension() {
 		int dimension = 0;
 		try {
 			CSVParser csv = new CSVParser(delimiter);
@@ -144,7 +157,9 @@ public class CsvWorker implements DataWorker {
 		return dimension;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see at.ac.univie.clustering.data.DataWorker#getCurPosition()
 	 */
 	@Override
@@ -152,26 +167,31 @@ public class CsvWorker implements DataWorker {
 		return current_position;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see at.ac.univie.clustering.data.DataWorker#readTuple()
 	 */
 	@Override
-	public float[] readTuple() {
-		if (current_position >= records)
-			return null;
-		
+	public float[] readTuple() throws IOException {
 		float[] tuple = null;
-		try {
-			String line = br.readLine();
-			current_position++;
-			String[] string_tuple = csv.parseLine(line);
-			tuple = new float[string_tuple.length];
-			for(int i=0; i < string_tuple.length; i++)
-			{
-				tuple[i] = Float.parseFloat(string_tuple[i].replace(',', '.'));
-			}
-		}catch (IOException e) {
-			e.printStackTrace();
+
+		String line = br.readLine();
+		if(line.isEmpty()){
+			return null;
+		}
+		
+		current_position++;
+		
+		String[] stringTuple = csv.parseLine(line);
+		if (stringTuple.length != dimension) {
+			throw new IOException("ERROR: Tuple with differeng dimension than originally determined at line "
+					+ current_position + ".");
+		}
+
+		tuple = new float[stringTuple.length];
+		for (int i = 0; i < stringTuple.length; i++) {
+			tuple[i] = Float.parseFloat(stringTuple[i].replace(',', '.'));
 		}
 		return tuple;
 	}

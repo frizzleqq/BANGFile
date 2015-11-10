@@ -26,7 +26,7 @@ public class CsvWorkerTest {
 			e.printStackTrace();
 			Assert.fail();
 		}
-		assertEquals(2, csv.getRecords(), 0);
+		assertEquals(2, csv.getnTuple(), 0);
 	}
 	
 	@Test
@@ -38,7 +38,7 @@ public class CsvWorkerTest {
 			e.printStackTrace();
 			Assert.fail();
 		}
-		assertEquals(2, csv.getRecords(), 0);
+		assertEquals(2, csv.getnTuple(), 0);
 	}
 
 	@Test
@@ -66,7 +66,7 @@ public class CsvWorkerTest {
 	}
 	
 	@Test
-	public void testReadTuple() {
+	public void testReadTuple() throws IOException{
 		CsvWorker csv = null;
 		try {
 			csv = new CsvWorker(CSV_FILE, ';', false);
@@ -85,7 +85,7 @@ public class CsvWorkerTest {
 	}
 	
 	@Test
-	public void testReadTupleHeader() {
+	public void testReadTupleHeader() throws IOException {
 		CsvWorker csv = null;
 		try {
 			csv = new CsvWorker(CSV_FILE_HEADER, ';', true);
@@ -104,7 +104,7 @@ public class CsvWorkerTest {
 	}
 	
 	@Test
-	public void testReadTupleReturnNull() {
+	public void testReadTupleReturnNull() throws IOException {
 		CsvWorker csv = null;
 		try {
 			csv = new CsvWorker(CSV_FILE, ';', false);
@@ -119,7 +119,7 @@ public class CsvWorkerTest {
 	}
 	
 	@Test(expected=NumberFormatException.class)
-	public void testReadTupleChar() {
+	public void testReadTupleChar() throws IOException {
 		CsvWorker csv = null;
 		try {
 			csv = new CsvWorker(CSV_FILE_CHAR, ';', false);
@@ -133,7 +133,7 @@ public class CsvWorkerTest {
 	}
 	
 	@Test(expected=NumberFormatException.class)
-	public void testReadTupleNull() {
+	public void testReadTupleNull() throws IOException {
 		CsvWorker csv = null;
 		try {
 			csv = new CsvWorker(CSV_FILE_NULL, ';', false);
