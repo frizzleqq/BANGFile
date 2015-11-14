@@ -203,7 +203,9 @@ public class BangClustering implements Clustering {
 			sparse = dirEntry.getRight();
 			dense = dirEntry.getLeft();
 		}
-
+		
+		//sparse will be moved to dirEntry
+		//TODO: unhook sparse object?
 		dirEntry.getRegion().setPopulation(sparse.getRegion().getPopulation());
 		dirEntry.getRegion().setTupleList(sparse.getRegion().getTupleList());
 
@@ -217,7 +219,7 @@ public class BangClustering implements Clustering {
 
 		dense = checkTree(dense);
 
-		redistribute(dense, dirEntry);
+		//redistribute(dense, dirEntry);
 		checkTree(dirEntry);
 
 	}
@@ -362,6 +364,7 @@ public class BangClustering implements Clustering {
 		int sparsePop, densePop;
 		DirectoryEntry sparseEntry, denseEntry;
 
+		// two new regions, sparse and dense
 		boolean inc = buddySplit(tupleEntry);
 
 		int enclosingPop = enclosingEntry.getRegion().getPopulation();
@@ -382,7 +385,10 @@ public class BangClustering implements Clustering {
 			denseEntry = tupleEntry.getLeft();
 		}
 
-		// check if distribution is possible, otherwise undo buddy split
+		/*
+		 * If the population of the dense region is greater than the population
+		 * of the enclosing region, the regions can be merged
+		 */
 		if (enclosingPop < densePop) {
 			tupleEntry.setRegion(null);
 
@@ -396,7 +402,7 @@ public class BangClustering implements Clustering {
 			if (sparseEntry.getLeft() == null && sparseEntry.getRight() == null) {
 				// If sparse region has no follow up then we clear it, otherwise it serves as connection
 				
-				// setting sparse to null does not set left/right to null...
+				// setting sparse to null does not set left/right to null
 				if (leftPop < rightPop) {
 					tupleEntry.setLeft(null);
 				} else {
