@@ -74,7 +74,6 @@ public class BangClustering implements Clustering {
 
 			// find the enclosing region
 			while (enclosingRegion != null && enclosingRegion.getRegion() == null) {
-				System.out.println("move 1 region back");
 				enclosingRegion = enclosingRegion.getBack();
 			}
 
@@ -185,7 +184,6 @@ public class BangClustering implements Clustering {
 	 * we move regions down one or more levels if they should be a buddy of a following
 	 * region.
 	 * 
-	 * Afterwards we redistribute tuples in the new tree.
 	 * 
 	 * @param dirEntry
 	 */
@@ -219,7 +217,7 @@ public class BangClustering implements Clustering {
 
 		dense = checkTree(dense);
 
-		//redistribute(dense, dirEntry);
+		redistribute(dense, dirEntry);
 		checkTree(dirEntry);
 
 	}
@@ -298,6 +296,8 @@ public class BangClustering implements Clustering {
 	}
 
 	/**
+	 * Ensure correct buddy-positions of regions
+	 * 
 	 * Check if region should be buddy of region underneath. If region has only one
 	 * follow up, make the region the buddy of it. This will be done over
 	 * multiple levels if necessary.
@@ -356,41 +356,41 @@ public class BangClustering implements Clustering {
 	/**
 	 * TODO
 	 * 
-	 * @param tupleEntry
+	 * @param dirEntry
 	 * @param enclosingEntry
 	 * @return
 	 */
-	private boolean redistribute(DirectoryEntry tupleEntry, DirectoryEntry enclosingEntry) {
+	private boolean redistribute(DirectoryEntry dirEntry, DirectoryEntry enclosingEntry) {
 		int sparsePop, densePop;
 		DirectoryEntry sparseEntry, denseEntry;
 
 		// two new regions, sparse and dense
-		boolean inc = buddySplit(tupleEntry);
+		boolean inc = buddySplit(dirEntry);
 
 		int enclosingPop = enclosingEntry.getRegion().getPopulation();
-		int leftPop = tupleEntry.getLeft().getRegion().getPopulation();
-		int rightPop = tupleEntry.getRight().getRegion().getPopulation();
+		int leftPop = dirEntry.getLeft().getRegion().getPopulation();
+		int rightPop = dirEntry.getRight().getRegion().getPopulation();
 
 		if (leftPop < rightPop) {
 			sparsePop = leftPop;
-			sparseEntry = tupleEntry.getLeft();
+			sparseEntry = dirEntry.getLeft();
 
 			densePop = rightPop;
-			denseEntry = tupleEntry.getRight();
+			denseEntry = dirEntry.getRight();
 		} else {
 			sparsePop = rightPop;
-			sparseEntry = tupleEntry.getRight();
+			sparseEntry = dirEntry.getRight();
 
 			densePop = leftPop;
-			denseEntry = tupleEntry.getLeft();
+			denseEntry = dirEntry.getLeft();
 		}
 
 		/*
 		 * If the population of the dense region is greater than the population
-		 * of the enclosing region, the regions can be merged
+		 * of the enclosing region, the enclosing and sparse regions can be merged
 		 */
 		if (enclosingPop < densePop) {
-			tupleEntry.setRegion(null);
+			dirEntry.setRegion(null);
 
 			// merge the enclosing region with the sparse region
 			for (float[] tuple : sparseEntry.getRegion().getTupleList()) {
@@ -404,9 +404,9 @@ public class BangClustering implements Clustering {
 				
 				// setting sparse to null does not set left/right to null
 				if (leftPop < rightPop) {
-					tupleEntry.setLeft(null);
+					dirEntry.setLeft(null);
 				} else {
-					tupleEntry.setRight(null);
+					dirEntry.setRight(null);
 				}
 			}
 
@@ -434,18 +434,18 @@ public class BangClustering implements Clustering {
 			}
 			
 			// clear left and right regions
-			//tupleEntry.getLeft().getRegion().setTupleList(null);
-			tupleEntry.getLeft().setRegion(null);
+			//dirEntry.getLeft().getRegion().setTupleList(null);
+			dirEntry.getLeft().setRegion(null);
 			
-			if (tupleEntry.getLeft().getLeft() == null && tupleEntry.getLeft().getRight() == null){
-				tupleEntry.setLeft(null);
+			if (dirEntry.getLeft().getLeft() == null && dirEntry.getLeft().getRight() == null){
+				dirEntry.setLeft(null);
 			}
 			
-			//tupleEntry.getRight().getRegion().setTupleList(null);
-			tupleEntry.getRight().setRegion(null);
+			//dirEntry.getRight().getRegion().setTupleList(null);
+			dirEntry.getRight().setRegion(null);
 			
-			if (tupleEntry.getRight().getLeft() == null && tupleEntry.getRight().getRight() == null){
-				tupleEntry.setRight(null);
+			if (dirEntry.getRight().getLeft() == null && dirEntry.getRight().getRight() == null){
+				dirEntry.setRight(null);
 			}
 			
 			return false;

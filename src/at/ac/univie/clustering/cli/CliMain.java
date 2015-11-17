@@ -19,7 +19,7 @@ public class CliMain {
 
 	private static Options options = new Options();
 
-	private static String filename = "src/resources/test2d.csv";
+	private static String filename = "src/resources/test2d_1.csv";
 	private static char delimiter = ';';
 	private static boolean header = false;
 	private static int bucketsize = 17;
