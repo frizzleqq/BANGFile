@@ -289,8 +289,6 @@ public class BangClustering implements Clustering {
 		for (float[] tuple : dirEntry.getRegion().getTupleList()) {
 			insertTuple(tuple);
 		}
-		
-		dirEntry.getRegion().clearTupleList();
 
 		return result;
 	}
