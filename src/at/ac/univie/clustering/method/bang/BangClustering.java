@@ -231,6 +231,9 @@ public class BangClustering implements Clustering {
 	}
 
 	/**
+	 * 
+	 * TODO: Most of this can move down to dirEntry (til incGridLevel probably)
+	 * 
 	 * When a region is split, the 2 resulting regions are considered "buddies".
 	 * 
 	 * The region is split into 2 buddy-regions called "left" and "right". The
@@ -363,7 +366,7 @@ public class BangClustering implements Clustering {
 	}
 
 	/**
-	 * TODO
+	 * TODO: write doc, this method is simply too big
 	 * 
 	 * @param dirEntry
 	 * @param enclosingEntry
@@ -422,9 +425,6 @@ public class BangClustering implements Clustering {
 			}
 
 			// If the dense region has a follow up we move it down as a buddy
-			/*
-			 * o o \ \ D ===> o \ / \ N D N
-			 */
 			denseEntry = checkTree(denseEntry);
 
 			if (enclosingEntry.getRegion().getPopulation() < densePop) {
@@ -470,6 +470,8 @@ public class BangClustering implements Clustering {
 	}
 
 	/**
+	 * TODO: where to call this? inside other method (that is called in main i guess)
+	 * 
 	 * Starting from the root entry, calculate the regions densities of all
 	 * entries with a region.
 	 */
