@@ -1,14 +1,18 @@
 package at.ac.univie.clustering.method.bang;
 
+import static org.junit.Assert.*;
+
+import java.util.ArrayList;
 
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Test;
 
 public class BangClusteringTest {
-	
-	//TODO: make a "real-life" test with minimal data (~2 dimension/3 tuples)
+
+	// TODO: make a "real-life" test with minimal data (~2 dimension/3 tuples)
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -26,29 +30,48 @@ public class BangClusteringTest {
 	public void tearDown() throws Exception {
 	}
 
-	/*
 	@Test
-	public void testMapRegion() {
-		//test-cases were created using randomly chosen input for Method mapRegion of C implementation
+	public void testInsertTuple() {
+		ArrayList<float[]> tuples = new ArrayList<>();
+		tuples.add(new float[] { 0.1f, 0.2f });
+		tuples.add(new float[] { 0.2f, 0.3f });
+		tuples.add(new float[] { 0.3f, 0.4f });
 		
-		BangClustering bang = new BangClustering(4, 0);
-		int[] level = {4, 3, 2, 1, 0};
-		int[] grid = {4, 5, 6, 7, 8};
-		bang.setLevels(level);
-		bang.setGrids(grid);
+		BangClustering bang = new BangClustering(2, 4, 10);
+
+		for (float[] tuple : tuples) {
+			bang.insertTuple(tuple);
+		}
+
+		DirectoryEntry file = bang.getBangFile();
+
+		assertEquals(3, file.getRegion().getPopulation());
+		assertEquals(tuples, file.getRegion().getTupleList());
+
+	}
+	
+	@Test
+	public void testBuddySplit(){
+		ArrayList<float[]> tuples = new ArrayList<>();
+		tuples.add(new float[] { 0.1f, 0.1f });
+		tuples.add(new float[] { 0.2f, 0.1f });
+		tuples.add(new float[] { 0.3f, 0.1f });
+		tuples.add(new float[] { 0.4f, 0.1f });
+		tuples.add(new float[] { 0.7f, 0.1f });
+		tuples.add(new float[] { 0.8f, 0.1f });
 		
-		float[] tuple = {0.2f, 0.4f, 0.6f, 0.5f};
-		assertEquals(4, bang.mapRegion(tuple));
+		BangClustering bang = new BangClustering(2, 4, 6);
 		
-		tuple[0] = 0.7f;
-		assertEquals(5, bang.mapRegion(tuple));
+		for (float[] tuple : tuples) {
+			bang.insertTuple(tuple);
+		}
 		
-		tuple[0] = 0.9f;
-		assertEquals(13, bang.mapRegion(tuple));
+		DirectoryEntry file = bang.getBangFile();
 		
-		level[0] = 1;
-		grid[0] = 1;
-		assertEquals(1, bang.mapRegion(tuple));
-	}*/
+		assertEquals(4, file.getRegion().getPopulation());
+		
+		assertEquals(2, file.getLeft().getLeft().getLeft().getRegion().getPopulation());
+		
+	}
 
 }

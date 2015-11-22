@@ -76,9 +76,22 @@ public class TupleRegion {
 		population++;
 	}
 	
+	/**
+	 * 
+	 */
 	public void clearTupleList(){
 		tupleList.clear();
 		population = 0;
+	}
+	
+	/**
+	 * The size of a region is calculated with:
+	 * size = 1 / (2 ^ level)
+	 * 
+	 * @return size of this region
+	 */
+	public float calculateSize(){
+		return  1.0f / ( 1 << getLevel());
 	}
 	
 	@Override
