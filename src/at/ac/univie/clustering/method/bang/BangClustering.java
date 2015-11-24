@@ -193,14 +193,13 @@ public class BangClustering implements Clustering {
 	 * whether the region-tree is correct, in which we move regions down one or
 	 * more levels if they should be a buddy of a succeeding region.
 	 * 
-	 * 
 	 * @param dirEntry
 	 */
 	private void splitRegion(DirectoryEntry dirEntry) {
 		DirectoryEntry sparse = null;
 		DirectoryEntry dense = null;
 
-		buddySplit(dirEntry);
+		manageBuddySplit(dirEntry);
 
 		// determine which region has a higher population
 		if (dirEntry.getLeft().getRegion().getPopulation() < dirEntry.getRight().getRegion().getPopulation()) {
@@ -231,15 +230,7 @@ public class BangClustering implements Clustering {
 	}
 
 	/**
-	 * 
-	 * TODO: Most of this can move down to dirEntry (til incGridLevel probably)
-	 * 
-	 * When a region is split, the 2 resulting regions are considered "buddies".
-	 * 
-	 * The region is split into 2 buddy-regions called "left" and "right". The
-	 * level of these new regions is increased by 1 compared to the old region.
-	 * The regionnumber of left is the same as the original region while the
-	 * regionnumber of right is increased via an added MSB.
+	 * Split region into 2 buddy regions.
 	 * 
 	 * Tuples are then moved from the original region to the new regions in the
 	 * new level.
@@ -248,47 +239,11 @@ public class BangClustering implements Clustering {
 	 *            Directory-Entry to perform buddy-split on
 	 * @return true if successfully done on max depth region
 	 */
-	private boolean buddySplit(DirectoryEntry dirEntry) {
+	private boolean manageBuddySplit(DirectoryEntry dirEntry) {
 		boolean result = false;
 
-		DirectoryEntry left = null;
-		DirectoryEntry right = null;
-
-		/*
-		 * left region of dirEntry, direntry is "back" of left left
-		 * region-number = back region-number left level = back level + 1
-		 * 
-		 * i.e.: back (0, 0) -> left (0, 1) or back (3, 2) -> left (3, 3)
-		 */
-		if (dirEntry.getLeft() != null) {
-			left = dirEntry.getLeft();
-		} else {
-			left = new DirectoryEntry();
-
-			dirEntry.setLeft(left);
-			left.setBack(dirEntry);
-		}
-
-		left.setRegion(new TupleRegion(dirEntry.getRegion().getRegion(), dirEntry.getRegion().getLevel() + 1));
-
-		/*
-		 * right region of dirEntry, direntry is "Back" of right right
-		 * region-number = back region-number + 1 Bit as MSB right level = back
-		 * level + 1
-		 * 
-		 * back (0, 0) -> right (1, 1) back (3, 2) -> right (7, 3)
-		 */
-		if (dirEntry.getRight() != null) {
-			right = dirEntry.getRight();
-		} else {
-			right = new DirectoryEntry();
-
-			dirEntry.setRight(right);
-			right.setBack(dirEntry);
-		}
-
-		right.setRegion(new TupleRegion(dirEntry.getRegion().getRegion() + (1 << dirEntry.getRegion().getLevel()),
-				dirEntry.getRegion().getLevel() + 1));
+		// Split region into 2 buddies
+		dirEntry.doBuddySplit();
 
 		// check if region was in max depth, then increase the grid levels
 		if (dirEntry.getRegion().getLevel() == levels[0]) {
@@ -377,7 +332,7 @@ public class BangClustering implements Clustering {
 		DirectoryEntry sparseEntry, denseEntry;
 
 		// two new regions, sparse and dense
-		boolean inc = buddySplit(dirEntry);
+		boolean inc = manageBuddySplit(dirEntry);
 
 		int enclosingPop = enclosingEntry.getRegion().getPopulation();
 		int leftPop = dirEntry.getLeft().getRegion().getPopulation();

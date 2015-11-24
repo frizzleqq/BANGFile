@@ -38,6 +38,52 @@ public class DirectoryEntry {
 	public void setRegion(TupleRegion region) {
 		this.region = region;
 	}
+	
+	/**
+	 * When a region is split, the 2 resulting regions are considered "buddies".
+	 * 
+	 * The region is split into 2 buddy-regions called "left" and "right". The
+	 * level of these new regions is increased by 1 compared to the old region.
+	 * The regionnumber of left is the same as the original region while the
+	 * regionnumber of right is increased via an added MSB.
+	 * 
+	 * left:
+	 * 		r = region
+	 * 		l = level + 1
+	 * right:
+	 * 		r = region + 2 ^ level
+	 * 		l = level + 1
+	 * 
+	 */
+	protected void doBuddySplit(){
+		/*
+		 * left region of dirEntry, direntry is "back" of left left
+		 * region-number = back region-number left level = back level + 1
+		 * 
+		 * i.e.: back (0, 0) -> left (0, 1) or back (3, 2) -> left (3, 3)
+		 */
+		if (left == null) {
+			left = new DirectoryEntry();
+			left.setBack(this);
+		}
+
+		left.setRegion(new TupleRegion(region.getRegion(), region.getLevel() + 1));
+
+		/*
+		 * right region of dirEntry, direntry is "Back" of right right
+		 * region-number = back region-number + 1 Bit as MSB right level = back
+		 * level + 1
+		 * 
+		 * back (0, 0) -> right (1, 1) back (3, 2) -> right (7, 3)
+		 */
+		if (right == null) {
+			right = new DirectoryEntry();
+			right.setBack(this);
+		}
+
+		right.setRegion(new TupleRegion(region.getRegion() + (1 << region.getLevel()),
+				region.getLevel() + 1));
+	}
 
 	/**
 	 * Calculate density of all existing regions of all entries that

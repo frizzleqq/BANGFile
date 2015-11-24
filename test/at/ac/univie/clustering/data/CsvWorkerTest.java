@@ -11,12 +11,12 @@ import at.ac.univie.clustering.data.CsvWorker;
 import org.junit.Assert;
 
 public class CsvWorkerTest {
-	
+
 	private static final String CSV_FILE_NO_HEADER = "test/resources/4_col_no_h.csv";
 	private static final String CSV_FILE_NO_HEADER_HEADER = "test/resources/4_col_h.csv";
 	private static final String CSV_FILE_NO_HEADER_CHAR = "test/resources/char_value.csv";
 	private static final String CSV_FILE_NO_HEADER_NULL = "test/resources/null_value.csv";
-	
+
 	@Test
 	public void testGetRecords() {
 		CsvWorker csv = null;
@@ -28,7 +28,7 @@ public class CsvWorkerTest {
 		}
 		assertEquals(2, csv.getnTuple(), 0);
 	}
-	
+
 	@Test
 	public void testGetRecordsHeader() {
 		CsvWorker csv = null;
@@ -52,7 +52,7 @@ public class CsvWorkerTest {
 		}
 		assertEquals(4, csv.getDimension(), 0);
 	}
-	
+
 	@Test
 	public void testGetDimensionsHeader() {
 		CsvWorker csv = null;
@@ -64,9 +64,9 @@ public class CsvWorkerTest {
 		}
 		assertEquals(4, csv.getDimension(), 0);
 	}
-	
+
 	@Test
-	public void testReadTuple() throws IOException{
+	public void testReadTuple() throws IOException {
 		CsvWorker csv = null;
 		try {
 			csv = new CsvWorker(CSV_FILE_NO_HEADER, ';', false);
@@ -74,16 +74,16 @@ public class CsvWorkerTest {
 			e.printStackTrace();
 			Assert.fail();
 		}
-		
-		float[] x = new float[]{0.1F,0.2F,0.3F,0.4F};
+
+		float[] x = new float[] { 0.1F, 0.2F, 0.3F, 0.4F };
 		assertArrayEquals(x, csv.readTuple(), 0);
 		assertEquals(1, csv.getCurPosition(), 0);
-		
-		x = new float[]{0.5F,0.6F,0.7F,0.8F};
+
+		x = new float[] { 0.5F, 0.6F, 0.7F, 0.8F };
 		assertArrayEquals(x, csv.readTuple(), 0);
 		assertEquals(2, csv.getCurPosition(), 0);
 	}
-	
+
 	@Test
 	public void testReadTupleHeader() throws IOException {
 		CsvWorker csv = null;
@@ -93,16 +93,16 @@ public class CsvWorkerTest {
 			e.printStackTrace();
 			Assert.fail();
 		}
-		
-		float[] x = new float[]{0.1F,0.2F,0.3F,0.4F};
+
+		float[] x = new float[] { 0.1F, 0.2F, 0.3F, 0.4F };
 		assertArrayEquals(x, csv.readTuple(), 0);
 		assertEquals(1, csv.getCurPosition(), 0);
-		
-		x = new float[]{0.5F,0.6F,0.7F,0.8F};
+
+		x = new float[] { 0.5F, 0.6F, 0.7F, 0.8F };
 		assertArrayEquals(x, csv.readTuple(), 0);
 		assertEquals(2, csv.getCurPosition(), 0);
 	}
-	
+
 	@Test
 	public void testReadTupleReturnNull() throws IOException {
 		CsvWorker csv = null;
@@ -112,13 +112,13 @@ public class CsvWorkerTest {
 			e.printStackTrace();
 			Assert.fail();
 		}
-		
+
 		csv.readTuple();
 		csv.readTuple();
 		assertEquals(null, csv.readTuple());
 	}
-	
-	@Test(expected=NumberFormatException.class)
+
+	@Test(expected = NumberFormatException.class)
 	public void testReadTupleChar() throws IOException {
 		CsvWorker csv = null;
 		try {
@@ -127,12 +127,12 @@ public class CsvWorkerTest {
 			e.printStackTrace();
 			Assert.fail();
 		}
-		
+
 		csv.readTuple();
 		csv.readTuple();
 	}
-	
-	@Test(expected=NumberFormatException.class)
+
+	@Test(expected = NumberFormatException.class)
 	public void testReadTupleNull() throws IOException {
 		CsvWorker csv = null;
 		try {
@@ -141,9 +141,20 @@ public class CsvWorkerTest {
 			e.printStackTrace();
 			Assert.fail();
 		}
-		
+
 		csv.readTuple();
 		csv.readTuple();
+	}
+
+	@Test
+	public void testFileNotExisting(){
+		CsvWorker csv = null;
+		try {
+			csv = new CsvWorker("notExistingFile.csv", ';', false);
+			Assert.fail();
+		} catch (IOException e) {
+		}
+
 	}
 
 }
