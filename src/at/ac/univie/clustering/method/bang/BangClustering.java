@@ -196,25 +196,18 @@ public class BangClustering implements Clustering {
 	 * @param dirEntry
 	 */
 	private void splitRegion(DirectoryEntry dirEntry) {
-		DirectoryEntry sparse = null;
-		DirectoryEntry dense = null;
 
 		manageBuddySplit(dirEntry);
 
-		// determine which region has a higher population
-		if (dirEntry.getLeft().getRegion().getPopulation() < dirEntry.getRight().getRegion().getPopulation()) {
-			sparse = dirEntry.getLeft();
-			dense = dirEntry.getRight();
-		} else {
-			sparse = dirEntry.getRight();
-			dense = dirEntry.getLeft();
-		}
+		// determine which of the new regions is sparse and dense
+		DirectoryEntry sparseEntry = dirEntry.getSparseEntry();
+		DirectoryEntry denseEntry = dirEntry.getDenseEntry();
 
 		// sparse will be moved to dirEntry
-		dirEntry.getRegion().setPopulation(sparse.getRegion().getPopulation());
-		dirEntry.getRegion().setTupleList(sparse.getRegion().getTupleList());
+		dirEntry.getRegion().setPopulation(sparseEntry.getRegion().getPopulation());
+		dirEntry.getRegion().setTupleList(sparseEntry.getRegion().getTupleList());
 
-		if (sparse.getLeft() == null && sparse.getRight() == null) {
+		if (sparseEntry.getLeft() == null && sparseEntry.getRight() == null) {
 			if (dirEntry.getLeft().getRegion().getPopulation() < dirEntry.getRight().getRegion().getPopulation()) {
 				dirEntry.setLeft(null);
 			} else {
@@ -222,9 +215,9 @@ public class BangClustering implements Clustering {
 			}
 		}
 
-		dense = checkTree(dense);
+		denseEntry = checkTree(denseEntry);
 
-		redistribute(dense, dirEntry);
+		redistribute(denseEntry, dirEntry);
 		checkTree(dirEntry);
 
 	}
@@ -328,29 +321,15 @@ public class BangClustering implements Clustering {
 	 * @return
 	 */
 	private boolean redistribute(DirectoryEntry dirEntry, DirectoryEntry enclosingEntry) {
-		int sparsePop, densePop;
-		DirectoryEntry sparseEntry, denseEntry;
-
 		// two new regions, sparse and dense
 		boolean inc = manageBuddySplit(dirEntry);
-
+		
+		DirectoryEntry sparseEntry = dirEntry.getSparseEntry();
+		DirectoryEntry denseEntry = dirEntry.getDenseEntry();
+		
+		//int sparsePop = sparseEntry.getRegion().getPopulation();
+		int densePop = denseEntry.getRegion().getPopulation();
 		int enclosingPop = enclosingEntry.getRegion().getPopulation();
-		int leftPop = dirEntry.getLeft().getRegion().getPopulation();
-		int rightPop = dirEntry.getRight().getRegion().getPopulation();
-
-		if (leftPop < rightPop) {
-			sparsePop = leftPop;
-			sparseEntry = dirEntry.getLeft();
-
-			densePop = rightPop;
-			denseEntry = dirEntry.getRight();
-		} else {
-			sparsePop = rightPop;
-			sparseEntry = dirEntry.getRight();
-
-			densePop = leftPop;
-			denseEntry = dirEntry.getLeft();
-		}
 
 		/*
 		 * If the population of the dense region is greater than the population
@@ -365,18 +344,13 @@ public class BangClustering implements Clustering {
 				enclosingEntry.getRegion().insertTuple(tuple);
 			}
 
-			sparseEntry.setRegion(null);
-
+			/* If sparse entry has no follow up, we clear it, otherwise we set
+			 * its region to null and it serves as connection.
+			 */
 			if (sparseEntry.getLeft() == null && sparseEntry.getRight() == null) {
-				// If sparse region has no follow up then we clear it, otherwise
-				// it serves as connection
-
-				// setting sparse to null does not set left/right to null
-				if (leftPop < rightPop) {
-					dirEntry.setLeft(null);
-				} else {
-					dirEntry.setRight(null);
-				}
+				dirEntry.clearSparseEntity();
+			} else {
+				sparseEntry.setRegion(null);
 			}
 
 			// If the dense region has a follow up we move it down as a buddy

@@ -84,6 +84,22 @@ public class DirectoryEntry {
 		right.setRegion(new TupleRegion(region.getRegion() + (1 << region.getLevel()),
 				region.getLevel() + 1));
 	}
+	
+	protected DirectoryEntry getSparseEntry(){
+		return (left.getRegion().getPopulation() < right.getRegion().getPopulation()) ? left : right;
+	}
+	
+	protected DirectoryEntry getDenseEntry(){
+		return (left.getRegion().getPopulation() < right.getRegion().getPopulation()) ? right : left;
+	}
+	
+	protected void clearSparseEntity(){
+		if (left.getRegion().getPopulation() < right.getRegion().getPopulation()){
+			left = null;
+		} else{
+			right = null;
+		}
+	}
 
 	/**
 	 * Calculate density of all existing regions of all entries that
