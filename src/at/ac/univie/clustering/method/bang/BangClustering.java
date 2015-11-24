@@ -1,10 +1,6 @@
 package at.ac.univie.clustering.method.bang;
 
-import java.lang.reflect.Array;
 import java.util.Arrays;
-
-import javax.sound.midi.SoundbankResource;
-
 import at.ac.univie.clustering.method.Clustering;
 
 /**
@@ -52,7 +48,7 @@ public class BangClustering implements Clustering {
 	public int getTuplesCount() {
 		return tuplesCount;
 	}
-	
+
 	protected void setLevels(int[] levels) {
 		this.levels = levels;
 	}
@@ -60,7 +56,7 @@ public class BangClustering implements Clustering {
 	protected void setGrids(int[] grids) {
 		this.grids = grids;
 	}
-	
+
 	public DirectoryEntry getBangFile() {
 		return bangFile;
 	}
@@ -199,7 +195,6 @@ public class BangClustering implements Clustering {
 
 		manageBuddySplit(dirEntry);
 
-		// determine which of the new regions is sparse and dense
 		DirectoryEntry sparseEntry = dirEntry.getSparseEntry();
 		DirectoryEntry denseEntry = dirEntry.getDenseEntry();
 
@@ -208,11 +203,7 @@ public class BangClustering implements Clustering {
 		dirEntry.getRegion().setTupleList(sparseEntry.getRegion().getTupleList());
 
 		if (sparseEntry.getLeft() == null && sparseEntry.getRight() == null) {
-			if (dirEntry.getLeft().getRegion().getPopulation() < dirEntry.getRight().getRegion().getPopulation()) {
-				dirEntry.setLeft(null);
-			} else {
-				dirEntry.setRight(null);
-			}
+			dirEntry.clearSparseEntity();
 		}
 
 		denseEntry = checkTree(denseEntry);
@@ -225,6 +216,8 @@ public class BangClustering implements Clustering {
 	/**
 	 * Split region into 2 buddy regions.
 	 * 
+	 * If the region was in max depth, we increase grid levels.
+	 * 
 	 * Tuples are then moved from the original region to the new regions in the
 	 * new level.
 	 * 
@@ -235,17 +228,13 @@ public class BangClustering implements Clustering {
 	private boolean manageBuddySplit(DirectoryEntry dirEntry) {
 		boolean result = false;
 
-		// Split region into 2 buddies
 		dirEntry.doBuddySplit();
 
-		// check if region was in max depth, then increase the grid levels
 		if (dirEntry.getRegion().getLevel() == levels[0]) {
 			increaseGridLevel();
 			result = true;
 		}
 
-		// Insert all tuples of directory again, since they should now be in
-		// either left or right.
 		for (float[] tuple : dirEntry.getRegion().getTupleList()) {
 			insertTuple(tuple);
 		}
@@ -254,6 +243,8 @@ public class BangClustering implements Clustering {
 	}
 
 	/**
+	 * TODO: move entire method to direntry
+	 * 
 	 * Ensure correct buddy-positions of regions
 	 * 
 	 * Check if region should be buddy of region underneath. If region has only
@@ -314,7 +305,7 @@ public class BangClustering implements Clustering {
 	}
 
 	/**
-	 * TODO: write doc, this method is simply too big
+	 * TODO: write doc, this method is too big probably
 	 * 
 	 * @param dirEntry
 	 * @param enclosingEntry
@@ -323,11 +314,11 @@ public class BangClustering implements Clustering {
 	private boolean redistribute(DirectoryEntry dirEntry, DirectoryEntry enclosingEntry) {
 		// two new regions, sparse and dense
 		boolean inc = manageBuddySplit(dirEntry);
-		
+
 		DirectoryEntry sparseEntry = dirEntry.getSparseEntry();
 		DirectoryEntry denseEntry = dirEntry.getDenseEntry();
-		
-		//int sparsePop = sparseEntry.getRegion().getPopulation();
+
+		// int sparsePop = sparseEntry.getRegion().getPopulation();
 		int densePop = denseEntry.getRegion().getPopulation();
 		int enclosingPop = enclosingEntry.getRegion().getPopulation();
 
@@ -344,7 +335,8 @@ public class BangClustering implements Clustering {
 				enclosingEntry.getRegion().insertTuple(tuple);
 			}
 
-			/* If sparse entry has no follow up, we clear it, otherwise we set
+			/*
+			 * If sparse entry has no follow up, we clear it, otherwise we set
 			 * its region to null and it serves as connection.
 			 */
 			if (sparseEntry.getLeft() == null && sparseEntry.getRight() == null) {
@@ -399,8 +391,6 @@ public class BangClustering implements Clustering {
 	}
 
 	/**
-	 * TODO: where to call this? inside other method (that is called in main i guess)
-	 * 
 	 * Starting from the root entry, calculate the regions densities of all
 	 * entries with a region.
 	 */
