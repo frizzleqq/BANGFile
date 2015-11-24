@@ -38,7 +38,7 @@ public class DirectoryEntry {
 	public void setRegion(TupleRegion region) {
 		this.region = region;
 	}
-	
+
 	/**
 	 * When a region is split, the 2 resulting regions are considered "buddies".
 	 * 
@@ -47,15 +47,11 @@ public class DirectoryEntry {
 	 * The regionnumber of left is the same as the original region while the
 	 * regionnumber of right is increased via an added MSB.
 	 * 
-	 * left:
-	 * 		r = region
-	 * 		l = level + 1
-	 * right:
-	 * 		r = region + 2 ^ level
-	 * 		l = level + 1
+	 * left: r = region l = level + 1 right: r = region + 2 ^ level l = level +
+	 * 1
 	 * 
 	 */
-	protected void doBuddySplit(){
+	protected void doBuddySplit() {
 		/*
 		 * left region of dirEntry, direntry is "back" of left left
 		 * region-number = back region-number left level = back level + 1
@@ -81,32 +77,66 @@ public class DirectoryEntry {
 			right.setBack(this);
 		}
 
-		right.setRegion(new TupleRegion(region.getRegion() + (1 << region.getLevel()),
-				region.getLevel() + 1));
+		right.setRegion(new TupleRegion(region.getRegion() + (1 << region.getLevel()), region.getLevel() + 1));
 	}
-	
-	protected DirectoryEntry getSparseEntry(){
+
+	/**
+	 * Move region to down to right directory entry.
+	 * Only call this if right did not exist.
+	 */
+	protected void moveToRight() {
+		DirectoryEntry tmpEntry = new DirectoryEntry();
+
+		tmpEntry.setBack(this);
+		
+		right = tmpEntry;
+
+		right.setRegion(new TupleRegion(region.getRegion() + (1 << region.getLevel()), region.getLevel() + 1));
+		right.getRegion().setPopulation(region.getPopulation());
+		right.getRegion().setTupleList(region.getTupleList());
+
+		region = null;
+	}
+
+	/**
+	 * Move region to down to left directory entry.
+	 * Only call this if left did not exist.
+	 */
+	protected void moveToLeft() {
+		DirectoryEntry tmpEntry = new DirectoryEntry();
+
+		tmpEntry.setBack(this);
+		
+		left = tmpEntry;
+
+		left.setRegion(new TupleRegion(region.getRegion(), region.getLevel() + 1));
+		left.getRegion().setPopulation(region.getPopulation());
+		left.getRegion().setTupleList(region.getTupleList());
+
+		region = null;
+	}
+
+	protected DirectoryEntry getSparseEntry() {
 		return (left.getRegion().getPopulation() < right.getRegion().getPopulation()) ? left : right;
 	}
-	
-	protected DirectoryEntry getDenseEntry(){
+
+	protected DirectoryEntry getDenseEntry() {
 		return (left.getRegion().getPopulation() < right.getRegion().getPopulation()) ? right : left;
 	}
-	
-	protected void clearSparseEntity(){
-		if (left.getRegion().getPopulation() < right.getRegion().getPopulation()){
+
+	protected void clearSparseEntity() {
+		if (left.getRegion().getPopulation() < right.getRegion().getPopulation()) {
 			left = null;
-		} else{
+		} else {
 			right = null;
 		}
 	}
 
 	/**
-	 * Calculate density of all existing regions of all entries that
-	 * succeed the entry this function is called with.
+	 * Calculate density of all existing regions of all entries that succeed the
+	 * entry this function is called with.
 	 * 
-	 * The size of a region is calculated with:
-	 * size = 1 / (2 ^ level)
+	 * The size of a region is calculated with: size = 1 / (2 ^ level)
 	 * 
 	 */
 	protected void calculateDensity() {
@@ -130,8 +160,8 @@ public class DirectoryEntry {
 	/**
 	 * The density of a region is the regions population divided by its size.
 	 * 
-	 * The size of enclosed regions within the region are subtracted from
-	 * the regions size.
+	 * The size of enclosed regions within the region are subtracted from the
+	 * regions size.
 	 * 
 	 */
 	private void calculateRegionDensity() {
@@ -143,8 +173,8 @@ public class DirectoryEntry {
 	}
 
 	/**
-	 * Find succeeding entries with a region and calculate their size.
-	 * size = 1 / (2 ^ level)
+	 * Find succeeding entries with a region and calculate their size. size = 1
+	 * / (2 ^ level)
 	 * 
 	 * @return size of region including succeeding regions
 	 */
@@ -158,10 +188,10 @@ public class DirectoryEntry {
 		}
 		return size;
 	}
-	
+
 	private void buildAliasEntry() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
