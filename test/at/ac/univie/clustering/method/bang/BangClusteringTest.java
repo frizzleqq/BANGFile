@@ -12,8 +12,6 @@ import org.junit.Test;
 
 public class BangClusteringTest {
 
-	// TODO: make a "real-life" test with minimal data (~2 dimension/3 tuples)
-
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 	}

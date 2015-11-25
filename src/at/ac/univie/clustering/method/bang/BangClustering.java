@@ -296,7 +296,6 @@ public class BangClustering implements Clustering {
 		DirectoryEntry sparseEntry = dirEntry.getSparseEntry();
 		DirectoryEntry denseEntry = dirEntry.getDenseEntry();
 
-		// int sparsePop = sparseEntry.getRegion().getPopulation();
 		int densePop = denseEntry.getRegion().getPopulation();
 		int enclosingPop = enclosingEntry.getRegion().getPopulation();
 

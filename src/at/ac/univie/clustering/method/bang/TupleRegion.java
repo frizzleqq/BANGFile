@@ -91,7 +91,7 @@ public class TupleRegion {
 	 * @return size of this region
 	 */
 	public float calculateSize(){
-		return  1.0f / ( 1 << getLevel());
+		return  1.0f / ( 1 << level);
 	}
 	
 	@Override

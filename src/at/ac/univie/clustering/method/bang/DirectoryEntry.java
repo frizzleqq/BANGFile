@@ -38,7 +38,7 @@ public class DirectoryEntry {
 	public void setRegion(TupleRegion region) {
 		this.region = region;
 	}
-
+	
 	/**
 	 * When a region is split, the 2 resulting regions are considered "buddies".
 	 * 
@@ -81,14 +81,14 @@ public class DirectoryEntry {
 	}
 
 	/**
-	 * Move region to down to right directory entry.
-	 * Only call this if right did not exist.
+	 * Move region to down to right directory entry. Only call this if right did
+	 * not exist.
 	 */
 	protected void moveToRight() {
 		DirectoryEntry tmpEntry = new DirectoryEntry();
 
 		tmpEntry.setBack(this);
-		
+
 		right = tmpEntry;
 
 		right.setRegion(new TupleRegion(region.getRegion() + (1 << region.getLevel()), region.getLevel() + 1));
@@ -99,14 +99,14 @@ public class DirectoryEntry {
 	}
 
 	/**
-	 * Move region to down to left directory entry.
-	 * Only call this if left did not exist.
+	 * Move region to down to left directory entry. Only call this if left did
+	 * not exist.
 	 */
 	protected void moveToLeft() {
 		DirectoryEntry tmpEntry = new DirectoryEntry();
 
 		tmpEntry.setBack(this);
-		
+
 		left = tmpEntry;
 
 		left.setRegion(new TupleRegion(region.getRegion(), region.getLevel() + 1));
@@ -189,8 +189,23 @@ public class DirectoryEntry {
 		return size;
 	}
 
+	/**
+	 * 
+	 */
 	private void buildAliasEntry() {
-		// TODO Auto-generated method stub
+		TupleRegion aliasRegion = region;
+
+		if (left != null) {
+
+		} else {
+
+		}
+
+		if (right != null) {
+
+		} else {
+
+		}
 
 	}
 
