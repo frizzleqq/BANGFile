@@ -126,12 +126,11 @@ public class CliMain {
 					System.exit(ERR_EXCEPTION);
 				}
 			}
-			
+
 			System.out.printf("%d: ", tuplesRead);
 			System.out.println(Arrays.toString(tuple));
 
 			cluster.insertTuple(tuple);
-
 
 			tuplesRead++;
 		}
@@ -140,9 +139,9 @@ public class CliMain {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		parse_options(args);
-		
+
 		DataWorker data = null;
-		
+
 		try {
 			data = new CsvWorker(filename, delimiter, header);
 		} catch (IOException e) {
@@ -150,42 +149,43 @@ public class CliMain {
 			System.err.println(e.getMessage());
 			System.exit(ERR_EXCEPTION);
 		}
-		
+
 		int dimension = data.getDimension();
 		int tuplesCount = data.getnTuple();
-		
-		//TODO: throw exceptions instead of system exit
-		if (dimension == 0){
+
+		// TODO: throw exceptions instead of system exit
+		if (dimension == 0) {
 			System.err.println("Could not determine dimensions of provided data.");
 			System.exit(1);
-		} else if (dimension < 2){
+		} else if (dimension < 2) {
 			System.err.println("Could not determine at least 2 dimensions.");
 			System.exit(1);
 		}
-		
-		if (tuplesCount == 0){
+
+		if (tuplesCount == 0) {
 			System.err.println("Could not determine amount of records of provided data.");
 			System.exit(1);
 		}
-		
+
 		System.out.println("Dimensions: " + dimension);
 		System.out.println("Tuples: " + tuplesCount + "\n");
-		
+
 		Clustering cluster = null;
-		
+
 		cluster = new BangClustering(dimension, bucketsize, tuplesCount);
-		//TODO: bucketsize, clusterPercent, bangAlias, neighbourhood -> constructor or method?
-		
-		//TODO: this should go to BangClustering
-		//if (neighbourhood == 0)
-		//	neighbourhood = dimension - 1;
-		
+		// TODO: bucketsize, clusterPercent, bangAlias, neighbourhood ->
+		// constructor or method?
+
+		// TODO: this should go to BangClustering
+		// if (neighbourhood == 0)
+		// neighbourhood = dimension - 1;
+
 		try {
 			readData(cluster, data);
 		} catch (IOException e) {
 			System.err.println("Problem while reading file: " + e.getMessage());
 			System.exit(ERR_EXCEPTION);
-		} catch (NumberFormatException e){
+		} catch (NumberFormatException e) {
 			System.err.println("ERROR: Wrong format of data: " + e.getMessage());
 			System.exit(ERR_EXCEPTION);
 		}

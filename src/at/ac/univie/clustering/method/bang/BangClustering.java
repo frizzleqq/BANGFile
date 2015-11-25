@@ -228,7 +228,7 @@ public class BangClustering implements Clustering {
 	private boolean manageBuddySplit(DirectoryEntry dirEntry) {
 		boolean result = false;
 
-		dirEntry.doBuddySplit();
+		dirEntry.createBuddySplit();
 
 		if (dirEntry.getRegion().getLevel() == levels[0]) {
 			increaseGridLevel();
@@ -243,10 +243,10 @@ public class BangClustering implements Clustering {
 	}
 
 	/**
-	 * Ensure correct buddy-positions of regions
+	 * Ensure correct buddy-positions of regions.
 	 * 
-	 * If region only has one follow up, make the region the buddy of it.
-	 * This will be done over multiple levels if possible.
+	 * If a region only has one successor, make the region the buddy of it.
+	 * This will be done over multiple levels.
 	 * 
 	 * @param dirEntry
 	 *            Directory-Entry that will be made a buddy of its follow up if
@@ -283,7 +283,15 @@ public class BangClustering implements Clustering {
 	}
 
 	/**
-	 * TODO: write doc
+	 * To ensure a nicely balanced tree we perform redistribute after a
+	 * region split.
+	 * 
+	 * Another buddy-split will be executed. If the denser region of the
+	 * resulting regions has a higher population than the enclosing
+	 * region, the enclosing region will be merged with the sparser
+	 * region.
+	 * If the denser region has a lower population, we undo the buddy
+	 * split.
 	 * 
 	 * @param dirEntry
 	 * @param enclosingEntry
@@ -307,15 +315,10 @@ public class BangClustering implements Clustering {
 		if (enclosingPop < densePop) {
 			dirEntry.setRegion(null);
 
-			// merge the enclosing region with the sparse region
 			for (float[] tuple : sparseEntry.getRegion().getTupleList()) {
 				enclosingEntry.getRegion().insertTuple(tuple);
 			}
 
-			/*
-			 * If sparse entry has no follow up, we clear it, otherwise we set
-			 * its region to null and it serves as connection.
-			 */
 			if (sparseEntry.getLeft() == null && sparseEntry.getRight() == null) {
 				dirEntry.clearSparseEntity();
 			} else {
@@ -333,23 +336,12 @@ public class BangClustering implements Clustering {
 
 		} else {
 
-			// confirm buddySplit was done, then decrease grid levels
+			// decrease grid level if buddy split done on deepest entry
 			if (inc) {
 				decreaseGridLevel();
 			}
 
-			// clear left and right regions
-			dirEntry.getLeft().setRegion(null);
-
-			if (dirEntry.getLeft().getLeft() == null && dirEntry.getLeft().getRight() == null) {
-				dirEntry.setLeft(null);
-			}
-
-			dirEntry.getRight().setRegion(null);
-
-			if (dirEntry.getRight().getLeft() == null && dirEntry.getRight().getRight() == null) {
-				dirEntry.setRight(null);
-			}
+			dirEntry.clearBuddySplit();
 
 			return false;
 		}

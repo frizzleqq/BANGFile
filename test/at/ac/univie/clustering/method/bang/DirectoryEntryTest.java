@@ -7,16 +7,16 @@ import org.junit.Test;
 public class DirectoryEntryTest {
 
 	@Test
-	public void testDoBuddySplitRoot() {
+	public void testCreateBuddySplitRoot() {
 		DirectoryEntry dirEntry = new DirectoryEntry();
-		
+
 		dirEntry.setRegion(new TupleRegion(0, 0));
-		
-		dirEntry.doBuddySplit();
-		
+
+		dirEntry.createBuddySplit();
+
 		assertEquals(0, dirEntry.getLeft().getRegion().getRegion());
 		assertEquals(1, dirEntry.getLeft().getRegion().getLevel());
-		
+
 		assertEquals(1, dirEntry.getRight().getRegion().getRegion());
 		assertEquals(1, dirEntry.getRight().getRegion().getLevel());
 	}
@@ -24,31 +24,45 @@ public class DirectoryEntryTest {
 	@Test
 	public void testDoBuddySplitSub() {
 		DirectoryEntry dirEntry = new DirectoryEntry();
-		
+
 		dirEntry.setRegion(new TupleRegion(3, 2));
-		
-		dirEntry.doBuddySplit();
-		
+
+		dirEntry.createBuddySplit();
+
 		assertEquals(3, dirEntry.getLeft().getRegion().getRegion());
 		assertEquals(3, dirEntry.getLeft().getRegion().getLevel());
-		
+
 		assertEquals(7, dirEntry.getRight().getRegion().getRegion());
 		assertEquals(3, dirEntry.getRight().getRegion().getLevel());
+	}
+	
+	@Test
+	public void testClearBuddySplit(){
+		DirectoryEntry dirEntry = new DirectoryEntry();
+
+		dirEntry.setRegion(new TupleRegion(0, 0));
+
+		dirEntry.createBuddySplit();
+		
+		dirEntry.clearBuddySplit();
+		
+		assertEquals(null, dirEntry.getLeft());
+		assertEquals(null, dirEntry.getRight());
 	}
 
 	@Test
 	public void testMoveToRight() {
 		DirectoryEntry dirEntry = new DirectoryEntry();
 		dirEntry.setRegion(new TupleRegion(3, 2));
-		
+
 		dirEntry.getRegion().insertTuple(new float[] { 0.1f, 0.1f });
 		dirEntry.getRegion().insertTuple(new float[] { 0.2f, 0.2f });
-		
+
 		dirEntry.moveToRight();
-		
+
 		assertEquals(null, dirEntry.getRegion());
 		assertEquals(null, dirEntry.getLeft());
-		
+
 		assertEquals(7, dirEntry.getRight().getRegion().getRegion());
 		assertEquals(3, dirEntry.getRight().getRegion().getLevel());
 		assertEquals(2, dirEntry.getRight().getRegion().getPopulation());
@@ -58,15 +72,15 @@ public class DirectoryEntryTest {
 	public void testMoveToLeft() {
 		DirectoryEntry dirEntry = new DirectoryEntry();
 		dirEntry.setRegion(new TupleRegion(3, 2));
-		
+
 		dirEntry.getRegion().insertTuple(new float[] { 0.1f, 0.1f });
 		dirEntry.getRegion().insertTuple(new float[] { 0.2f, 0.2f });
-		
+
 		dirEntry.moveToLeft();
-		
+
 		assertEquals(null, dirEntry.getRegion());
 		assertEquals(null, dirEntry.getRight());
-		
+
 		assertEquals(3, dirEntry.getLeft().getRegion().getRegion());
 		assertEquals(3, dirEntry.getLeft().getRegion().getLevel());
 		assertEquals(2, dirEntry.getLeft().getRegion().getPopulation());
@@ -76,15 +90,15 @@ public class DirectoryEntryTest {
 	public void testGetSparseEntry() {
 		DirectoryEntry dirEntry = new DirectoryEntry();
 		dirEntry.setRegion(new TupleRegion(0, 0));
-		dirEntry.doBuddySplit();
-		
+		dirEntry.createBuddySplit();
+
 		dirEntry.getLeft().getRegion().insertTuple(new float[] { 0.1f, 0.1f });
-		
+
 		assertEquals(dirEntry.getRight(), dirEntry.getSparseEntry());
-		
+
 		dirEntry.getRight().getRegion().insertTuple(new float[] { 0.1f, 0.1f });
 		dirEntry.getRight().getRegion().insertTuple(new float[] { 0.1f, 0.1f });
-		
+
 		assertEquals(dirEntry.getLeft(), dirEntry.getSparseEntry());
 	}
 
@@ -92,15 +106,15 @@ public class DirectoryEntryTest {
 	public void testGetDenseEntry() {
 		DirectoryEntry dirEntry = new DirectoryEntry();
 		dirEntry.setRegion(new TupleRegion(0, 0));
-		dirEntry.doBuddySplit();
-		
+		dirEntry.createBuddySplit();
+
 		dirEntry.getLeft().getRegion().insertTuple(new float[] { 0.1f, 0.1f });
-		
+
 		assertEquals(dirEntry.getLeft(), dirEntry.getDenseEntry());
-		
+
 		dirEntry.getRight().getRegion().insertTuple(new float[] { 0.1f, 0.1f });
 		dirEntry.getRight().getRegion().insertTuple(new float[] { 0.1f, 0.1f });
-		
+
 		assertEquals(dirEntry.getRight(), dirEntry.getDenseEntry());
 	}
 
@@ -108,12 +122,12 @@ public class DirectoryEntryTest {
 	public void testClearSparseEntity() {
 		DirectoryEntry dirEntry = new DirectoryEntry();
 		dirEntry.setRegion(new TupleRegion(0, 0));
-		dirEntry.doBuddySplit();
-		
+		dirEntry.createBuddySplit();
+
 		dirEntry.getLeft().getRegion().insertTuple(new float[] { 0.1f, 0.1f });
-		
+
 		dirEntry.clearSparseEntity();
-		
+
 		assertEquals(null, dirEntry.getRight());
 	}
 

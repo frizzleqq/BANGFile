@@ -38,7 +38,7 @@ public class DirectoryEntry {
 	public void setRegion(TupleRegion region) {
 		this.region = region;
 	}
-	
+
 	/**
 	 * When a region is split, the 2 resulting regions are considered "buddies".
 	 * 
@@ -47,11 +47,11 @@ public class DirectoryEntry {
 	 * The regionnumber of left is the same as the original region while the
 	 * regionnumber of right is increased via an added MSB.
 	 * 
-	 * left: r = region l = level + 1 right: r = region + 2 ^ level l = level +
-	 * 1
+	 * left: r = region l = level + 1
+	 * right: r = region + 2 ^ level l = level + 1
 	 * 
 	 */
-	protected void doBuddySplit() {
+	protected void createBuddySplit() {
 		/*
 		 * left region of dirEntry, direntry is "back" of left left
 		 * region-number = back region-number left level = back level + 1
@@ -78,6 +78,26 @@ public class DirectoryEntry {
 		}
 
 		right.setRegion(new TupleRegion(region.getRegion() + (1 << region.getLevel()), region.getLevel() + 1));
+	}
+
+	/**
+	 * If the dense region of the new regions (from buddy split) has less tuples
+	 * than the enclosing one, we will revert the buddy split.
+	 * 
+	 * Note: This is done before the tuples are moved down.
+	 */
+	protected void clearBuddySplit() {
+		left.setRegion(null);
+
+		if (left.getLeft() == null && left.getRight() == null) {
+			left = null;
+		}
+
+		right.setRegion(null);
+
+		if (right.getLeft() == null && right.getRight() == null) {
+			right = null;
+		}
 	}
 
 	/**
@@ -164,7 +184,7 @@ public class DirectoryEntry {
 	 * regions size.
 	 * 
 	 */
-	private void calculateRegionDensity() {
+	protected void calculateRegionDensity() {
 
 		float leftSize = (left != null) ? left.getRegionSize() : 0f;
 		float rightSize = (right != null) ? right.getRegionSize() : 0f;
@@ -173,12 +193,12 @@ public class DirectoryEntry {
 	}
 
 	/**
-	 * Find succeeding entries with a region and calculate their size. size = 1
-	 * / (2 ^ level)
+	 * Find succeeding entries with a region and calculate their size.
+	 * size = 1 / (2 ^ level)
 	 * 
 	 * @return size of region including succeeding regions
 	 */
-	private float getRegionSize() {
+	protected float getRegionSize() {
 		float size = 0;
 		if (region != null) {
 			size = region.calculateSize();
@@ -192,21 +212,33 @@ public class DirectoryEntry {
 	/**
 	 * 
 	 */
-	private void buildAliasEntry() {
+	protected void buildAliasEntry() {
+		//TODO: ensure region is not changed
 		TupleRegion aliasRegion = region;
 
 		if (left != null) {
-
+			buildAlias(left, region.getRegion(), region.getLevel() + 1);
 		} else {
-
+			aliasRegion.setAlias(
+					new TupleRegion(region.getRegion(),
+									region.getLevel() + 1));
+			aliasRegion = aliasRegion.getAlias();
 		}
 
 		if (right != null) {
-
+			buildAlias(	right,
+						region.getRegion() + ( 1 << region.getLevel()),
+						region.getLevel() + 1);
 		} else {
-
+			aliasRegion.setAlias(
+					new TupleRegion(region.getRegion() + ( 1 << region.getLevel()),
+									region.getLevel() + 1));
+			aliasRegion = aliasRegion.getAlias();
 		}
 
+	}
+
+	protected void buildAlias(DirectoryEntry dirEntry, int region, int level) {		
 	}
 
 	@Override
