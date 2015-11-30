@@ -13,6 +13,9 @@ public class TupleRegion {
 	private List<float[]> tupleList = new ArrayList<float[]>();
 	private TupleRegion alias = null;
 	
+	//TODO: remove this variable once density has unittests
+	public float size = 0;
+	
 	public TupleRegion(int region, int level) {
 		this.region = region;
 		this.level = level;
@@ -101,6 +104,8 @@ public class TupleRegion {
 		regString += "\n\tPopulation: " + population;
 		regString += "\n\tLevel: " + level;
 		regString += "\n\tDensity: " + density;
+		regString += "\n\tSize: " + size;
+		
 		regString += "\n\tAlias: " + alias;
 		
 		regString += "\n\tTuples: ";

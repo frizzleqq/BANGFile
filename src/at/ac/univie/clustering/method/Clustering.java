@@ -11,5 +11,7 @@ public interface Clustering {
 	public int getDimension();
 	
 	public int getTuplesCount();
+	
+	public void analyzeClusters();
 
 }

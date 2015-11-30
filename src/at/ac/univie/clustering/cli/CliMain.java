@@ -189,6 +189,10 @@ public class CliMain {
 			System.err.println("ERROR: Wrong format of data: " + e.getMessage());
 			System.exit(ERR_EXCEPTION);
 		}
+		
+		cluster.analyzeClusters();
+		
+		
 
 		System.out.println("\n" + cluster);
 

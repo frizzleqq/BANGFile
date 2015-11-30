@@ -357,6 +357,12 @@ public class BangClustering implements Clustering {
 		levels[((levels[0] - 1) % dimension) + 1] -= 1;
 		levels[0] -= 1;
 	}
+	
+	@Override
+	public void analyzeClusters() {
+		bangFile.calculateDensity();
+		
+	}
 
 	/**
 	 * Starting from the root entry, calculate the regions densities of all
