@@ -364,14 +364,6 @@ public class BangClustering implements Clustering {
 		
 	}
 
-	/**
-	 * Starting from the root entry, calculate the regions densities of all
-	 * entries with a region.
-	 */
-	public void calculateDensities() {
-		bangFile.calculateDensity();
-	}
-
 	@Override
 	public String toString() {
 		String bangString = "Bang-File:";

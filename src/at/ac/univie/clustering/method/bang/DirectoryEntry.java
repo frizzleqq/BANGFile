@@ -161,7 +161,7 @@ public class DirectoryEntry {
 	 */
 	protected void calculateDensity() {
 		if (region != null) {
-			calculateRegionDensity();
+			region.setDensity(calculateRegionDensity());
 
 			// check for successor for alias
 			if (left != null || right != null) {
@@ -177,21 +177,23 @@ public class DirectoryEntry {
 		}
 	}
 
+
 	/**
 	 * The density of a region is the regions population divided by its size.
 	 * 
 	 * The size of enclosed regions within the region are subtracted from the
 	 * regions size.
 	 * 
+	 * @return regions population / regions size
 	 */
-	protected void calculateRegionDensity() {
+	protected float calculateRegionDensity() {
 
 		float leftSize = (left != null) ? left.getRegionSize() : 0f;
 		float rightSize = (right != null) ? right.getRegionSize() : 0f;
 		
 		region.size = region.calculateSize() - leftSize - rightSize;
 
-		region.setDensity(region.getPopulation() / (region.calculateSize() - leftSize - rightSize));
+		return (region.getPopulation() / (region.calculateSize() - leftSize - rightSize));
 	}
 
 	/**
@@ -219,35 +221,43 @@ public class DirectoryEntry {
 		TupleRegion aliasRegion = region;
 
 		if (left != null) {
-			buildAlias(left, aliasRegion, region.getRegion(), region.getLevel() + 1);
+			left.buildAlias(aliasRegion, region.getRegion(), region.getLevel() + 1);
 		} else {
-			aliasRegion.setAlias(new TupleRegion(region.getRegion(), region.getLevel() + 1));
-			aliasRegion = aliasRegion.getAlias();
+			aliasRegion = new TupleRegion(region.getRegion(), region.getLevel() + 1);
+			//aliasRegion = aliasRegion.getAlias();
 		}
 
 		if (right != null) {
-			buildAlias(right, aliasRegion,	region.getRegion() + ( 1 << region.getLevel()),	region.getLevel() + 1);
+			right.buildAlias(aliasRegion, region.getRegion() + ( 1 << region.getLevel()),	region.getLevel() + 1);
 		} else {
-			aliasRegion.setAlias(new TupleRegion(region.getRegion() + ( 1 << region.getLevel()), region.getLevel() + 1));
-			aliasRegion = aliasRegion.getAlias();
+			aliasRegion = new TupleRegion(region.getRegion() + ( 1 << region.getLevel()), region.getLevel() + 1);
+			//aliasRegion = aliasRegion.getAlias();
 		}
+		
+
 
 	}
 
-	protected void buildAlias(DirectoryEntry dirEntry, TupleRegion aliasRegion, int region, int level) {
-		// enclosed region = ending condition
-		if (dirEntry.getRegion() == null){
-			if (dirEntry.getLeft() != null) {
-				buildAlias(dirEntry.getLeft(), aliasRegion, region, level + 1);
+	/**
+	 * enclosed region = ending condition
+	 * 
+	 * @param aliasRegion
+	 * @param region
+	 * @param level
+	 */
+	protected void buildAlias(TupleRegion aliasRegion, int region, int level) {
+		if (this.region == null){
+			if (left != null) {
+				left.buildAlias(aliasRegion, region, level + 1);
 			} else {
 				aliasRegion.setAlias(new TupleRegion(region, level + 1));
 				aliasRegion = aliasRegion.getAlias();
 			}
 
-			if (dirEntry.getRight() != null) {
-				buildAlias(	dirEntry.getRight(), aliasRegion, region + ( 1 << level), region + 1);
+			if (right != null) {
+				right.buildAlias(aliasRegion, region + ( 1 << level), level + 1);
 			} else {
-				aliasRegion.setAlias(new TupleRegion(region + ( 1 << level), region + 1));
+				aliasRegion.setAlias(new TupleRegion(region + ( 1 << level), level + 1));
 				aliasRegion = aliasRegion.getAlias();
 			}
 		}
