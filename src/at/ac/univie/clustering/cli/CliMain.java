@@ -17,184 +17,183 @@ import at.ac.univie.clustering.method.bang.BangClustering;
 
 public class CliMain {
 
-	private static Options options = new Options();
+    private static final Options options = new Options();
 
-	private static String filename = "src/resources/test2d_1.csv";
-	private static char delimiter = ';';
-	private static boolean header = false;
-	private static int bucketsize = 17;
-	private static int neighbourhood = 0;
-	private static int clusterPercent = 50;
-	private static boolean bangAlias = false;
+    private static String filename = "src/resources/test2d_1.csv";
+    private static char delimiter = ';';
+    private static boolean header = false;
+    private static int bucketsize = 17;
+    private static int neighbourhood = 0;
+    private static int clusterPercent = 50;
+    private static boolean bangAlias = false;
 
-	private static final int ERR_EXCEPTION = 1;
-	private static final int ERR_PARAM = 2;
+    private static final int ERR_EXCEPTION = 1;
+    private static final int ERR_PARAM = 2;
 
-	private static void parse_options(String[] args) {
+    private static void parse_options(String[] args) {
 
-		options.addOption("h", "help", false, "show help.");
-		options.addOption("f", true, "filename");
-		options.addOption("d", true, "delimiter");
-		options.addOption(null, "header", false, "header");
-		options.addOption("s", true, "bucketsize (max population)");
-		options.addOption("n", true, "neighbourhood");
-		options.addOption("c", true, "cluster-percent");
-		options.addOption("a", false, "alias");
+        options.addOption("h", "help", false, "show help.");
+        options.addOption("f", true, "filename");
+        options.addOption("d", true, "delimiter");
+        options.addOption(null, "header", false, "header");
+        options.addOption("s", true, "bucketsize (max population)");
+        options.addOption("n", true, "neighbourhood");
+        options.addOption("c", true, "cluster-percent");
+        options.addOption("a", false, "alias");
 
-		CommandLineParser parser = new DefaultParser();
-		CommandLine cmd = null;
+        CommandLineParser parser = new DefaultParser();
+        CommandLine cmd = null;
 
-		try {
-			cmd = parser.parse(options, args);
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
+        try {
+            cmd = parser.parse(options, args);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            System.exit(ERR_PARAM);
+        }
 
-		if (cmd.hasOption("h") || cmd.hasOption("help")) {
-			help();
-		}
+        if (cmd.hasOption("h") || cmd.hasOption("help")) {
+            help();
+        }
 
-		if (cmd.hasOption("header")) {
-			header = true;
-		}
+        if (cmd.hasOption("header")) {
+            header = true;
+        }
 
-		if (cmd.hasOption("f"))
-			filename = cmd.getOptionValue("f");
+        if (cmd.hasOption("f"))
+            filename = cmd.getOptionValue("f");
 
-		if (cmd.hasOption("d"))
-			delimiter = cmd.getOptionValue("d").charAt(0);
+        if (cmd.hasOption("d"))
+            delimiter = cmd.getOptionValue("d").charAt(0);
 
-		if (cmd.hasOption("s"))
-			bucketsize = Integer.parseInt(cmd.getOptionValue("s"));
-		if (bucketsize < 4) {
-			System.err.println("'bucketsize' has to be at least 4");
-			System.exit(ERR_PARAM);
-		}
+        if (cmd.hasOption("s"))
+            bucketsize = Integer.parseInt(cmd.getOptionValue("s"));
+        if (bucketsize < 4) {
+            System.err.println("'bucketsize' has to be at least 4");
+            System.exit(ERR_PARAM);
+        }
 
-		if (cmd.hasOption("n"))
-			neighbourhood = Integer.parseInt(cmd.getOptionValue("n"));
+        if (cmd.hasOption("n"))
+            neighbourhood = Integer.parseInt(cmd.getOptionValue("n"));
 
-		if (cmd.hasOption("c")) {
-			clusterPercent = Integer.parseInt(cmd.getOptionValue("s"));
-			if (clusterPercent < 0 || clusterPercent > 100) {
-				System.err.println("ClusterPercent has to be between 0 and 100.");
-				System.exit(ERR_PARAM);
-			}
-		}
+        if (cmd.hasOption("c")) {
+            clusterPercent = Integer.parseInt(cmd.getOptionValue("s"));
+            if (clusterPercent < 0 || clusterPercent > 100) {
+                System.err.println("ClusterPercent has to be between 0 and 100.");
+                System.exit(ERR_PARAM);
+            }
+        }
 
-		if (cmd.hasOption("a"))
-			bangAlias = true;
+        if (cmd.hasOption("a"))
+            bangAlias = true;
 
-	}
+    }
 
-	private static void help() {
-		String header = "Bang Clustering:\n\n";
-		String footer = "\nTODO: write more help.";
-		HelpFormatter formatter = new HelpFormatter();
-		formatter.printHelp("Bang", header, options, footer, true);
-		System.exit(0);
-	}
+    private static void help() {
+        String header = "Bang Clustering:\n\n";
+        String footer = "\nTODO: write more help.";
+        HelpFormatter formatter = new HelpFormatter();
+        formatter.printHelp("Bang", header, options, footer, true);
+        System.exit(0);
+    }
 
-	/**
-	 *
-	 * @param cluster
-	 * @param data
-	 * @throws Exception
-	 */
-	public static void readData(Clustering cluster, DataWorker data) throws IOException, NumberFormatException {
-		int tuplesRead = 0;
-		float[] tuple;
+    /**
+     * @param cluster
+     * @param data
+     * @throws IOException, NumberFormatException
+     */
+    private static void readData(Clustering cluster, DataWorker data) throws IOException, NumberFormatException {
+        int tuplesRead = 0;
+        float[] tuple;
 
 		/*
-		 * TODO: - NumberFormatException should be handled - should be caught in
+         * TODO: - NumberFormatException should be handled - should be caught in
 		 * DataWorker? - force range 0 - 1? or change to readFloat / readInt
 		 * etc. - add bool called "normalize"?
 		 */
-		while ((tuple = data.readTuple()) != null) {
+        while ((tuple = data.readTuple()) != null) {
 
-			if (tuple.length != data.getDimension()) {
-				System.err.println(Arrays.toString(tuple));
-				System.err.println(String.format("Tuple-dimension [%d] differs from predetermined dimension [%d].\n",
-						tuple.length, data.getDimension()));
-				System.exit(ERR_EXCEPTION);
-			}
+            if (tuple.length != data.getDimension()) {
+                System.err.println(Arrays.toString(tuple));
+                System.err.println(String.format("Tuple-dimension [%d] differs from predetermined dimension [%d].\n",
+                        tuple.length, data.getDimension()));
+                System.exit(ERR_EXCEPTION);
+            }
 
-			for (float f : tuple) {
-				if (f < 0 || f > 1) {
-					System.err.println(Arrays.toString(tuple));
-					System.err.println(String.format("Incorrect tuple value found [%f].\n", f));
-					System.exit(ERR_EXCEPTION);
-				}
-			}
+            for (float f : tuple) {
+                if (f < 0 || f > 1) {
+                    System.err.println(Arrays.toString(tuple));
+                    System.err.println(String.format("Incorrect tuple value found [%f].\n", f));
+                    System.exit(ERR_EXCEPTION);
+                }
+            }
 
-			System.out.printf("%d: ", tuplesRead);
-			System.out.println(Arrays.toString(tuple));
+            System.out.printf("%d: ", tuplesRead);
+            System.out.println(Arrays.toString(tuple));
 
-			cluster.insertTuple(tuple);
+            cluster.insertTuple(tuple);
 
-			tuplesRead++;
-		}
-	}
+            tuplesRead++;
+        }
+    }
 
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		parse_options(args);
+    public static void main(String[] args) {
+        // TODO Auto-generated method stub
+        parse_options(args);
 
-		DataWorker data = null;
+        DataWorker data = null;
 
-		try {
-			data = new CsvWorker(filename, delimiter, header);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			System.err.println(e.getMessage());
-			System.exit(ERR_EXCEPTION);
-		}
+        try {
+            data = new CsvWorker(filename, delimiter, header);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            System.err.println(e.getMessage());
+            System.exit(ERR_EXCEPTION);
+        }
 
-		int dimension = data.getDimension();
-		int tuplesCount = data.getnTuple();
+        int dimension = data.getDimension();
+        int tuplesCount = data.getnTuple();
 
-		// TODO: throw exceptions instead of system exit
-		if (dimension == 0) {
-			System.err.println("Could not determine dimensions of provided data.");
-			System.exit(1);
-		} else if (dimension < 2) {
-			System.err.println("Could not determine at least 2 dimensions.");
-			System.exit(1);
-		}
+        // TODO: throw exceptions instead of system exit
+        if (dimension == 0) {
+            System.err.println("Could not determine dimensions of provided data.");
+            System.exit(1);
+        } else if (dimension < 2) {
+            System.err.println("Could not determine at least 2 dimensions.");
+            System.exit(1);
+        }
 
-		if (tuplesCount == 0) {
-			System.err.println("Could not determine amount of records of provided data.");
-			System.exit(1);
-		}
+        if (tuplesCount == 0) {
+            System.err.println("Could not determine amount of records of provided data.");
+            System.exit(1);
+        }
 
-		System.out.println("Dimensions: " + dimension);
-		System.out.println("Tuples: " + tuplesCount + "\n");
+        System.out.println("Dimensions: " + dimension);
+        System.out.println("Tuples: " + tuplesCount + "\n");
 
-		Clustering cluster = null;
+        Clustering cluster;
 
-		cluster = new BangClustering(dimension, bucketsize, tuplesCount);
-		// TODO: bucketsize, clusterPercent, bangAlias, neighbourhood ->
-		// constructor or method?
+        cluster = new BangClustering(dimension, bucketsize, tuplesCount);
+        // TODO: bucketsize, clusterPercent, bangAlias, neighbourhood ->
+        // constructor or method?
 
-		// TODO: this should go to BangClustering
-		// if (neighbourhood == 0)
-		// neighbourhood = dimension - 1;
+        // TODO: this should go to BangClustering
+        // if (neighbourhood == 0)
+        // neighbourhood = dimension - 1;
 
-		try {
-			readData(cluster, data);
-		} catch (IOException e) {
-			System.err.println("Problem while reading file: " + e.getMessage());
-			System.exit(ERR_EXCEPTION);
-		} catch (NumberFormatException e) {
-			System.err.println("ERROR: Wrong format of data: " + e.getMessage());
-			System.exit(ERR_EXCEPTION);
-		}
-		
-		cluster.analyzeClusters();
-		
-		
+        try {
+            readData(cluster, data);
+        } catch (IOException e) {
+            System.err.println("Problem while reading file: " + e.getMessage());
+            System.exit(ERR_EXCEPTION);
+        } catch (NumberFormatException e) {
+            System.err.println("ERROR: Wrong format of data: " + e.getMessage());
+            System.exit(ERR_EXCEPTION);
+        }
 
-		System.out.println("\n" + cluster);
+        cluster.analyzeClusters();
 
-	}
+
+        System.out.println("\n" + cluster);
+
+    }
 }
