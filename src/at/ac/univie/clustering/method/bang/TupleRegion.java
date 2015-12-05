@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class TupleRegion {
+public class TupleRegion implements Comparable<TupleRegion> {
 
     private int population = 0;
     private int region;
@@ -70,6 +70,8 @@ public class TupleRegion {
     }
 
     /**
+     * Insert tuple and increment population.
+     *
      * @param tuple
      */
     public void insertTuple(float[] tuple) {
@@ -79,7 +81,7 @@ public class TupleRegion {
     }
 
     /**
-     *
+     * Clear a tuple list and set population to 0.
      */
     public void clearTupleList() {
         tupleList.clear();
@@ -95,6 +97,8 @@ public class TupleRegion {
     public float calculateSize() {
         return 1.0f / (1 << level);
     }
+
+
 
     @Override
     public String toString() {
@@ -115,4 +119,8 @@ public class TupleRegion {
         return regString;
     }
 
+    @Override
+    public int compareTo(TupleRegion o) {
+        return Float.compare(this.getDensity(), o.getDensity());
+    }
 }

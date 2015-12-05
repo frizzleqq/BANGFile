@@ -1,5 +1,7 @@
 package at.ac.univie.clustering.method.bang;
 
+import java.util.List;
+
 public class DirectoryEntry {
 
     private DirectoryEntry left = null;
@@ -213,7 +215,7 @@ public class DirectoryEntry {
     }
 
     /**
-     *
+     * TODO
      */
     protected void buildAliasEntry() {
         TupleRegion aliasRegion = region;
@@ -260,6 +262,23 @@ public class DirectoryEntry {
         }
     }
 
+    /**
+     * Collect all regions within a directory and store them in a list.
+     *
+     * @param regionArray
+     */
+    protected void collectRegions(List<TupleRegion> regionArray) {
+        if (left != null){
+            left.collectRegions(regionArray);
+        }
+        if (right != null){
+            right.collectRegions(regionArray);
+        }
+        if (region != null){
+            regionArray.add(region);
+        }
+    }
+
     @Override
     public String toString() {
         String dirString = "DirectoryEntry:";
@@ -278,5 +297,7 @@ public class DirectoryEntry {
         }
         return dirString + "\n";
     }
+
+
 
 }

@@ -4,6 +4,9 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class DirectoryEntryTest {
 
 	@Test
@@ -135,5 +138,28 @@ public class DirectoryEntryTest {
 	public void testCalculateDensity() {
 		fail("Not yet implemented");
 	}
+
+
+    @Test
+    public void testCollectRegions(){
+        DirectoryEntry dirEntry = new DirectoryEntry();
+        dirEntry.setRegion(new TupleRegion(0, 0));
+        dirEntry.createBuddySplit();
+
+        dirEntry.getLeft().createBuddySplit();
+
+        List<TupleRegion> regionArray = new ArrayList<TupleRegion>();
+        dirEntry.collectRegions(regionArray);
+
+        assertEquals(5, regionArray.size());
+
+        assertTrue(regionArray.contains( dirEntry.getRegion()));
+
+        assertTrue(regionArray.contains( dirEntry.getLeft().getRegion()));
+        assertTrue(regionArray.contains( dirEntry.getRight().getRegion()));
+
+        assertTrue(regionArray.contains( dirEntry.getLeft().getLeft().getRegion()));
+        assertTrue(regionArray.contains( dirEntry.getLeft().getRight().getRegion()));
+    }
 
 }

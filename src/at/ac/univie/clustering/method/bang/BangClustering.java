@@ -1,6 +1,9 @@
 package at.ac.univie.clustering.method.bang;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import at.ac.univie.clustering.method.Clustering;
 
@@ -360,6 +363,42 @@ public class BangClustering implements Clustering {
     public void analyzeClusters() {
         bangFile.calculateDensity();
 
+    }
+
+    public void sortDirectory(){
+
+        //TODO: these vars should be class vars when done
+
+        List<TupleRegion> regionArray = new ArrayList<TupleRegion>();
+
+        bangFile.collectRegions(regionArray);
+        int nRegions = regionArray.size();
+        int nAlias = 0;
+
+        Collections.sort(regionArray);
+
+        int[] nRegionsAlias = new int[nRegions+1];
+        nRegionsAlias[0] = 0;
+
+        int count = 0;
+
+        //TODO: eigene countalias funktion für testbarkeit
+
+        for(int i = 1; i <= nRegions; i++){
+            TupleRegion aliasNext = regionArray.get(i).getAlias();
+
+            if (aliasNext == null){
+                count++;
+            } else{
+                while(aliasNext != null){
+                    count++;
+                    aliasNext = aliasNext.getAlias();
+                }
+            }
+            nRegionsAlias[i] = count;
+        }
+
+        nAlias = count;
     }
 
     @Override
