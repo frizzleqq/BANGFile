@@ -102,17 +102,13 @@ public class DirectoryEntry {
     }
 
     /**
-     * Move region to down to right directory entry. Only call this if right did
-     * not exist.
+     * Move region down to right directory entry.
      */
     void moveToRight() {
-
-        //TODO: tmpEntry not really needed anymore
-        DirectoryEntry tmpEntry = new DirectoryEntry();
-
-        tmpEntry.setBack(this);
-
-        right = tmpEntry;
+        if (right == null) {
+            right = new DirectoryEntry();
+            right.setBack(this);
+        }
 
         right.setRegion(new TupleRegion(region.getRegion() + (1 << region.getLevel()), region.getLevel() + 1));
         right.getRegion().setPopulation(region.getPopulation());
@@ -122,15 +118,13 @@ public class DirectoryEntry {
     }
 
     /**
-     * Move region to down to left directory entry. Only call this if left did
-     * not exist.
+     * Move region to down to left directory entry.
      */
     void moveToLeft() {
-        DirectoryEntry tmpEntry = new DirectoryEntry();
-
-        tmpEntry.setBack(this);
-
-        left = tmpEntry;
+        if (left == null) {
+            left = new DirectoryEntry();
+            left.setBack(this);
+        }
 
         left.setRegion(new TupleRegion(region.getRegion(), region.getLevel() + 1));
         left.getRegion().setPopulation(region.getPopulation());

@@ -265,7 +265,6 @@ public class BangClustering implements Clustering {
                 }
             }
 
-            //TODO: WE LOSE VALUES HERE IF things are beneath right :(
             dirEntry.moveToRight();
             dirEntry = checkTree(dirEntry.getRight());
 
