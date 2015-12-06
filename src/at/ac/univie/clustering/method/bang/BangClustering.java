@@ -383,7 +383,6 @@ public class BangClustering implements Clustering {
         int count = 0;
 
         //TODO: eigene countalias funktion für testbarkeit
-
         for(int i = 1; i <= nRegions; i++){
             TupleRegion aliasNext = regionArray.get(i).getAlias();
 

@@ -136,7 +136,25 @@ public class DirectoryEntryTest {
 
 	@Test
 	public void testCalculateDensity() {
-		fail("Not yet implemented");
+        DirectoryEntry dirEntry = new DirectoryEntry();
+        dirEntry.setRegion(new TupleRegion(0, 0));
+
+        dirEntry.setLeft(new DirectoryEntry());
+        dirEntry.getLeft().setLeft(new DirectoryEntry());
+
+        dirEntry.getLeft().getLeft().setRegion(new TupleRegion(0, 2));
+
+        dirEntry.getRegion().insertTuple(new float[] { 0.1f, 0.1f });
+
+        dirEntry.getLeft().getLeft().getRegion().insertTuple(new float[] { 0.1f, 0.1f });
+        dirEntry.getLeft().getLeft().getRegion().insertTuple(new float[] { 0.1f, 0.1f });
+
+        dirEntry.calculateDensity();
+        //main is size 0,75; main->left->left is size 0,25
+
+        assertEquals(1.333f, dirEntry.getRegion().getDensity(), 0.001f);
+
+        assertEquals(8f, dirEntry.getLeft().getLeft().getRegion().getDensity(), 0f);
 	}
 
 
