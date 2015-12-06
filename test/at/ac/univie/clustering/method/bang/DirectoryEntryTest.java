@@ -122,14 +122,14 @@ public class DirectoryEntryTest {
 	}
 
 	@Test
-	public void testClearSparseEntity() {
+	public void testClearSucceedingEntry() {
 		DirectoryEntry dirEntry = new DirectoryEntry();
 		dirEntry.setRegion(new TupleRegion(0, 0));
 		dirEntry.createBuddySplit();
 
 		dirEntry.getLeft().getRegion().insertTuple(new float[] { 0.1f, 0.1f });
 
-		dirEntry.clearSparseEntity();
+		dirEntry.clearSucceedingEntry(dirEntry.getRight());
 
 		assertEquals(null, dirEntry.getRight());
 	}

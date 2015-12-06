@@ -98,29 +98,33 @@ public class TupleRegion implements Comparable<TupleRegion> {
         return 1.0f / (1 << level);
     }
 
+    public String toStringHierarchy(int level) {
+        StringBuilder builder = new StringBuilder();
+        String tabs = "\n";
+        for (int i = 0; i < level; i++){
+            tabs += "\t";
+        }
+        builder.append(tabs + "TupleRegion:");
+        builder.append(tabs + "Region: " + region);
+        builder.append(tabs + "Population: " + population);
+        builder.append(tabs + "Level: " + level);
+        builder.append(tabs + "Density: " + density);
+        builder.append(tabs + "Size: " + size);
 
-
-    @Override
-    public String toString() {
-        String regString = "TupleRegion:";
-        regString += "\n\tRegion: " + region;
-        regString += "\n\tPopulation: " + population;
-        regString += "\n\tLevel: " + level;
-        regString += "\n\tDensity: " + density;
-        regString += "\n\tSize: " + size;
-
-        regString += "\n\tAlias: " + alias;
-
-        regString += "\n\tTuples: ";
+        //builder.append(tabs + "Alias: " + alias;
+        String tupleString = "";
         for (float[] tuple : tupleList) {
-            regString += "\n\t\t" + Arrays.toString(tuple);
+            tupleString += Arrays.toString(tuple) + "; ";
         }
 
-        return regString;
+        builder.append(tabs + "Tuples: " + tupleString);
+
+        return builder.toString();
     }
 
     @Override
     public int compareTo(TupleRegion o) {
-        return Float.compare(this.getDensity(), o.getDensity());
+        //bigger region should come first, so switch objects
+        return Float.compare(o.getDensity(), this.getDensity());
     }
 }

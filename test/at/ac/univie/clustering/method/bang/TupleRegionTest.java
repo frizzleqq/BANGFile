@@ -4,6 +4,10 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 public class TupleRegionTest {
 
 	@Test
@@ -44,5 +48,30 @@ public class TupleRegionTest {
 		
 		assertEquals(0.0625f, tupleRegion.calculateSize(), 0);
 	}
+
+    @Test
+    public void testCompareTo(){
+        TupleRegion sparseRegion = new TupleRegion(0, 0);
+        sparseRegion.setDensity(1f);
+
+        TupleRegion mediumRegion = new TupleRegion(0, 0);
+        mediumRegion.setDensity(4f);
+
+        TupleRegion denseRegion = new TupleRegion(0, 0);
+        denseRegion.setDensity(8f);
+
+        List<TupleRegion> regArray = new ArrayList<TupleRegion>();
+
+        regArray.add(mediumRegion);
+        regArray.add(denseRegion);
+        regArray.add(sparseRegion);
+
+
+        Collections.sort(regArray);
+
+        assertEquals(0, regArray.indexOf(denseRegion));
+        assertEquals(1, regArray.indexOf(mediumRegion));
+        assertEquals(2, regArray.indexOf(sparseRegion));
+    }
 
 }

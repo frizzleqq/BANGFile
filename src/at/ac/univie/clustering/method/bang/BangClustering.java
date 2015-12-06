@@ -80,18 +80,18 @@ public class BangClustering implements Clustering {
         if (dirEntry.getRegion().getPopulation() < bucketsize) {
             dirEntry.getRegion().insertTuple(tuple);
         } else {
-            DirectoryEntry enclosingRegion = dirEntry.getBack();
+            DirectoryEntry enclosingEntry = dirEntry.getBack();
 
             // find the enclosing region
-            while (enclosingRegion != null && enclosingRegion.getRegion() == null) {
-                enclosingRegion = enclosingRegion.getBack();
+            while (enclosingEntry != null && enclosingEntry.getRegion() == null) {
+                enclosingEntry = enclosingEntry.getBack();
             }
 
-            if (enclosingRegion == null) {
-                // enclosing region not found (possible if outermost region)
+            if (enclosingEntry == null) {
+                // enclosing region null if already outmost region
                 splitRegion(dirEntry);
             } else {
-                if (!redistribute(dirEntry, enclosingRegion)) {
+                if (!redistribute(dirEntry, enclosingEntry)) {
                     region = mapRegion(tuple);
 
                     dirEntry = findRegion(region, levels[0]);
@@ -204,9 +204,10 @@ public class BangClustering implements Clustering {
         // sparse will be moved to dirEntry
         dirEntry.getRegion().setPopulation(sparseEntry.getRegion().getPopulation());
         dirEntry.getRegion().setTupleList(sparseEntry.getRegion().getTupleList());
+        sparseEntry.setRegion(null);
 
         if (sparseEntry.getLeft() == null && sparseEntry.getRight() == null) {
-            dirEntry.clearSparseEntity();
+            dirEntry.clearSucceedingEntry(sparseEntry);
         }
 
         denseEntry = checkTree(denseEntry);
@@ -264,6 +265,7 @@ public class BangClustering implements Clustering {
                 }
             }
 
+            //TODO: WE LOSE VALUES HERE IF things are beneath right :(
             dirEntry.moveToRight();
             dirEntry = checkTree(dirEntry.getRight());
 
@@ -320,10 +322,9 @@ public class BangClustering implements Clustering {
                 enclosingEntry.getRegion().insertTuple(tuple);
             }
 
+            sparseEntry.setRegion(null);
             if (sparseEntry.getLeft() == null && sparseEntry.getRight() == null) {
-                dirEntry.clearSparseEntity();
-            } else {
-                sparseEntry.setRegion(null);
+                dirEntry.clearSucceedingEntry(sparseEntry);
             }
 
             // If the dense region has a follow up we move it down as a buddy
@@ -361,7 +362,7 @@ public class BangClustering implements Clustering {
 
     @Override
     public void analyzeClusters() {
-        bangFile.calculateDensity();
+        //bangFile.calculateDensity();
 
     }
 
@@ -404,13 +405,12 @@ public class BangClustering implements Clustering {
     public String toString() {
         String bangString = "Bang-File:";
 
-        bangString += "\n\tDimension: " + dimension;
-        bangString += "\n\tBucketSize: " + bucketsize;
-        bangString += "\n\tTuples: " + tuplesCount + "\n\n";
+        bangString += "\n -Dimension: " + dimension;
+        bangString += "\n -BucketSize: " + bucketsize;
+        bangString += "\n -Tuples: " + tuplesCount + "\n";
 
         bangString += bangFile;
 
         return bangString;
     }
-
 }

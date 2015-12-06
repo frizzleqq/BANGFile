@@ -106,6 +106,8 @@ public class DirectoryEntry {
      * not exist.
      */
     void moveToRight() {
+
+        //TODO: tmpEntry not really needed anymore
         DirectoryEntry tmpEntry = new DirectoryEntry();
 
         tmpEntry.setBack(this);
@@ -145,10 +147,10 @@ public class DirectoryEntry {
         return (left.getRegion().getPopulation() < right.getRegion().getPopulation()) ? right : left;
     }
 
-    void clearSparseEntity() {
-        if (left.getRegion().getPopulation() < right.getRegion().getPopulation()) {
+    void clearSucceedingEntry(DirectoryEntry dirEntry) {
+        if (left == dirEntry) {
             left = null;
-        } else {
+        } else if (right == dirEntry) {
             right = null;
         }
     }
@@ -281,21 +283,31 @@ public class DirectoryEntry {
 
     @Override
     public String toString() {
-        String dirString = "DirectoryEntry:";
+        return toStringHierarchy(0);
+    }
+
+    public String toStringHierarchy(int level){
+        StringBuilder builder = new StringBuilder();
+        String tabs = "\n";
+        for (int i = 0; i < level; i++){
+            tabs += "\t";
+        }
+        builder.append(tabs + "DirectoryEntry:");
         if (region != null) {
-            dirString += "\n" + region;
+            builder.append(region.toStringHierarchy(level));
         } else {
-            dirString += "\n\tEmpty Region.";
+            builder.append(" Empty Region.");
         }
-        dirString += "\nLeft: ";
+        builder.append(tabs + "Left: ");
         if (left != null) {
-            dirString += left;
+            builder.append(left.toStringHierarchy(level + 1));
         }
-        dirString += "\nRight: ";
+        builder.append(tabs + "Right: ");
         if (right != null) {
-            dirString += right;
+            builder.append(right.toStringHierarchy(level + 1));
         }
-        return dirString + "\n";
+
+        return builder.toString();
     }
 
 
