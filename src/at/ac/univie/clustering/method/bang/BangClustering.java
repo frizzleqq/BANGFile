@@ -1,9 +1,6 @@
 package at.ac.univie.clustering.method.bang;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import at.ac.univie.clustering.method.Clustering;
 
@@ -12,12 +9,17 @@ import at.ac.univie.clustering.method.Clustering;
  */
 public class BangClustering implements Clustering {
 
-    private int tuplesCount = 0;
-    private int dimension = 0;
-    private int bucketsize = 0;
+    private int tuplesCount;
+    private int dimension;
+    private int bucketsize;
+    private int neighbourCondition;
+    private int clusterPercent;
     private int[] levels = null;
     private int[] grids = null;
     private final DirectoryEntry bangFile;
+    private List<TupleRegion> sortedRegions;
+    private List<TupleRegion> dendogram = new ArrayList<>();
+    private int nAlias;
 
     /**
      * @param dimension
@@ -25,10 +27,28 @@ public class BangClustering implements Clustering {
      * @param tuplesCount
      */
     public BangClustering(int dimension, int bucketsize, int tuplesCount) {
+        this(dimension, bucketsize, tuplesCount, 1, 50);
+    }
+
+    /**
+     * @param dimension
+     * @param bucketsize
+     * @param tuplesCount
+     * @param neighbourCondition
+     * @param clusterPercent
+     */
+    public BangClustering(int dimension, int bucketsize, int tuplesCount, int neighbourCondition, int clusterPercent) {
 
         this.dimension = dimension;
         this.bucketsize = bucketsize;
         this.tuplesCount = tuplesCount;
+        this.clusterPercent = clusterPercent;
+
+        if (dimension <= neighbourCondition){
+            this.neighbourCondition = dimension - 1;
+        }else{
+            this.neighbourCondition = dimension - neighbourCondition;
+        }
 
         levels = new int[dimension + 1]; // level[0] = sum level[i]
         Arrays.fill(levels, 0);
@@ -39,7 +59,6 @@ public class BangClustering implements Clustering {
         // create root of bang file
         bangFile = new DirectoryEntry();
         bangFile.setRegion(new TupleRegion(0, 0));
-
     }
 
     @Override
@@ -349,11 +368,17 @@ public class BangClustering implements Clustering {
 
     }
 
+    /**
+     *
+     */
     private void increaseGridLevel() {
         levels[(levels[0] % dimension) + 1] += 1;
         levels[0] += 1;
     }
 
+    /**
+     *
+     */
     private void decreaseGridLevel() {
         levels[((levels[0] - 1) % dimension) + 1] -= 1;
         levels[0] -= 1;
@@ -361,55 +386,192 @@ public class BangClustering implements Clustering {
 
     @Override
     public void analyzeClusters() {
-        //bangFile.calculateDensity();
+        bangFile.calculateDensity();
+
+        sortedRegions = getSortedRegions();
+
+        nAlias = countAliases();
+
+        createDendogram();
 
     }
 
-    public void sortDirectory(){
+    /**
+     *
+     * @return
+     */
+    private List<TupleRegion> getSortedRegions(){
+        List <TupleRegion> sortedRegions = new ArrayList<TupleRegion>();
+        bangFile.collectRegions(sortedRegions);
+        Collections.sort(sortedRegions);
 
-        //TODO: these vars should be class vars when done
+        return sortedRegions;
+    }
 
-        List<TupleRegion> regionArray = new ArrayList<TupleRegion>();
-
-        bangFile.collectRegions(regionArray);
-        int nRegions = regionArray.size();
-        int nAlias = 0;
-
-        Collections.sort(regionArray);
-
-        int[] nRegionsAlias = new int[nRegions+1];
-        nRegionsAlias[0] = 0;
-
+    /**
+     *
+     * @return
+     */
+    private int countAliases(){
+        int[] nRegionsAlias = new int[sortedRegions.size()+1];
         int count = 0;
+        nRegionsAlias[0] = count;
 
-        //TODO: eigene countalias funktion für testbarkeit
-        for(int i = 1; i <= nRegions; i++){
-            TupleRegion aliasNext = regionArray.get(i).getAlias();
-
-            if (aliasNext == null){
-                count++;
-            } else{
-                while(aliasNext != null){
-                    count++;
-                    aliasNext = aliasNext.getAlias();
-                }
-            }
+        for(int i = 1; i < sortedRegions.size(); i++){
+            List<TupleRegion> aliases = sortedRegions.get(i).getAliases();
+            count += aliases.size();
             nRegionsAlias[i] = count;
         }
 
-        nAlias = count;
+        return count;
+    }
+
+    /**
+     *
+     */
+    public void createDendogram(){
+        dendogram.clear();
+        dendogram.add(sortedRegions.get(0));
+
+        List<TupleRegion> remaining = new ArrayList<>();
+        for (int i = 1; i < sortedRegions.size(); i++){
+            remaining.add(sortedRegions.get(i));
+        }
+
+        for (int dendoPos = 0; remaining.size() > 0; dendoPos++){
+            addNeighbours(dendoPos, remaining);
+        }
+
+    }
+
+    /**
+     *
+     * @param dendoPos
+     * @param remaining
+     * @return
+     */
+    private void addNeighbours(int dendoPos, List<TupleRegion> remaining){
+
+        int found = 0;
+        grids = unmapRegion(dendogram.get(dendoPos));
+
+        for (Iterator<TupleRegion> it = remaining.iterator(); it.hasNext(); ){
+            TupleRegion tupleReg = it.next();
+            if (checkNeighbourhood(dendogram.get(dendoPos), tupleReg)) {
+                found++;
+                dendogram.add(dendoPos + found, tupleReg);
+                it.remove();
+            }
+        }
+    }
+
+    /**
+     *
+     * @param a
+     * @param b
+     * @return
+     */
+    private boolean checkNeighbourhood(TupleRegion a, TupleRegion b){
+        int [] gridsCompare = unmapRegion(b);
+
+        int[] compare, convert;
+        int[] gridDelta = new int[dimension + 1];
+        int[] gridMin = new int[dimension + 1];
+        int[] gridMax = new int[dimension + 1];
+
+        int delta, deltax, deltaLevel, abw = 0;
+
+        if (grids[0] == gridsCompare[0]){
+            for (int i = 1; i <= dimension; i++){
+                delta = Math.abs(grids[i] - gridsCompare[i]);
+                if (delta == 1){
+                    abw++;
+                } else if (delta > 1) {
+                    return false;
+                }
+            }
+            if (abw > neighbourCondition){
+                return false;
+            }
+        } else {
+            if (grids[0] > gridsCompare[0]){
+                deltaLevel = grids[0] - gridsCompare[0];
+                compare = Arrays.copyOf(grids, grids.length);
+                convert = Arrays.copyOf(gridsCompare, gridsCompare.length);
+            } else {
+                deltaLevel = gridsCompare[0] - grids[0];
+                compare = Arrays.copyOf(gridsCompare, gridsCompare.length);
+                convert = Arrays.copyOf(grids, grids.length);
+            }
+
+            for (int i = 0; i <= dimension; i++){
+                gridDelta[i] = 0;
+            }
+
+            for (int i = convert[0]%dimension, j = 1; j <= deltaLevel; i++, j++){
+                gridDelta[(i%dimension) + 1]++;
+            }
+
+            for (int i = 1; i <= dimension; i++){
+                gridMin[i] = convert[i] * (1 << gridDelta[i]);
+                gridMax[i] = gridMin[i] + (1 << gridDelta[i]) - 1;
+                delta = compare[i] - gridMin[i];
+                deltax = compare[i] - gridMax[i];
+                if ( delta < 0 || deltax > 0){
+                    delta = Math.abs(delta);
+                    deltax = Math.abs(deltax);
+                    if (!(delta <= 1 || deltax <= 1)){
+                        return false;
+                    }
+                    if (delta > 0 && deltax > 0){
+                        abw++;
+                    }
+                }
+            }
+            if (abw > neighbourCondition){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private int[] unmapRegion(TupleRegion tupleReg){
+        int [] grids = new int[dimension + 1];
+        for (int i = 1; i <= dimension; i++){
+            grids[i] = 0;
+        }
+
+        grids[0] = tupleReg.getLevel();
+        for(int k = 0, i = 0; k < grids[0]; k++){
+            i = (k % dimension) + 1;
+            grids[i] = (grids[i] << 1);
+            if ( (tupleReg.getRegion() & (1 << k)) > 0){
+                grids[i]++;
+            }
+        }
+        return grids;
     }
 
     @Override
     public String toString() {
-        String bangString = "Bang-File:";
+        StringBuilder builder = new StringBuilder();
+        builder.append("Bang-File:");
 
-        bangString += "\n -Dimension: " + dimension;
-        bangString += "\n -BucketSize: " + bucketsize;
-        bangString += "\n -Tuples: " + tuplesCount + "\n";
+        builder.append("\n -Dimension: " + dimension);
+        builder.append("\n -BucketSize: " + bucketsize);
+        builder.append("\n -Tuples: " + tuplesCount);
 
-        bangString += bangFile;
+        builder.append("\n" + bangFile);
+        builder.append("\n");
 
-        return bangString;
+        for (TupleRegion tupleReg : sortedRegions){
+            builder.append("\nRegion " + tupleReg.getRegion() + ","  + tupleReg.getLevel() + " Density: " + tupleReg.getDensity());
+        }
+        builder.append("\n");
+        for (TupleRegion tupleReg : dendogram){
+            builder.append("\nRegion " + tupleReg.getRegion() + ","  + tupleReg.getLevel() + " Density: " + tupleReg.getDensity());
+        }
+
+        return builder.toString();
     }
 }

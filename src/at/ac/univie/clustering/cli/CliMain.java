@@ -23,7 +23,7 @@ public class CliMain {
     private static char delimiter = ';';
     private static boolean header = false;
     private static int bucketsize = 17;
-    private static int neighbourhood = 0;
+    private static int neighbourhood = 1;
     private static int clusterPercent = 50;
     private static boolean bangAlias = false;
 
@@ -167,18 +167,16 @@ public class CliMain {
             System.exit(1);
         }
 
+        if (dimension <= neighbourhood){
+            System.err.println("Provided neighbourhood-condition has to be smaller than data dimension");
+            System.exit(ERR_PARAM);
+        }
+
         System.out.println("Dimensions: " + dimension);
         System.out.println("Tuples: " + tuplesCount + "\n");
 
         Clustering cluster;
-
         cluster = new BangClustering(dimension, bucketsize, tuplesCount);
-        // TODO: bucketsize, clusterPercent, bangAlias, neighbourhood ->
-        // constructor or method?
-
-        // TODO: this should go to BangClustering
-        // if (neighbourhood == 0)
-        // neighbourhood = dimension - 1;
 
         try {
             readData(cluster, data);

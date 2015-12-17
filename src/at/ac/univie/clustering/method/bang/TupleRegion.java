@@ -11,7 +11,7 @@ public class TupleRegion implements Comparable<TupleRegion> {
     private int level;
     private float density = 0;
     private List<float[]> tupleList = new ArrayList<>();
-    private TupleRegion alias = null;
+    private List<TupleRegion> aliases = new ArrayList<>();
 
     //TODO: remove this variable once density has unittests
     public float size = 0;
@@ -53,20 +53,28 @@ public class TupleRegion implements Comparable<TupleRegion> {
         this.density = density;
     }
 
-    public TupleRegion getAlias() {
-        return alias;
-    }
-
-    public void setAlias(TupleRegion alias) {
-        this.alias = alias;
-    }
-
     public List<float[]> getTupleList() {
         return tupleList;
     }
 
     public void setTupleList(List<float[]> tupleList) {
         this.tupleList = tupleList;
+    }
+
+    public float getSize() {
+        return size;
+    }
+
+    public void setSize(float size) {
+        this.size = size;
+    }
+
+    public List<TupleRegion> getAliases() {
+        return aliases;
+    }
+
+    public void setAliases(List<TupleRegion> aliases) {
+        this.aliases = aliases;
     }
 
     /**
