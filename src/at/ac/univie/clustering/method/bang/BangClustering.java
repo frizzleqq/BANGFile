@@ -451,105 +451,15 @@ public class BangClustering implements Clustering {
      * @return
      */
     private void addNeighbours(int dendoPos, List<TupleRegion> remaining){
-
         int found = 0;
-        grids = unmapRegion(dendogram.get(dendoPos));
-
         for (Iterator<TupleRegion> it = remaining.iterator(); it.hasNext(); ){
             TupleRegion tupleReg = it.next();
-            if (checkNeighbourhood(dendogram.get(dendoPos), tupleReg)) {
+            if (dendogram.get(dendoPos).isNeighbour(tupleReg, dimension, neighbourCondition)) {
                 found++;
                 dendogram.add(dendoPos + found, tupleReg);
                 it.remove();
             }
         }
-    }
-
-    /**
-     *
-     * @param a
-     * @param b
-     * @return
-     */
-    private boolean checkNeighbourhood(TupleRegion a, TupleRegion b){
-        int [] gridsCompare = unmapRegion(b);
-
-        int[] compare, convert;
-        int[] gridDelta = new int[dimension + 1];
-        int[] gridMin = new int[dimension + 1];
-        int[] gridMax = new int[dimension + 1];
-
-        int delta, deltax, deltaLevel, abw = 0;
-
-        if (grids[0] == gridsCompare[0]){
-            for (int i = 1; i <= dimension; i++){
-                delta = Math.abs(grids[i] - gridsCompare[i]);
-                if (delta == 1){
-                    abw++;
-                } else if (delta > 1) {
-                    return false;
-                }
-            }
-            if (abw > neighbourCondition){
-                return false;
-            }
-        } else {
-            if (grids[0] > gridsCompare[0]){
-                deltaLevel = grids[0] - gridsCompare[0];
-                compare = Arrays.copyOf(grids, grids.length);
-                convert = Arrays.copyOf(gridsCompare, gridsCompare.length);
-            } else {
-                deltaLevel = gridsCompare[0] - grids[0];
-                compare = Arrays.copyOf(gridsCompare, gridsCompare.length);
-                convert = Arrays.copyOf(grids, grids.length);
-            }
-
-            for (int i = 0; i <= dimension; i++){
-                gridDelta[i] = 0;
-            }
-
-            for (int i = convert[0]%dimension, j = 1; j <= deltaLevel; i++, j++){
-                gridDelta[(i%dimension) + 1]++;
-            }
-
-            for (int i = 1; i <= dimension; i++){
-                gridMin[i] = convert[i] * (1 << gridDelta[i]);
-                gridMax[i] = gridMin[i] + (1 << gridDelta[i]) - 1;
-                delta = compare[i] - gridMin[i];
-                deltax = compare[i] - gridMax[i];
-                if ( delta < 0 || deltax > 0){
-                    delta = Math.abs(delta);
-                    deltax = Math.abs(deltax);
-                    if (!(delta <= 1 || deltax <= 1)){
-                        return false;
-                    }
-                    if (delta > 0 && deltax > 0){
-                        abw++;
-                    }
-                }
-            }
-            if (abw > neighbourCondition){
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private int[] unmapRegion(TupleRegion tupleReg){
-        int [] grids = new int[dimension + 1];
-        for (int i = 1; i <= dimension; i++){
-            grids[i] = 0;
-        }
-
-        grids[0] = tupleReg.getLevel();
-        for(int k = 0, i = 0; k < grids[0]; k++){
-            i = (k % dimension) + 1;
-            grids[i] = (grids[i] << 1);
-            if ( (tupleReg.getRegion() & (1 << k)) > 0){
-                grids[i]++;
-            }
-        }
-        return grids;
     }
 
     @Override

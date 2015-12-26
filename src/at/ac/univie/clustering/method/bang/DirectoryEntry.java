@@ -187,8 +187,6 @@ public class DirectoryEntry {
         float leftSize = (left != null) ? left.getRegionSize() : 0f;
         float rightSize = (right != null) ? right.getRegionSize() : 0f;
 
-        region.size = region.calculateSize() - leftSize - rightSize;
-
         return (region.getPopulation() / (region.calculateSize() - leftSize - rightSize));
     }
 
