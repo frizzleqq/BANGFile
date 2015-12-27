@@ -451,13 +451,20 @@ public class BangClustering implements Clustering {
      * @return
      */
     private void addNeighbours(int dendoPos, List<TupleRegion> remaining){
-        int found = 0;
+        int neighboursFound = 0;
         for (Iterator<TupleRegion> it = remaining.iterator(); it.hasNext(); ){
             TupleRegion tupleReg = it.next();
             if (dendogram.get(dendoPos).isNeighbour(tupleReg, dimension, neighbourCondition)) {
-                found++;
-                dendogram.add(dendoPos + found, tupleReg);
+                int insertPos = 0;
+                while (insertPos < neighboursFound){
+                    insertPos++;
+                    if (tupleReg.compareTo(dendogram.get(dendoPos + insertPos)) < 0){
+                        break;
+                    }
+                }
+                dendogram.add(dendoPos + insertPos + 1, tupleReg);
                 it.remove();
+                neighboursFound++;
             }
         }
     }
@@ -472,11 +479,12 @@ public class BangClustering implements Clustering {
         builder.append("\n -Tuples: " + tuplesCount);
 
         builder.append("\n" + bangFile);
-        builder.append("\n");
 
+        builder.append("\n");
         for (TupleRegion tupleReg : sortedRegions){
             builder.append("\nRegion " + tupleReg.getRegion() + ","  + tupleReg.getLevel() + " Density: " + tupleReg.getDensity());
         }
+
         builder.append("\n");
         for (TupleRegion tupleReg : dendogram){
             builder.append("\nRegion " + tupleReg.getRegion() + ","  + tupleReg.getLevel() + " Density: " + tupleReg.getDensity());
