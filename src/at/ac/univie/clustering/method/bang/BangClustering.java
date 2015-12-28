@@ -458,7 +458,7 @@ public class BangClustering implements Clustering {
                 int insertPos = 0;
                 while (insertPos < neighboursFound){
                     insertPos++;
-                    if (tupleReg.compareTo(dendogram.get(dendoPos + insertPos)) < 0){
+                    if (tupleReg.getDensity() > dendogram.get(dendoPos + insertPos).getDensity()){
                         break;
                     }
                 }
