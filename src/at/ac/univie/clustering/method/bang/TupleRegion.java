@@ -9,6 +9,7 @@ public class TupleRegion implements Comparable<TupleRegion> {
     private int population = 0;
     private int region;
     private int level;
+    private int position;
     private float density = 0;
     private List<float[]> tupleList = new ArrayList<>();
     private List<TupleRegion> aliases = new ArrayList<>();
@@ -40,6 +41,14 @@ public class TupleRegion implements Comparable<TupleRegion> {
 
     public void setLevel(int level) {
         this.level = level;
+    }
+
+    public int getPosition(){
+        return this.position;
+    }
+
+    public void setPosition(int position) {
+        this.position = position;
     }
 
     public float getDensity() {

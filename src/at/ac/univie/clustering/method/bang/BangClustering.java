@@ -405,6 +405,10 @@ public class BangClustering implements Clustering {
         bangFile.collectRegions(sortedRegions);
         Collections.sort(sortedRegions);
 
+        for (int i = 0; i < sortedRegions.size(); i++){
+            sortedRegions.get(i).setPosition(i + 1);
+        }
+
         return sortedRegions;
     }
 
@@ -417,6 +421,7 @@ public class BangClustering implements Clustering {
         int count = 0;
         nRegionsAlias[0] = count;
 
+        //TODO: why start with 1?
         for(int i = 1; i < sortedRegions.size(); i++){
             List<TupleRegion> aliases = sortedRegions.get(i).getAliases();
             count += aliases.size();
@@ -451,20 +456,21 @@ public class BangClustering implements Clustering {
      * @return
      */
     private void addNeighbours(int dendoPos, List<TupleRegion> remaining){
-        int neighboursFound = 0;
+        int startSearch = dendoPos + 1;
         for (Iterator<TupleRegion> it = remaining.iterator(); it.hasNext(); ){
             TupleRegion tupleReg = it.next();
             if (dendogram.get(dendoPos).isNeighbour(tupleReg, dimension, neighbourCondition)) {
-                int insertPos = 0;
-                while (insertPos < neighboursFound){
+                int insertPos = startSearch;
+                while (insertPos < dendogram.size() &&  dendogram.get(insertPos).getDensity() > tupleReg.getDensity()){
                     insertPos++;
-                    if (tupleReg.getDensity() > dendogram.get(dendoPos + insertPos).getDensity()){
-                        break;
-                    }
                 }
-                dendogram.add(dendoPos + insertPos + 1, tupleReg);
+                while (insertPos < dendogram.size() && dendogram.get(insertPos).getDensity() == tupleReg.getDensity()
+                        && dendogram.get(insertPos).getPosition() < tupleReg.getPosition()){
+                    insertPos++;
+                }
+                dendogram.add(insertPos, tupleReg);
                 it.remove();
-                neighboursFound++;
+                startSearch++;
             }
         }
     }
