@@ -1,18 +1,21 @@
 package at.ac.univie.clustering.gui;
 
-import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
-
-import java.net.URL;
-import java.util.ResourceBundle;
-
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.stage.Modality;
 
 /**
  * Created by Fritzi on 10.01.2016.
  */
-public class Controller implements Initializable {
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
+public class Controller{
 
+    @FXML
+    public void onSelectFileAction(ActionEvent event){
+        FileDialog fileDialog = new FileDialog();
+        fileDialog.initModality(Modality.APPLICATION_MODAL);
+        fileDialog.showAndWait();
+
+        System.out.print("check if file ok in method");
     }
+
 }

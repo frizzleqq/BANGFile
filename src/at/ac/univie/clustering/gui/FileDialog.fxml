@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="8.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+    <children>
+      <HBox spacing="8.0">
+         <children>
+            <TextField fx:id="filepath" prefColumnCount="25" />
+            <Button fx:id="browseButton" mnemonicParsing="false" onAction="#onBrowseButtonAction" text="Browse" />
+         </children>
+      </HBox><HBox alignment="CENTER_RIGHT" prefHeight="43.0" prefWidth="237.0">
+        <children><Button fx:id="okButton" defaultButton="true" mnemonicParsing="false" onAction="#onOkButtonAction" text="OK" />
+        </children>
+        <opaqueInsets>
+            <Insets />
+        </opaqueInsets>
+        <padding>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+        </padding></HBox>
+    </children>
+   <padding>
+      <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+   </padding></VBox>
