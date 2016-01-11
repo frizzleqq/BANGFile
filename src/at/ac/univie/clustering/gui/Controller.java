@@ -15,7 +15,9 @@ public class Controller{
         fileDialog.initModality(Modality.APPLICATION_MODAL);
         fileDialog.showAndWait();
 
-        System.out.print("check if file ok in method");
+        System.out.print(fileDialog.getDelimiter());
+        System.out.print(fileDialog.getFilepath());
+        System.out.print(fileDialog.getHeader());
     }
 
 }

@@ -19,13 +19,17 @@ import java.io.IOException;
 public class FileDialog extends Stage {
 
     @FXML
-    private TextField filepath;
+    private TextField filepathField;
 
     @FXML
-    private TextField delimiter;
+    private TextField delimiterField;
 
     @FXML
-    private CheckBox header;
+    private CheckBox headerBox;
+
+    private String filepath;
+    private String delimiter;
+    private boolean header;
 
     public FileDialog()
     {
@@ -45,22 +49,36 @@ public class FileDialog extends Stage {
         }
     }
 
+    public String getFilepath() {
+        return filepath;
+    }
+
+    public String getDelimiter() {
+        return delimiter;
+    }
+
+    public boolean getHeader() {
+        return header;
+    }
+
+
     public void onOkButtonAction(ActionEvent actionEvent) {
         System.out.println("OK Button");
-        System.out.println(delimiter.getText());
-        System.out.println(filepath.getText());
-        System.out.println(header.isSelected());
-        //set stuff here? or stuff already set via elements
+        delimiter = delimiterField.getText();
+        filepath = filepathField.getText();
+        header = headerBox.isSelected();
+
+        close();
     }
 
     public void onBrowseButtonAction(ActionEvent actionEvent) {
         FileChooser fileChooser = new FileChooser();
         File selectedFile = fileChooser.showOpenDialog(null);
         if (selectedFile != null) {
-            filepath.setText(selectedFile.getAbsolutePath());
+            filepathField.setText(selectedFile.getAbsolutePath());
         }
         else {
-            filepath.setText("");
+            filepathField.setText("");
         }
 
     }
