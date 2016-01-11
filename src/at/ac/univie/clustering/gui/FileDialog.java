@@ -5,6 +5,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -19,6 +20,12 @@ public class FileDialog extends Stage {
 
     @FXML
     private TextField filepath;
+
+    @FXML
+    private TextField delimiter;
+
+    @FXML
+    private CheckBox header;
 
     public FileDialog()
     {
@@ -40,6 +47,9 @@ public class FileDialog extends Stage {
 
     public void onOkButtonAction(ActionEvent actionEvent) {
         System.out.println("OK Button");
+        System.out.println(delimiter.getText());
+        System.out.println(filepath.getText());
+        System.out.println(header.isSelected());
         //set stuff here? or stuff already set via elements
     }
 
