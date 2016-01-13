@@ -14,12 +14,12 @@
                 <Menu mnemonicParsing="false" text="File">
                   <items>
                         <MenuItem mnemonicParsing="false" onAction="#onSelectFileAction" text="Select File..." />
-                    <MenuItem mnemonicParsing="false" text="Close" />
+                    <MenuItem fx:id="closeMenuItem" mnemonicParsing="false" onAction="#onCloseAction" text="Close" />
                   </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Edit">
                   <items>
-                    <MenuItem mnemonicParsing="false" text="Delete" />
+                    <MenuItem mnemonicParsing="false" onAction="#onSettingsAction" text="Settings" />
                   </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Help">
@@ -34,8 +34,8 @@
                   <Label text="Label" />
                   <Label text="Label" />
                   <Region HBox.hgrow="ALWAYS" />
-                  <Button mnemonicParsing="false" text="Start" />
-                  <Button mnemonicParsing="false" text="Settings" />
+                  <Button mnemonicParsing="false" prefWidth="70.0" text="Start" />
+                  <Button mnemonicParsing="false" onAction="#onSettingsAction" prefWidth="70.0" text="Settings" />
                </children>
                <VBox.margin>
                   <Insets bottom="4.0" left="8.0" right="8.0" top="4.0" />

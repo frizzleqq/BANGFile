@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.collections.*?>
 <?import java.lang.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.collections.FXCollections?>
 
 <VBox spacing="8.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
     <children>
@@ -29,28 +27,37 @@
                <HBox.margin>
                   <Insets />
                </HBox.margin>
+               <padding>
+                  <Insets left="10.0" />
+               </padding>
             </Label>
-            <Region prefWidth="60.0" HBox.hgrow="SOMETIMES" />
-            <TextField fx:id="delimiterField" prefColumnCount="4" />
+            <Region prefWidth="65.0" HBox.hgrow="SOMETIMES" />
+            <TextField fx:id="delimiterField" prefColumnCount="2" />
             <Region HBox.hgrow="ALWAYS" />
          </children>
       </HBox>
       <HBox layoutX="15.0" layoutY="65.0">
          <children>
-            <Label text="Header:" />
+            <Label text="Header:">
+               <padding>
+                  <Insets left="10.0" />
+               </padding></Label>
             <Region prefWidth="90.0" HBox.hgrow="SOMETIMES" />
             <CheckBox fx:id="headerBox" mnemonicParsing="false" />
             <Region HBox.hgrow="ALWAYS" />
          </children>
-      </HBox><HBox alignment="CENTER_RIGHT">
-        <children><Button fx:id="okButton" defaultButton="true" mnemonicParsing="false" onAction="#onOkButtonAction" text="OK" />
+      </HBox>
+      <HBox>
+         <children>
+            <Label fx:id="infoLabel" prefWidth="358.0" textFill="#fc0000" />
+         </children>
+      </HBox><HBox alignment="CENTER_RIGHT" spacing="8.0">
+        <children><Button fx:id="okButton" defaultButton="true" mnemonicParsing="false" onAction="#onOkButtonAction" prefWidth="65.0" text="OK" />
+            <Button fx:id="cancelButton" defaultButton="true" layoutX="330.0" layoutY="15.0" mnemonicParsing="false" onAction="#onCancelButtonAction" prefWidth="65.0" text="Cancel" />
         </children>
         <opaqueInsets>
             <Insets />
-        </opaqueInsets>
-        <padding>
-            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-        </padding></HBox>
+        </opaqueInsets></HBox>
     </children>
    <padding>
       <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />

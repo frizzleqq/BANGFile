@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="8.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+    <children>
+        <HBox>
+            <children>
+                <Label text="Bucketsize (Max Population)">
+                    <HBox.margin>
+                        <Insets />
+                    </HBox.margin>
+                    <padding>
+                        <Insets left="10.0" />
+                    </padding>
+                </Label>
+                <Region prefWidth="100.0" HBox.hgrow="ALWAYS" />
+                <TextField fx:id="bucketsizeField" prefColumnCount="2" />
+            </children>
+        </HBox>
+      <HBox layoutX="20.0" layoutY="20.0">
+         <children>
+            <Label text="Neighbourhood-Condition">
+               <padding>
+                  <Insets left="10.0" />
+               </padding>
+               <HBox.margin>
+                  <Insets />
+               </HBox.margin>
+            </Label>
+            <Region prefWidth="72.0" HBox.hgrow="ALWAYS" />
+            <TextField fx:id="neighbourhoodField" prefColumnCount="2" />
+         </children>
+      </HBox>
+        <HBox layoutX="15.0" layoutY="65.0">
+            <children>
+                <Label text="Debug-Mode?">
+                    <padding>
+                        <Insets left="10.0" />
+                    </padding></Label>
+                <Region prefWidth="177.0" HBox.hgrow="ALWAYS" />
+                <CheckBox fx:id="debugBox" mnemonicParsing="false" />
+                <Region HBox.hgrow="ALWAYS" />
+            </children>
+        </HBox>
+        <HBox>
+            <children>
+            <Label fx:id="infoLabel" prefWidth="296.0" textFill="#fc0000" />
+            </children>
+        </HBox><HBox alignment="CENTER_RIGHT" spacing="8.0">
+        <children><Button fx:id="okButton" defaultButton="true" mnemonicParsing="false" onAction="#onOkButtonAction" prefWidth="65.0" text="OK" />
+            <Button fx:id="cancelButton" defaultButton="true" layoutX="330.0" layoutY="15.0" mnemonicParsing="false" onAction="#onCancelButtonAction" prefWidth="65.0" text="Cancel" />
+        </children>
+        <opaqueInsets>
+            <Insets />
+        </opaqueInsets></HBox>
+    </children>
+    <padding>
+        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+    </padding></VBox>

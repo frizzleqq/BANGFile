@@ -6,6 +6,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -18,6 +19,10 @@ import java.io.IOException;
  */
 public class FileDialog extends Stage {
 
+    private static String filepath = "";
+    private static char delimiter = ';';
+    private static boolean header = false;
+
     @FXML
     private TextField filepathField;
 
@@ -27,18 +32,19 @@ public class FileDialog extends Stage {
     @FXML
     private CheckBox headerBox;
 
-    private String filepath;
-    private String delimiter;
-    private boolean header;
+    @FXML
+    private Label infoLabel;
+
+    private boolean complete = false;
 
     public FileDialog()
     {
         setTitle("Select a file...");
+        setResizable(false);
 
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("FileDialog.fxml"));
         fxmlLoader.setController(this);
 
-        // Nice to have this in a load() method instead of constructor, but this seems to be de-facto standard.
         try
         {
             setScene(new Scene((Parent) fxmlLoader.load()));
@@ -47,27 +53,46 @@ public class FileDialog extends Stage {
         {
             e.printStackTrace();
         }
+
+        filepathField.setText(filepath);
+        delimiterField.setText(Character.toString(delimiter));
+        headerBox.setSelected(header);
     }
 
-    public String getFilepath() {
+    public static String getFilepath() {
         return filepath;
     }
 
-    public String getDelimiter() {
+    public static char getDelimiter() {
         return delimiter;
     }
 
-    public boolean getHeader() {
+    public static boolean getHeader() {
         return header;
     }
 
+    public boolean isComplete(){
+        return complete;
+    }
 
     public void onOkButtonAction(ActionEvent actionEvent) {
-        System.out.println("OK Button");
-        delimiter = delimiterField.getText();
-        filepath = filepathField.getText();
-        header = headerBox.isSelected();
+        if (delimiterField.getText() == ""){
+            infoLabel.setText("Delimiter can not be empty.");
+        } else if (delimiterField.getText().length() > 1){
+            infoLabel.setText("Delimiter can only be 1 character.");
+        } else if (!new File(filepathField.getText()).isFile()){
+            infoLabel.setText("File not found.");
+        } else{
+            delimiter = delimiterField.getText().charAt(0);
+            filepath = filepathField.getText();
+            header = headerBox.isSelected();
 
+            complete = true;
+            close();
+        }
+    }
+
+    public void onCancelButtonAction(ActionEvent actionEvent) {
         close();
     }
 
