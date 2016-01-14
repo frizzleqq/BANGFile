@@ -8,6 +8,12 @@ import java.io.IOException;
 public interface DataWorker {
 
     /**
+     *
+     * @return
+     */
+    String getName();
+
+    /**
      * @return
      */
     int getnTuple();

@@ -18,6 +18,7 @@ public class CsvWorker implements DataWorker {
 	 */
 
     private final String filename;
+    private final String shortFilename;
     private final char delimiter;
     private final boolean header;
     private int nTuple = 0;
@@ -54,6 +55,7 @@ public class CsvWorker implements DataWorker {
         if (!fileReadable())
             throw new IOException("File with provided filename is not readable.");
 
+        shortFilename = new File(filename).getName();
         dimension = countDimension();
         nTuple = countTuples();
 
@@ -62,6 +64,16 @@ public class CsvWorker implements DataWorker {
         if (header)
             br.readLine();
 
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see at.ac.univie.clustering.data.DataWorker#getName()
+     */
+    @Override
+    public String getName() {
+        return shortFilename;
     }
 
     /*

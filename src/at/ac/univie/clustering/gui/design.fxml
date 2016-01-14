@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.text.*?>
+<?import javafx.scene.chart.*?>
 <?import javafx.geometry.*?>
 <?import java.lang.*?>
 <?import javafx.scene.control.*?>
@@ -31,16 +33,69 @@
             </MenuBar>
             <HBox spacing="10.0">
                <children>
-                  <Label text="Label" />
-                  <Label text="Label" />
+                  <VBox spacing="1.0">
+                     <children>
+                        <HBox>
+                           <children>
+                              <Label text="Data:">
+                                 <font>
+                                    <Font name="System Bold" size="12.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </HBox>
+                        <HBox>
+                           <children>
+                              <Label text="Dimension:">
+                                 <font>
+                                    <Font name="System Bold" size="12.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </HBox>
+                        <HBox>
+                           <children>
+                              <Label text="Records:">
+                                 <font>
+                                    <Font name="System Bold" size="12.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </HBox>
+                     </children>
+                     <padding>
+                        <Insets left="5.0" />
+                     </padding>
+                  </VBox>
+                  <VBox spacing="1.0">
+                     <children>
+                        <Label fx:id="dataLabel" />
+                        <Label fx:id="dimensionLabel" />
+                        <Label fx:id="recordsLabel" />
+                     </children>
+                  </VBox>
                   <Region HBox.hgrow="ALWAYS" />
-                  <Button mnemonicParsing="false" prefWidth="70.0" text="Start" />
-                  <Button mnemonicParsing="false" onAction="#onSettingsAction" prefWidth="70.0" text="Settings" />
+                  <VBox>
+                     <children>
+                        <HBox>
+                           <children>
+                              <Region prefHeight="13.0" />
+                           </children>
+                        </HBox>
+                        <HBox spacing="10.0">
+                           <children>
+                              <Button mnemonicParsing="false" onAction="#onStartAction" prefWidth="70.0" text="Start" />
+                              <Button mnemonicParsing="false" onAction="#onSettingsAction" prefWidth="70.0" text="Settings" />
+                           </children>
+                        </HBox>
+                     </children>
+                  </VBox>
                </children>
                <VBox.margin>
-                  <Insets bottom="4.0" left="8.0" right="8.0" top="4.0" />
+                  <Insets bottom="5.0" left="8.0" right="8.0" top="5.0" />
                </VBox.margin>
             </HBox>
+            <Separator />
          </children>
       </VBox>
    </top>
@@ -57,20 +112,4 @@
          </padding>
       </HBox>
    </bottom>
-   <center>
-      <TabPane tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
-        <tabs>
-          <Tab text="Untitled Tab 1">
-            <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" />
-            </content>
-          </Tab>
-          <Tab text="Untitled Tab 2">
-            <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" />
-            </content>
-          </Tab>
-        </tabs>
-      </TabPane>
-   </center>
 </BorderPane>

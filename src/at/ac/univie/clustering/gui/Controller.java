@@ -7,8 +7,9 @@ import at.ac.univie.clustering.method.bang.BangClustering;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
+import javafx.scene.control.Label;
 import javafx.stage.Modality;
-
 import java.io.IOException;
 
 /**
@@ -16,17 +17,25 @@ import java.io.IOException;
  */
 public class Controller{
 
+    @FXML
+    private Label dataLabel;
+
+    @FXML
+    private Label dimensionLabel;
+
+    @FXML
+    private Label recordsLabel;
+
     private DataWorker data = null;
+    private Clustering cluster = null;
 
     @FXML
     public void onSelectFileAction(ActionEvent event){
         FileDialog fileDialog = new FileDialog();
         fileDialog.initModality(Modality.APPLICATION_MODAL);
         fileDialog.showAndWait();
-        System.out.println("complete");
 
         if(fileDialog.isComplete()){
-            System.out.println("complete");
             try {
                 data = new CsvWorker(FileDialog.getFilepath(), FileDialog.getDelimiter(), FileDialog.getHeader());
             } catch (IOException e) {
@@ -54,8 +63,9 @@ public class Controller{
                 System.exit(1);
             }
 
-            Clustering cluster;
-            cluster = new BangClustering(dimension, Settings.getBucketsize(), tuplesCount);
+            dataLabel.setText(data.getName());
+            dimensionLabel.setText(Integer.toString(data.getDimension()));
+            recordsLabel.setText(Integer.toString(data.getnTuple()));
         }
     }
 
@@ -68,6 +78,16 @@ public class Controller{
         System.out.print(Settings.getBucketsize());
         System.out.print(Settings.getNeighbourhood());
         System.out.print(Settings.getDebug());
+    }
+
+    @FXML
+    public void onStartAction(ActionEvent event){
+        if (data == null){
+            System.out.println("nana data null");
+        }else{
+            System.out.println("set cluster");
+            cluster = new BangClustering(data.getDimension(), Settings.getBucketsize(), data.getnTuple());
+        }
     }
 
     @FXML
