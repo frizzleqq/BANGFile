@@ -202,4 +202,11 @@ public class CsvWorker implements DataWorker {
         return tuple;
     }
 
+    @Override
+    public void reset() throws IOException{
+        current_position = 0;
+        br = new BufferedReader(new FileReader(filename));
+        if (header)
+            br.readLine();
+    }
 }

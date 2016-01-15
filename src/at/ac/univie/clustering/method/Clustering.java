@@ -1,5 +1,8 @@
 package at.ac.univie.clustering.method;
 
+import java.util.List;
+import java.util.Objects;
+
 /**
  * @author Florian Fritz
  */
@@ -12,5 +15,7 @@ public interface Clustering {
     int getTuplesCount();
 
     void analyzeClusters();
+
+    List<Object> getRegions();
 
 }

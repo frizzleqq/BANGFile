@@ -24,6 +24,11 @@ public interface DataWorker {
     int getDimension();
 
     /**
+     *
+     */
+    void reset() throws IOException;
+
+    /**
      * @return
      */
     int getCurPosition();

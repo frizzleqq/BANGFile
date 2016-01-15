@@ -18,7 +18,7 @@ public class BangClustering implements Clustering {
     private int[] grids = null;
     private final DirectoryEntry bangFile;
     private List<TupleRegion> sortedRegions;
-    private List<TupleRegion> dendogram;
+    private List<Object> dendogram;
     private int nAlias;
 
     /**
@@ -81,6 +81,10 @@ public class BangClustering implements Clustering {
 
     public DirectoryEntry getBangFile() {
         return bangFile;
+    }
+
+    public List<Object> getRegions() {
+        return dendogram;
     }
 
     /**
@@ -355,7 +359,6 @@ public class BangClustering implements Clustering {
             return true;
 
         } else {
-
             // decrease grid level if buddy split done on deepest entry
             if (inc) {
                 decreaseGridLevel();
@@ -365,7 +368,6 @@ public class BangClustering implements Clustering {
 
             return false;
         }
-
     }
 
     /**
@@ -435,7 +437,7 @@ public class BangClustering implements Clustering {
     /**
      *
      */
-    private List<TupleRegion> createDendogram(){
+    private List<Object> createDendogram(){
         List<TupleRegion> dendogram = new ArrayList<>();
         dendogram.add(sortedRegions.get(0));
 
@@ -448,7 +450,12 @@ public class BangClustering implements Clustering {
             addNeighbours(dendoPos, dendogram, remaining);
         }
 
-        return dendogram;
+        List<Object> dendogramObjects = new ArrayList<>();
+        for (TupleRegion tupleRegion : dendogram){
+            dendogramObjects.add(tupleRegion);
+        }
+
+        return dendogramObjects;
 
     }
 
@@ -487,13 +494,13 @@ public class BangClustering implements Clustering {
         int clusteredPop = 0, tmpPop = 0, clusteredRegions = 0;
         System.out.println(clusterGoal);
 
-        Iterator<TupleRegion> it = sortedRegions.iterator();
-        TupleRegion tupleReg = it.next();
+        Iterator<TupleRegion> sortedIterator = sortedRegions.iterator();
+        TupleRegion tupleReg = sortedIterator.next();
         tmpPop = tupleReg.getPopulation();
         System.out.println(tmpPop);
         while(tmpPop < (clusterGoal - clusteredPop)){
             clusteredPop += tmpPop;
-            tupleReg = it.next();
+            tupleReg = sortedIterator.next();
             tmpPop = tupleReg.getPopulation();
             System.out.println(tmpPop);
             clusteredRegions++;
@@ -518,8 +525,8 @@ public class BangClustering implements Clustering {
         System.out.println(percentage);
 
         boolean newCluster = false;
-        it = dendogram.iterator();
-        tupleReg = it.next();
+        Iterator<Object> dendoIterator = dendogram.iterator();
+        tupleReg = (TupleRegion) dendoIterator.next();
 
         if (clusteredRegions == 0){
             clusterInfo.add(0);
@@ -539,7 +546,7 @@ public class BangClustering implements Clustering {
                     newCluster = false;
 
                 }
-                tupleReg = it.next();
+                tupleReg = (TupleRegion) dendoIterator.next();
             }
             clusterInfo.add(population);
         }
@@ -571,7 +578,9 @@ public class BangClustering implements Clustering {
         }
 
         builder.append("\n");
-        for (TupleRegion tupleReg : dendogram){
+        TupleRegion tupleReg;
+        for (Object o : dendogram){
+            tupleReg = (TupleRegion) o;
             builder.append("\nRegion " + tupleReg.getRegion() + ","  + tupleReg.getLevel() + " Density: " + tupleReg.getDensity());
         }
 

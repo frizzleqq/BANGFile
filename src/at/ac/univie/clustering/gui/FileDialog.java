@@ -98,9 +98,13 @@ public class FileDialog extends Stage {
 
     public void onBrowseButtonAction(ActionEvent actionEvent) {
         FileChooser fileChooser = new FileChooser();
+        if (filepath != ""){
+            fileChooser.setInitialDirectory(new File(filepath).getParentFile());
+        }
         File selectedFile = fileChooser.showOpenDialog(null);
         if (selectedFile != null) {
             filepathField.setText(selectedFile.getAbsolutePath());
+            System.out.println(selectedFile.getPath());
         }
         else {
             filepathField.setText("");
