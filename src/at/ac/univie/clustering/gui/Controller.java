@@ -164,11 +164,13 @@ public class Controller{
                 ColumnConstraints col1 = new ColumnConstraints();
                 col1.setPercentWidth(50);
                 col1.setHgrow(Priority.SOMETIMES);
-                col1.setPrefWidth(3000);
+                col1.setPrefWidth(300);
+                col1.setMinWidth(1.0);
                 ColumnConstraints col2 = new ColumnConstraints();
                 col2.setPercentWidth(50);
                 col2.setHgrow(Priority.SOMETIMES);
-                col2.setPrefWidth(3000);
+                col2.setPrefWidth(300);
+                col2.setMinWidth(1.0);
                 grid.getColumnConstraints().addAll(col1, col2);
                 if (dirEntry.getLeft() != null) {
                     grid.add(buildDirectoryGrid(dirEntry.getLeft(), 1 - axis), 0, 0);
@@ -180,11 +182,13 @@ public class Controller{
                 RowConstraints row1 = new RowConstraints();
                 row1.setPercentHeight(50);
                 row1.setVgrow(Priority.SOMETIMES);
-                row1.setPrefHeight(3000);
+                row1.setPrefHeight(300);
+                row1.setMinHeight(1.0);
                 RowConstraints row2 = new RowConstraints();
                 row2.setPercentHeight(50);
                 row2.setVgrow(Priority.SOMETIMES);
-                row2.setPrefHeight(3000);
+                row2.setPrefHeight(300);
+                row2.setMinHeight(1.0);
                 grid.getRowConstraints().addAll(row1, row2);
                 if (dirEntry.getLeft() != null) {
                     grid.add(buildDirectoryGrid(dirEntry.getLeft(), 1 - axis), 0, 0);
@@ -193,21 +197,26 @@ public class Controller{
                     grid.add(buildDirectoryGrid(dirEntry.getRight(), 1 - axis), 0, 1);
                 }
             }
+        } else{
+            grid.setPrefWidth(300);
+            grid.setMinWidth(1.0);
+            grid.setPrefHeight(300);
+            grid.setMinHeight(1.0);
         }
         grid.setGridLinesVisible(true);
         if (dirEntry.getRegion() != null) {
+        System.out.println(dirEntry.getRegion().getRegion() + "," + dirEntry.getRegion().getLevel());
             grid.setOnMouseEntered(new EventHandler<javafx.scene.input.MouseEvent>() {
                 @Override
                 public void handle(javafx.scene.input.MouseEvent event) {
                     System.out.println(dirEntry.getRegion().getRegion() + "," + dirEntry.getRegion().getLevel());
                 }
             });
-        } else{
-            grid.setStyle("-fx-border-style: dashed; -fx-border-width: 0.01;");
         }
 
         //grid.setPrefSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
-        //grid.setMinSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
+        //grid.setMinWidth(-1);
+        //grid.setMinHeight(-1);
         //grid.setMaxSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
         return grid;
     }
