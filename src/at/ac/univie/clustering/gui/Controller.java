@@ -4,16 +4,19 @@ import at.ac.univie.clustering.data.CsvWorker;
 import at.ac.univie.clustering.data.DataWorker;
 import at.ac.univie.clustering.method.Clustering;
 import at.ac.univie.clustering.method.bang.BangClustering;
+import at.ac.univie.clustering.method.bang.DirectoryEntry;
 import at.ac.univie.clustering.method.bang.TupleRegion;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.chart.BarChart;
-import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.Control;
 import javafx.scene.control.Label;
+import javafx.scene.layout.*;
 import javafx.stage.Modality;
+
+import java.awt.*;
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -33,6 +36,9 @@ public class Controller{
 
     @FXML
     private BarChart dendogramChart;
+
+    @FXML
+    private BorderPane gridBorderPane;
 
     private static DataWorker data = null;
     private static Clustering cluster = null;
@@ -91,8 +97,12 @@ public class Controller{
                 data.reset();
             }
 
+            //reset ui elements
             dendogramChart.getData().clear();
             dendogramChart.layout();
+            gridBorderPane.getChildren().clear();
+            gridBorderPane.layout();
+
 
             cluster = new BangClustering(data.getDimension(), Settings.getBucketsize(), data.getnTuple(), Settings.getNeighbourhood(), 50);
 
@@ -117,7 +127,78 @@ public class Controller{
             }
             dendogramChart.getData().add(dendogramSeries);
 
+            GridPane grid = buildDirectoryGrid((DirectoryEntry) cluster.getDirectoryRoot(), 0);
+
+            gridBorderPane.setCenter(grid);
+
+
         }
+    }
+
+    /*        builder.append(tabs + "DirectoryEntry:");
+        if (region != null) {
+            builder.append(region.toStringHierarchy(level));
+        } else {
+            builder.append(" Empty Region.");
+        }
+        builder.append(tabs + "Left: ");
+        if (left != null) {
+            builder.append(left.toStringHierarchy(level + 1));
+        }
+        builder.append(tabs + "Right: ");
+        if (right != null) {
+            builder.append(right.toStringHierarchy(level + 1));
+        }
+
+        return builder.toString();*/
+
+    private GridPane buildDirectoryGrid(DirectoryEntry dirEntry, int axis){
+        GridPane grid = new GridPane();
+
+        if (dirEntry.getRight() != null || dirEntry.getLeft() != null){
+            if (axis == 0) {
+                ColumnConstraints col1 = new ColumnConstraints();
+                col1.setPercentWidth(50);
+                col1.setHgrow(Priority.SOMETIMES);
+                col1.setPrefWidth(100);
+                ColumnConstraints col2 = new ColumnConstraints();
+                col2.setPercentWidth(50);
+                col2.setHgrow(Priority.SOMETIMES);
+                col2.setPrefWidth(100);
+                grid.getColumnConstraints().addAll(col1, col2);
+                if (dirEntry.getLeft() != null) {
+                    grid.add(buildDirectoryGrid(dirEntry.getLeft(), 1 - axis), 0, 0);
+                }
+                if (dirEntry.getRight() != null) {
+                    grid.add(buildDirectoryGrid(dirEntry.getRight(), 1 - axis), 1, 0);
+                }
+            } else{
+                RowConstraints row1 = new RowConstraints();
+                row1.setPercentHeight(50);
+                row1.setVgrow(Priority.SOMETIMES);
+                row1.setPrefHeight(100);
+                RowConstraints row2 = new RowConstraints();
+                row2.setPercentHeight(50);
+                row2.setVgrow(Priority.SOMETIMES);
+                row2.setPrefHeight(100);
+                grid.getRowConstraints().addAll(row1, row2);
+                if (dirEntry.getLeft() != null) {
+                    grid.add(buildDirectoryGrid(dirEntry.getLeft(), 1 - axis), 0, 0);
+                }
+                if (dirEntry.getRight() != null) {
+                    grid.add(buildDirectoryGrid(dirEntry.getRight(), 1 - axis), 0, 1);
+                }
+            }
+        }
+        grid.setGridLinesVisible(true);
+        if (dirEntry.getRegion() == null){
+            grid.setStyle("-fx-border-style: dashed; -fx-border-width: 0.01;");
+        }
+
+        //grid.setPrefSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
+        //grid.setMinSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
+        //grid.setMaxSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
+        return grid;
     }
 
     /**
