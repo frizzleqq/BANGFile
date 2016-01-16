@@ -10,6 +10,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.chart.BarChart;
+import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
 import javafx.stage.Modality;
@@ -89,8 +90,11 @@ public class Controller{
             if (data.getCurPosition() > 0){
                 data.reset();
             }
+
             dendogramChart.getData().clear();
-            cluster = new BangClustering(data.getDimension(), Settings.getBucketsize(), data.getnTuple());
+            dendogramChart.layout();
+
+            cluster = new BangClustering(data.getDimension(), Settings.getBucketsize(), data.getnTuple(), Settings.getNeighbourhood(), 50);
 
             try {
                 readAllData();
@@ -106,13 +110,11 @@ public class Controller{
 
             XYChart.Series dendogramSeries = new XYChart.Series();
             dendogramSeries.setName("Dendogram");
-
-            TupleRegion tupleRegion;
+            TupleRegion tupleReg;
             for (Object o : cluster.getRegions()){
-                tupleRegion = (TupleRegion) o;
-                dendogramSeries.getData().add(new XYChart.Data(tupleRegion.getRegion() + " " + tupleRegion.getLevel(), tupleRegion.getDensity()));
+                tupleReg = (TupleRegion) o;
+                dendogramSeries.getData().add(new XYChart.Data(tupleReg.getRegion() + " " + tupleReg.getLevel(), tupleReg.getDensity()));
             }
-
             dendogramChart.getData().add(dendogramSeries);
 
         }

@@ -168,7 +168,6 @@ public class TupleRegion implements Comparable<TupleRegion> {
                 }
             }
         }
-
         return (diff <= condition);
     }
 

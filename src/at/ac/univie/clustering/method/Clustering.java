@@ -16,6 +16,8 @@ public interface Clustering {
 
     void analyzeClusters();
 
+    Object getDirectoryRoot();
+
     List<Object> getRegions();
 
 }

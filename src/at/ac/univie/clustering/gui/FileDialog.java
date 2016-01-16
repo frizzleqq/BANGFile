@@ -100,11 +100,12 @@ public class FileDialog extends Stage {
         FileChooser fileChooser = new FileChooser();
         if (filepath != ""){
             fileChooser.setInitialDirectory(new File(filepath).getParentFile());
+        } else{
+            fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
         }
         File selectedFile = fileChooser.showOpenDialog(null);
         if (selectedFile != null) {
             filepathField.setText(selectedFile.getAbsolutePath());
-            System.out.println(selectedFile.getPath());
         }
         else {
             filepathField.setText("");

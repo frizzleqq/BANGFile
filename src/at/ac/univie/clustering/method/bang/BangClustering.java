@@ -16,9 +16,9 @@ public class BangClustering implements Clustering {
     private int clusterPercent;
     private int[] levels = null;
     private int[] grids = null;
-    private final DirectoryEntry bangFile;
+    private DirectoryEntry bangFile;
     private List<TupleRegion> sortedRegions;
-    private List<Object> dendogram;
+    private List<TupleRegion> dendogram;
     private int nAlias;
 
     /**
@@ -71,6 +71,11 @@ public class BangClustering implements Clustering {
         return tuplesCount;
     }
 
+    @Override
+    public Object getDirectoryRoot() {
+        return bangFile;
+    }
+
     protected void setLevels(int[] levels) {
         this.levels = levels;
     }
@@ -79,12 +84,12 @@ public class BangClustering implements Clustering {
         this.grids = grids;
     }
 
-    public DirectoryEntry getBangFile() {
-        return bangFile;
-    }
-
     public List<Object> getRegions() {
-        return dendogram;
+        List<Object> dendogramObjects = new ArrayList<>();
+        for (TupleRegion tupleRegion : dendogram){
+            dendogramObjects.add(tupleRegion);
+        }
+        return dendogramObjects;
     }
 
     /**
@@ -437,7 +442,7 @@ public class BangClustering implements Clustering {
     /**
      *
      */
-    private List<Object> createDendogram(){
+    private List<TupleRegion> createDendogram(){
         List<TupleRegion> dendogram = new ArrayList<>();
         dendogram.add(sortedRegions.get(0));
 
@@ -450,12 +455,7 @@ public class BangClustering implements Clustering {
             addNeighbours(dendoPos, dendogram, remaining);
         }
 
-        List<Object> dendogramObjects = new ArrayList<>();
-        for (TupleRegion tupleRegion : dendogram){
-            dendogramObjects.add(tupleRegion);
-        }
-
-        return dendogramObjects;
+        return dendogram;
 
     }
 
@@ -492,17 +492,17 @@ public class BangClustering implements Clustering {
         List<Integer> clusterInfo = new ArrayList<>();
         int clusterGoal = ((clusterPercent * tuplesCount) + 50) / 100;
         int clusteredPop = 0, tmpPop = 0, clusteredRegions = 0;
-        System.out.println(clusterGoal);
+        //System.out.println(clusterGoal);
 
         Iterator<TupleRegion> sortedIterator = sortedRegions.iterator();
         TupleRegion tupleReg = sortedIterator.next();
         tmpPop = tupleReg.getPopulation();
-        System.out.println(tmpPop);
+        //System.out.println(tmpPop);
         while(tmpPop < (clusterGoal - clusteredPop)){
             clusteredPop += tmpPop;
             tupleReg = sortedIterator.next();
             tmpPop = tupleReg.getPopulation();
-            System.out.println(tmpPop);
+            //System.out.println(tmpPop);
             clusteredRegions++;
         }
         int diff = clusterGoal - clusteredPop;
@@ -511,21 +511,21 @@ public class BangClustering implements Clustering {
             clusteredRegions++;
         }
 
-        System.out.println(clusteredPop);
-        System.out.println(clusteredRegions);
-        System.out.println(diff);
+        //System.out.println(clusteredPop);
+        //System.out.println(clusteredRegions);
+        //System.out.println(diff);
 
         clusteredPop = (clusteredPop != 0) ? clusteredPop : 1;
         float tuplesCount = (this.tuplesCount != 0) ? this.tuplesCount : 1;
         float percentage = (clusteredPop * 100 ) / tuplesCount;
         int counter = 0, population = 0, clusterNr = 0;
 
-        System.out.println(clusteredPop);
-        System.out.println(tuplesCount);
-        System.out.println(percentage);
+        //System.out.println(clusteredPop);
+        //System.out.println(tuplesCount);
+        //System.out.println(percentage);
 
         boolean newCluster = false;
-        Iterator<Object> dendoIterator = dendogram.iterator();
+        Iterator<TupleRegion> dendoIterator = dendogram.iterator();
         tupleReg = (TupleRegion) dendoIterator.next();
 
         if (clusteredRegions == 0){
@@ -533,9 +533,6 @@ public class BangClustering implements Clustering {
         } else{
             while (counter < clusteredRegions){
                 if(tupleReg.getPosition() <= clusteredRegions){
-                    for (float[] tuple : tupleReg.getTupleList()) {
-                        System.out.println(Arrays.toString(tuple));
-                    }
                     population += tupleReg.getPopulation();
                     counter++;
                     newCluster = true;
@@ -552,13 +549,8 @@ public class BangClustering implements Clustering {
         }
 
         Collections.reverse(clusterInfo);
-        System.out.println(clusterInfo.size());
+        //System.out.println(clusterInfo.size());
 
-        for( int i : clusterInfo){
-            System.out.println(i);
-            System.out.println((i / tuplesCount) * 100);
-            System.out.println((i / clusteredPop) * 100);
-        }
     }
 
     @Override
@@ -578,9 +570,7 @@ public class BangClustering implements Clustering {
         }
 
         builder.append("\n");
-        TupleRegion tupleReg;
-        for (Object o : dendogram){
-            tupleReg = (TupleRegion) o;
+        for (TupleRegion tupleReg : dendogram){
             builder.append("\nRegion " + tupleReg.getRegion() + ","  + tupleReg.getLevel() + " Density: " + tupleReg.getDensity());
         }
 
