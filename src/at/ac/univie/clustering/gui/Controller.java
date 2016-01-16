@@ -8,6 +8,8 @@ import at.ac.univie.clustering.method.bang.DirectoryEntry;
 import at.ac.univie.clustering.method.bang.TupleRegion;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.event.EventType;
 import javafx.fxml.FXML;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.XYChart;
@@ -17,6 +19,8 @@ import javafx.scene.layout.*;
 import javafx.stage.Modality;
 
 import java.awt.*;
+import java.awt.event.InputEvent;
+import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -123,7 +127,7 @@ public class Controller{
             TupleRegion tupleReg;
             for (Object o : cluster.getRegions()){
                 tupleReg = (TupleRegion) o;
-                dendogramSeries.getData().add(new XYChart.Data(tupleReg.getRegion() + " " + tupleReg.getLevel(), tupleReg.getDensity()));
+                dendogramSeries.getData().add(new XYChart.Data(tupleReg.getRegion() + "," + tupleReg.getLevel(), tupleReg.getDensity()));
             }
             dendogramChart.getData().add(dendogramSeries);
 
@@ -152,7 +156,7 @@ public class Controller{
 
         return builder.toString();*/
 
-    private GridPane buildDirectoryGrid(DirectoryEntry dirEntry, int axis){
+    private GridPane buildDirectoryGrid(final DirectoryEntry dirEntry, int axis){
         GridPane grid = new GridPane();
 
         if (dirEntry.getRight() != null || dirEntry.getLeft() != null){
@@ -160,11 +164,11 @@ public class Controller{
                 ColumnConstraints col1 = new ColumnConstraints();
                 col1.setPercentWidth(50);
                 col1.setHgrow(Priority.SOMETIMES);
-                col1.setPrefWidth(100);
+                col1.setPrefWidth(3000);
                 ColumnConstraints col2 = new ColumnConstraints();
                 col2.setPercentWidth(50);
                 col2.setHgrow(Priority.SOMETIMES);
-                col2.setPrefWidth(100);
+                col2.setPrefWidth(3000);
                 grid.getColumnConstraints().addAll(col1, col2);
                 if (dirEntry.getLeft() != null) {
                     grid.add(buildDirectoryGrid(dirEntry.getLeft(), 1 - axis), 0, 0);
@@ -176,11 +180,11 @@ public class Controller{
                 RowConstraints row1 = new RowConstraints();
                 row1.setPercentHeight(50);
                 row1.setVgrow(Priority.SOMETIMES);
-                row1.setPrefHeight(100);
+                row1.setPrefHeight(3000);
                 RowConstraints row2 = new RowConstraints();
                 row2.setPercentHeight(50);
                 row2.setVgrow(Priority.SOMETIMES);
-                row2.setPrefHeight(100);
+                row2.setPrefHeight(3000);
                 grid.getRowConstraints().addAll(row1, row2);
                 if (dirEntry.getLeft() != null) {
                     grid.add(buildDirectoryGrid(dirEntry.getLeft(), 1 - axis), 0, 0);
@@ -191,7 +195,14 @@ public class Controller{
             }
         }
         grid.setGridLinesVisible(true);
-        if (dirEntry.getRegion() == null){
+        if (dirEntry.getRegion() != null) {
+            grid.setOnMouseEntered(new EventHandler<javafx.scene.input.MouseEvent>() {
+                @Override
+                public void handle(javafx.scene.input.MouseEvent event) {
+                    System.out.println(dirEntry.getRegion().getRegion() + "," + dirEntry.getRegion().getLevel());
+                }
+            });
+        } else{
             grid.setStyle("-fx-border-style: dashed; -fx-border-width: 0.01;");
         }
 
