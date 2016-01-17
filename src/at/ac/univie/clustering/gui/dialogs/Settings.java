@@ -1,4 +1,4 @@
-package at.ac.univie.clustering.gui;
+package at.ac.univie.clustering.gui.dialogs;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -8,10 +8,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-import java.io.File;
 import java.io.IOException;
 
 /**

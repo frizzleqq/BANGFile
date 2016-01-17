@@ -1,4 +1,4 @@
-package at.ac.univie.clustering.gui;
+package at.ac.univie.clustering.gui.dialogs;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;

@@ -112,4 +112,68 @@
          </padding>
       </HBox>
    </bottom>
+   <center>
+      <VBox BorderPane.alignment="CENTER">
+         <children>
+            <HBox VBox.vgrow="SOMETIMES">
+               <children>
+                  <Label text="Region selected:">
+                     <font>
+                        <Font name="System Bold" size="12.0" />
+                     </font>
+                     <HBox.margin>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </HBox.margin>
+                  </Label>
+                  <Label fx:id="regionLabel">
+                     <HBox.margin>
+                        <Insets bottom="5.0" left="8.0" right="8.0" top="5.0" />
+                     </HBox.margin>
+                  </Label>
+                  <Region HBox.hgrow="SOMETIMES" />
+               </children>
+               <VBox.margin>
+                  <Insets bottom="5.0" left="8.0" right="8.0" top="5.0" />
+               </VBox.margin></HBox>
+            <TabPane side="BOTTOM" tabClosingPolicy="UNAVAILABLE" tabMinWidth="80.0" VBox.vgrow="SOMETIMES">
+              <tabs>
+                <Tab closable="false" text="Dendogram">
+                     <content>
+                        <BorderPane>
+                           <center>
+                              <BarChart fx:id="dendogramChart" animated="false" barGap="0.0" categoryGap="0.0" legendVisible="false" BorderPane.alignment="CENTER">
+                                <xAxis>
+                                  <CategoryAxis animated="false" label="Region" side="BOTTOM" tickMarkVisible="false" />
+                                </xAxis>
+                                <yAxis>
+                                  <NumberAxis animated="false" label="Density" minorTickVisible="false" side="LEFT" />
+                                </yAxis>
+                              </BarChart>
+                           </center>
+                        </BorderPane>
+                     </content>
+                </Tab>
+                <Tab closable="false" text="Grid-View">
+                     <content>
+                        <BorderPane fx:id="gridBorderPane">
+                           <left>
+                              <Region minWidth="150.0" prefWidth="150.0" BorderPane.alignment="CENTER" />
+                           </left>
+                           <right>
+                              <Region minWidth="150.0" prefWidth="150.0" BorderPane.alignment="CENTER" />
+                           </right>
+                           <top>
+                              <Button mnemonicParsing="false" onAction="#onPopoutAction" prefWidth="120.0" text="Popout Grid-View" BorderPane.alignment="TOP_RIGHT">
+                                 <BorderPane.margin>
+                                    <Insets right="8.0" />
+                                 </BorderPane.margin>
+                              </Button>
+                           </top></BorderPane>
+                     </content>
+                </Tab>
+              </tabs>
+            </TabPane>
+         </children>
+      </VBox>
+   </center>
 </BorderPane>
