@@ -7,13 +7,17 @@ import at.ac.univie.clustering.method.Clustering;
 import at.ac.univie.clustering.method.bang.BangClustering;
 import at.ac.univie.clustering.method.bang.DirectoryEntry;
 import at.ac.univie.clustering.method.bang.TupleRegion;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import javafx.application.Platform;
+import javafx.concurrent.Task;
+import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.*;
 import javafx.stage.Modality;
 
@@ -43,6 +47,12 @@ public class Controller{
     @FXML
     private Label regionLabel;
 
+    @FXML
+    private ProgressBar progressBar;
+
+    @FXML
+    private Label infoLabel;
+
     private static DataWorker data = null;
     private static Clustering cluster = null;
 
@@ -56,28 +66,24 @@ public class Controller{
             try {
                 data = new CsvWorker(at.ac.univie.clustering.gui.dialogs.FileDialog.getFilepath(), at.ac.univie.clustering.gui.dialogs.FileDialog.getDelimiter(), at.ac.univie.clustering.gui.dialogs.FileDialog.getHeader());
             } catch (IOException e) {
-                System.err.println(e.getMessage());
+                infoLabel.setText(e.getMessage());
             }
 
             int dimension = data.getDimension();
             int tuplesCount = data.getnTuple();
 
             if (dimension == 0) {
-                System.err.println("Could not determine dimensions of provided data.");
-                System.exit(1);
+                infoLabel.setText("Could not determine dimensions of provided data.");
             } else if (dimension < 2) {
-                System.err.println("Could not determine at least 2 dimensions.");
-                System.exit(1);
+                infoLabel.setText("Could not determine at least 2 dimensions.");
             }
 
             if (tuplesCount == 0) {
-                System.err.println("Could not determine amount of records of provided data.");
-                System.exit(1);
+                infoLabel.setText("Could not determine amount of records of provided data.");
             }
 
             if (dimension <= Settings.getNeighbourhood()){
-                System.err.println("Provided neighbourhood-condition has to be smaller than data dimension");
-                System.exit(1);
+                infoLabel.setText("Provided neighbourhood-condition has to be smaller than data dimension");
             }
 
             dataLabel.setText(data.getName());
@@ -106,29 +112,45 @@ public class Controller{
 
             cluster = new BangClustering(data.getDimension(), Settings.getBucketsize(), data.getnTuple(), Settings.getNeighbourhood(), 50);
 
+            Task<Boolean> runFactoryTask;
+
             try {
-                readAllData();
-            } catch (IOException e) {
-                System.err.println("Problem while reading file: " + e.getMessage());
-                System.exit(1);
-            } catch (NumberFormatException e) {
-                System.err.println("ERROR: Wrong format of data: " + e.getMessage());
-                System.exit(1);
+                runFactoryTask = readAllDataFactory();
+
+                runFactoryTask.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
+                    @Override
+                    public void handle(WorkerStateEvent t)
+                    {
+                        cluster.analyzeClusters();
+
+                        XYChart.Series dendogramSeries = new XYChart.Series();
+                        dendogramSeries.setName("Dendogram");
+                        TupleRegion tupleReg;
+                        for (Object o : cluster.getRegions()){
+                            tupleReg = (TupleRegion) o;
+                            dendogramSeries.getData().add(new XYChart.Data<String, Float>(tupleReg.getRegion() + "," + tupleReg.getLevel(), tupleReg.getDensity()));
+                        }
+                        dendogramChart.getData().add(dendogramSeries);
+                        GridPane grid = buildDirectoryGrid((DirectoryEntry) cluster.getDirectoryRoot(), 0);
+                        gridBorderPane.setCenter(grid);
+                        gridBorderPane.layout();
+                    }
+                });
+
+                runFactoryTask.setOnFailed(new EventHandler<WorkerStateEvent>() {
+                    @Override
+                    public void handle(WorkerStateEvent t)
+                    {
+                        // Code to run once runFactory() **fails**
+                    }
+                });
+                progressBar.progressProperty().bind(runFactoryTask.progressProperty());
+                new Thread(runFactoryTask).start();
+
+            }catch (InterruptedException e) {
+                e.printStackTrace();
             }
 
-            cluster.analyzeClusters();
-
-            XYChart.Series dendogramSeries = new XYChart.Series();
-            dendogramSeries.setName("Dendogram");
-            TupleRegion tupleReg;
-            for (Object o : cluster.getRegions()){
-                tupleReg = (TupleRegion) o;
-                dendogramSeries.getData().add(new XYChart.Data<String, Float>(tupleReg.getRegion() + "," + tupleReg.getLevel(), tupleReg.getDensity()));
-            }
-            dendogramChart.getData().add(dendogramSeries);
-            GridPane grid = buildDirectoryGrid((DirectoryEntry) cluster.getDirectoryRoot(), 0);
-            gridBorderPane.setCenter(grid);
-            gridBorderPane.layout();
         }
     }
 
@@ -147,30 +169,37 @@ public class Controller{
     }
 
     /**
-     * @throws IOException, NumberFormatException
+     *
+     * @return
+     * @throws InterruptedException
      */
-    private static void readAllData() throws IOException, NumberFormatException {
-        float[] tuple;
+    public Task<Boolean> readAllDataFactory() throws InterruptedException {
+        return new Task<Boolean>() {
+            @Override
+            public Boolean call() throws IOException {
+                Boolean result = true;
+                float[] tuple;
 
-        while ((tuple = data.readTuple()) != null) {
+                while ((tuple = data.readTuple()) != null) {
+                    if (tuple.length != data.getDimension()) {
+                        infoLabel.setText(String.format("Tuple-dimension [%d] differs from predetermined dimension [%d].\n",
+                                tuple.length, data.getDimension()));
+                        result = false;
+                    }
 
-            if (tuple.length != data.getDimension()) {
-                System.err.println(Arrays.toString(tuple));
-                System.err.println(String.format("Tuple-dimension [%d] differs from predetermined dimension [%d].\n",
-                        tuple.length, data.getDimension()));
-                System.exit(1);
-            }
+                    for (float f : tuple) {
+                        if (f < 0 || f > 1) {
+                            infoLabel.setText(String.format("Incorrect tuple value found [%f].\n", f));
+                            result = false;
+                        }
+                    }
 
-            for (float f : tuple) {
-                if (f < 0 || f > 1) {
-                    System.err.println(Arrays.toString(tuple));
-                    System.err.println(String.format("Incorrect tuple value found [%f].\n", f));
-                    System.exit(1);
+                    cluster.insertTuple(tuple);
+                    updateProgress(data.getCurPosition() * 1 / data.getnTuple(), data.getnTuple());
                 }
+                return result;
             }
-
-            cluster.insertTuple(tuple);
-        }
+        };
     }
 
     private GridPane buildDirectoryGrid(final DirectoryEntry dirEntry, int axis){
@@ -181,12 +210,12 @@ public class Controller{
                 ColumnConstraints col1 = new ColumnConstraints();
                 col1.setPercentWidth(50);
                 col1.setHgrow(Priority.SOMETIMES);
-                col1.setPrefWidth(300);
+                col1.setPrefWidth(500);
                 col1.setMinWidth(1.0);
                 ColumnConstraints col2 = new ColumnConstraints();
                 col2.setPercentWidth(50);
                 col2.setHgrow(Priority.SOMETIMES);
-                col2.setPrefWidth(300);
+                col2.setPrefWidth(500);
                 col2.setMinWidth(1.0);
                 grid.getColumnConstraints().addAll(col1, col2);
                 if (dirEntry.getLeft() != null) {
@@ -199,12 +228,12 @@ public class Controller{
                 RowConstraints row1 = new RowConstraints();
                 row1.setPercentHeight(50);
                 row1.setVgrow(Priority.SOMETIMES);
-                row1.setPrefHeight(300);
+                row1.setPrefHeight(500);
                 row1.setMinHeight(1.0);
                 RowConstraints row2 = new RowConstraints();
                 row2.setPercentHeight(50);
                 row2.setVgrow(Priority.SOMETIMES);
-                row2.setPrefHeight(300);
+                row2.setPrefHeight(500);
                 row2.setMinHeight(1.0);
                 grid.getRowConstraints().addAll(row1, row2);
                 if (dirEntry.getLeft() != null) {

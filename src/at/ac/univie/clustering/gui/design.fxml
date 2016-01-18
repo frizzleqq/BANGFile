@@ -102,10 +102,10 @@
    <bottom>
       <HBox spacing="8.0" BorderPane.alignment="CENTER">
          <children>
-            <Label text="Label" />
-            <ProgressBar progress="0.0" />
+            <Label text="Progress" />
+            <ProgressBar fx:id="progressBar" progress="0.0" />
             <Region HBox.hgrow="ALWAYS" />
-            <Label layoutX="12.0" layoutY="12.0" text="Label" />
+            <Label fx:id="infoLabel" layoutX="12.0" layoutY="12.0" prefWidth="204.0" HBox.hgrow="SOMETIMES" />
          </children>
          <padding>
             <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
