@@ -41,11 +41,10 @@ public class BangClusteringTest {
 			bang.insertTuple(tuple);
 		}
 
-		DirectoryEntry file = (DirectoryEntry) bang.getDirectoryRoot();
+		DirectoryEntry file = (DirectoryEntry) bang.getRootDirectory();
 
 		assertEquals(3, file.getRegion().getPopulation());
 		assertEquals(tuples, file.getRegion().getTupleList());
-
 	}
 
 	@Test
@@ -64,7 +63,7 @@ public class BangClusteringTest {
 			bang.insertTuple(tuple);
 		}
 
-		DirectoryEntry file = (DirectoryEntry) bang.getDirectoryRoot();
+		DirectoryEntry file = (DirectoryEntry) bang.getRootDirectory();
 
 		assertEquals(4, file.getRegion().getPopulation());
 

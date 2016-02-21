@@ -157,6 +157,24 @@ public class DirectoryEntryTest {
         assertEquals(8f, dirEntry.getLeft().getLeft().getRegion().getDensity(), 0f);
 	}
 
+    @Test
+    public void testGetRegionSize() {
+        DirectoryEntry dirEntry = new DirectoryEntry();
+        dirEntry.setRegion(new TupleRegion(0, 0));
+
+        dirEntry.setLeft(new DirectoryEntry());
+        dirEntry.getLeft().setLeft(new DirectoryEntry());
+
+        dirEntry.getLeft().getLeft().setRegion(new TupleRegion(0, 2));
+
+        dirEntry.getRegion().insertTuple(new float[] { 0.1f, 0.1f });
+
+        dirEntry.getLeft().getLeft().getRegion().insertTuple(new float[] { 0.1f, 0.1f });
+        dirEntry.getLeft().getLeft().getRegion().insertTuple(new float[] { 0.1f, 0.1f });
+
+        assertEquals(1f, dirEntry.getRegionSize(), 0f);
+        assertEquals(0.25f, dirEntry.getLeft().getLeft().getRegionSize(), 0f);
+    }
 
     @Test
     public void testCollectRegions(){

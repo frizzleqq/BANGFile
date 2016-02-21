@@ -76,7 +76,7 @@ public class TupleRegion implements Comparable<TupleRegion> {
     }
 
     /**
-     * Insert tuple and increment population.
+     * Insert tuple into region and increment population.
      *
      * @param tuple
      */
@@ -87,7 +87,7 @@ public class TupleRegion implements Comparable<TupleRegion> {
     }
 
     /**
-     * Clear a tuple list and set population to 0.
+     * Clear tuple list of region and set population to 0.
      */
     public void clearTupleList() {
         tupleList.clear();
@@ -96,9 +96,11 @@ public class TupleRegion implements Comparable<TupleRegion> {
 
     /**
      * The size of a region is calculated with:
+     * Size of root directory is 1.
+     *
      * size = 1 / (2 ^ level)
      *
-     * @return size of this region
+     * @return size of region
      */
     public float calculateSize() {
         return 1.0f / (1 << level);

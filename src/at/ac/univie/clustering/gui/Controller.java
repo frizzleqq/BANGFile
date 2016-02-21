@@ -131,7 +131,7 @@ public class Controller{
                             dendogramSeries.getData().add(new XYChart.Data<String, Float>(tupleReg.getRegion() + "," + tupleReg.getLevel(), tupleReg.getDensity()));
                         }
                         dendogramChart.getData().add(dendogramSeries);
-                        GridPane grid = buildDirectoryGrid((DirectoryEntry) cluster.getDirectoryRoot(), 0);
+                        GridPane grid = buildDirectoryGrid((DirectoryEntry) cluster.getRootDirectory(), 0);
                         gridBorderPane.setCenter(grid);
                         gridBorderPane.layout();
                     }

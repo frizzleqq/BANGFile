@@ -72,8 +72,17 @@ public class BangClustering implements Clustering {
     }
 
     @Override
-    public Object getDirectoryRoot() {
+    public Object getRootDirectory() {
         return bangFile;
+    }
+
+    @Override
+    public List<Object> getRegions() {
+        List<Object> dendogramObjects = new ArrayList<>();
+        for (TupleRegion tupleRegion : dendogram){
+            dendogramObjects.add(tupleRegion);
+        }
+        return dendogramObjects;
     }
 
     protected void setLevels(int[] levels) {
@@ -84,13 +93,6 @@ public class BangClustering implements Clustering {
         this.grids = grids;
     }
 
-    public List<Object> getRegions() {
-        List<Object> dendogramObjects = new ArrayList<>();
-        for (TupleRegion tupleRegion : dendogram){
-            dendogramObjects.add(tupleRegion);
-        }
-        return dendogramObjects;
-    }
 
     /**
      * TODO
@@ -395,13 +397,9 @@ public class BangClustering implements Clustering {
     public void analyzeClusters() {
         bangFile.calculateDensity();
         sortedRegions = getSortedRegions();
-
         nAlias = countAliases();
-
         dendogram = createDendogram();
-
         createClusters();
-
     }
 
     /**

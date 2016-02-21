@@ -102,7 +102,7 @@ public class DirectoryEntry {
     }
 
     /**
-     * Move region down to right directory entry.
+     * Move region of directory down to succeeding right directory.
      */
     void moveToRight() {
         if (right == null) {
@@ -118,7 +118,7 @@ public class DirectoryEntry {
     }
 
     /**
-     * Move region to down to left directory entry.
+     * Move region of directory to down to succeeding left directory.
      */
     void moveToLeft() {
         if (left == null) {
@@ -133,14 +133,29 @@ public class DirectoryEntry {
         region = null;
     }
 
+    /**
+     * Compares populations of both succeeding regions and returns the less populated one.
+     *
+     * @return directory with less populated region
+     */
     DirectoryEntry getSparseEntry() {
         return (left.getRegion().getPopulation() < right.getRegion().getPopulation()) ? left : right;
     }
 
+    /**
+     * Compares populations of both succeeding regions and returns the more populated one.
+     *
+     * @return directory with more populated region
+     */
     DirectoryEntry getDenseEntry() {
         return (left.getRegion().getPopulation() < right.getRegion().getPopulation()) ? right : left;
     }
 
+    /**
+     * Clear either the left or the right directory.
+     *
+     * @param dirEntry  directory to be cleared
+     */
     void clearSucceedingEntry(DirectoryEntry dirEntry) {
         if (left == dirEntry) {
             left = null;
@@ -150,8 +165,8 @@ public class DirectoryEntry {
     }
 
     /**
-     * Calculate density of all existing regions of all entries that succeed the
-     * entry this function is called with.
+     * Calculate density of all existing regions of all directories that succeed
+     * this directory.
      * <p>
      * The size of a region is calculated with: size = 1 / (2 ^ level)
      */
@@ -177,10 +192,9 @@ public class DirectoryEntry {
     /**
      * The density of a region is the regions population divided by its size.
      * <p>
-     * The size of enclosed regions within the region are subtracted from the
-     * regions size.
+     * Enclosed regions within the region are subtracted from the regions size.
      *
-     * @return regions population / regions size
+     * @return regions population divided by its regions size
      */
     protected float calculateRegionDensity() {
 
@@ -191,7 +205,9 @@ public class DirectoryEntry {
     }
 
     /**
-     * Find succeeding entries with a region and calculate their size.
+     * Calculate size of region and size of regions in succeeding directories.
+     * Size of root directory is 1.
+     *
      * size = 1 / (2 ^ level)
      *
      * @return size of region including succeeding regions
@@ -253,8 +269,9 @@ public class DirectoryEntry {
 
     /**
      * Collect all regions within a directory and store them in a list.
+     * Collecting is done via depth first search.
      *
-     * @param regionArray
+     * @param regionArray   List used to store all regions
      */
     protected void collectRegions(List<TupleRegion> regionArray) {
         if (left != null){
