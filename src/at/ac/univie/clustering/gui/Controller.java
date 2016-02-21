@@ -211,12 +211,12 @@ public class Controller{
                 col1.setPercentWidth(50);
                 col1.setHgrow(Priority.SOMETIMES);
                 col1.setPrefWidth(500);
-                col1.setMinWidth(1.0);
+                col1.setMinWidth(0.2);
                 ColumnConstraints col2 = new ColumnConstraints();
                 col2.setPercentWidth(50);
                 col2.setHgrow(Priority.SOMETIMES);
                 col2.setPrefWidth(500);
-                col2.setMinWidth(1.0);
+                col2.setMinWidth(0.2);
                 grid.getColumnConstraints().addAll(col1, col2);
                 if (dirEntry.getLeft() != null) {
                     grid.add(buildDirectoryGrid(dirEntry.getLeft(), 1 - axis), 0, 0);
@@ -229,12 +229,12 @@ public class Controller{
                 row1.setPercentHeight(50);
                 row1.setVgrow(Priority.SOMETIMES);
                 row1.setPrefHeight(500);
-                row1.setMinHeight(1.0);
+                row1.setMinHeight(0.2);
                 RowConstraints row2 = new RowConstraints();
                 row2.setPercentHeight(50);
                 row2.setVgrow(Priority.SOMETIMES);
                 row2.setPrefHeight(500);
-                row2.setMinHeight(1.0);
+                row2.setMinHeight(0.2);
                 grid.getRowConstraints().addAll(row1, row2);
                 if (dirEntry.getLeft() != null) {
                     grid.add(buildDirectoryGrid(dirEntry.getLeft(), 1 - axis), 0, 0);
@@ -245,9 +245,9 @@ public class Controller{
             }
         } else{
             grid.setPrefWidth(300);
-            grid.setMinWidth(1.0);
+            grid.setMinWidth(0.2);
             grid.setPrefHeight(300);
-            grid.setMinHeight(1.0);
+            grid.setMinHeight(0.2);
         }
         grid.setGridLinesVisible(true);
         if (dirEntry.getRegion() != null) {

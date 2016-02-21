@@ -1,6 +1,8 @@
 package at.ac.univie.clustering.gui.dialogs;
 
 import javafx.event.ActionEvent;
+import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -8,6 +10,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyEvent;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -57,6 +60,7 @@ public class FileDialog extends Stage {
         filepathField.setText(filepath);
         delimiterField.setText(Character.toString(delimiter));
         headerBox.setSelected(header);
+
     }
 
     public static String getFilepath() {
@@ -111,5 +115,9 @@ public class FileDialog extends Stage {
             filepathField.setText("");
         }
 
+    }
+
+    public void onTextfieldAction(ActionEvent actionEvent){
+        actionEvent.consume();
     }
 }

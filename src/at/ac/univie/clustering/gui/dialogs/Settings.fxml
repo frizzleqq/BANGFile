@@ -18,7 +18,7 @@
                     </padding>
                 </Label>
                 <Region prefWidth="100.0" HBox.hgrow="ALWAYS" />
-                <TextField fx:id="bucketsizeField" prefColumnCount="2" />
+                <TextField fx:id="bucketsizeField" onAction="#onTextfieldAction" prefColumnCount="2" />
             </children>
         </HBox>
       <HBox layoutX="20.0" layoutY="20.0">
@@ -32,7 +32,7 @@
                </HBox.margin>
             </Label>
             <Region prefWidth="72.0" HBox.hgrow="ALWAYS" />
-            <TextField fx:id="neighbourhoodField" prefColumnCount="2" />
+            <TextField fx:id="neighbourhoodField" onAction="#onTextfieldAction" prefColumnCount="2" />
          </children>
       </HBox>
         <HBox layoutX="15.0" layoutY="65.0">
@@ -42,7 +42,7 @@
                         <Insets left="10.0" />
                     </padding></Label>
                 <Region prefWidth="177.0" HBox.hgrow="ALWAYS" />
-                <CheckBox fx:id="debugBox" mnemonicParsing="false" />
+                <CheckBox fx:id="debugBox" mnemonicParsing="false" onAction="#onTextfieldAction" />
                 <Region HBox.hgrow="ALWAYS" />
             </children>
         </HBox>

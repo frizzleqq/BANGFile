@@ -92,5 +92,9 @@ public class Settings extends Stage {
     public void onCancelButtonAction(ActionEvent actionEvent) {
         close();
     }
+
+    public void onTextfieldAction(ActionEvent actionEvent){
+        actionEvent.consume();
+    }
 }
 

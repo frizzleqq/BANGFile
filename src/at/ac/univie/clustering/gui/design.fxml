@@ -141,7 +141,7 @@
                      <content>
                         <BorderPane>
                            <center>
-                              <BarChart fx:id="dendogramChart" animated="false" barGap="0.0" categoryGap="0.0" legendVisible="false" BorderPane.alignment="CENTER">
+                              <BarChart fx:id="dendogramChart" animated="false" barGap="0.0" categoryGap="0.0" horizontalGridLinesVisible="false" legendVisible="false" BorderPane.alignment="CENTER">
                                 <xAxis>
                                   <CategoryAxis animated="false" label="Region" side="BOTTOM" tickMarkVisible="false" />
                                 </xAxis>
