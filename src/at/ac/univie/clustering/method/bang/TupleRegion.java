@@ -110,61 +110,55 @@ public class TupleRegion implements Comparable<TupleRegion> {
      * Verifying neighbourhood of two regions is done via comparison of grid
      * values. If the level of the regions is equal, we can determine the
      * grid difference directly. If not, we have to transform the region
-     * with the higher level (as in above in the directory) to the one with
+     * with the higher level (as in: above in the directory) to the one with
      * deeper level. The comparison is then done with the region resulting
      * from the transformation.
      *
-     * @param other
-     * @param dimension
-     * @param condition
+     * Default neighbourhood-condition is 1. In a 2 dimensional grid this equals to
+     * region-edges touching. With neighbourhood-condition of 2 the region-corners touching
+     * is enough for neighbourhood to be true.
+     *
+     * @param other         tupleregion to test if neighbourhood
+     * @param dimension     dimension of grid
+     * @param condition     neighbourhood-condition: starting with 1, a higher value results in more lenient check
      * @return true if neighbour, false if not
      */
     public boolean isNeighbour(TupleRegion other, int dimension, int condition){
         int[] grids = unmapRegion(dimension);
-        int[] gridsCompare = other.unmapRegion(dimension);
+        int[] gridsOther = other.unmapRegion(dimension);
 
-        int[] compare, convert;
-        int[] gridDelta = new int[dimension + 1];
-        int[] gridMin = new int[dimension + 1];
-        int[] gridMax = new int[dimension + 1];
-
-        int deltaLevel;
         int diff = 0;
 
-        if (grids[0] == gridsCompare[0]){
+        // regions are on same level
+        if (grids[0] == gridsOther[0]){
             for (int i = 1; i <= dimension; i++){
-                if (Math.abs(grids[i] - gridsCompare[i]) == 1){
+                if (Math.abs(grids[i] - gridsOther[i]) == 1){
                     diff++;
-                } else if (Math.abs(grids[i] - gridsCompare[i]) > 1) {
+                } else if (Math.abs(grids[i] - gridsOther[i]) > 1) {
                     return false;
                 }
             }
         } else {
-            if (grids[0] > gridsCompare[0]){
-                deltaLevel = grids[0] - gridsCompare[0];
-                compare = Arrays.copyOf(grids, grids.length);
-                convert = Arrays.copyOf(gridsCompare, gridsCompare.length);
-            } else {
-                deltaLevel = gridsCompare[0] - grids[0];
-                compare = Arrays.copyOf(gridsCompare, gridsCompare.length);
-                convert = Arrays.copyOf(grids, grids.length);
-            }
+            int deltaLevel = Math.abs(grids[0] - gridsOther[0]);
+            int[] gridsCompare = (grids[0] > gridsOther[0]) ? grids : gridsOther;
+            int[] gridsConvert = (grids[0] > gridsOther[0]) ? gridsOther : grids;
 
-            for (int i = 0; i <= dimension; i++){
-                gridDelta[i] = 0;
-            }
-            for (int i = convert[0]%dimension, j = 1; j <= deltaLevel; i++, j++){
-                gridDelta[(i%dimension) + 1]++;
+            int[] gridsDelta = new int[dimension + 1];
+            int[] gridsMin = new int[dimension + 1];
+            int[] gridsMax = new int[dimension + 1];
+
+            for (int i = gridsConvert[0]%dimension, j = 1; j <= deltaLevel; i++, j++){
+                gridsDelta[(i%dimension) + 1]++;
             }
 
             for (int i = 1; i <= dimension; i++){
-                gridMin[i] = convert[i] * (1 << gridDelta[i]);
-                gridMax[i] = gridMin[i] + (1 << gridDelta[i]) - 1;
-                if ( compare[i] < gridMin[i] || compare[i] > gridMax[i]){
-                    if (Math.abs(compare[i] - gridMin[i]) > 1 && Math.abs(compare[i] - gridMax[i]) > 1){
+                gridsMin[i] = gridsConvert[i] * (1 << gridsDelta[i]);
+                gridsMax[i] = gridsMin[i] + (1 << gridsDelta[i]) - 1;
+                if ( gridsCompare[i] < gridsMin[i] || gridsCompare[i] > gridsMax[i]){
+                    if (Math.abs(gridsCompare[i] - gridsMin[i]) > 1 && Math.abs(gridsCompare[i] - gridsMax[i]) > 1){
                         return false;
                     }
-                    if (Math.abs(compare[i] - gridMin[i]) != 0 && Math.abs(compare[i] - gridMax[i]) != 0){
+                    if (Math.abs(gridsCompare[i] - gridsMin[i]) > 0 && Math.abs(gridsCompare[i] - gridsMax[i]) > 0){
                         diff++;
                     }
                 }
@@ -174,11 +168,15 @@ public class TupleRegion implements Comparable<TupleRegion> {
     }
 
     /**
+     * Calculate the grid values of a region within its level.
+     * These grid values are the value for each dimension and represent the location of the region in its level.
+     *
+     * The first element of the array is set to the value of level.
      *
      * @param dimension
-     * @return
+     * @return array representing location in grid of regions level (first element set to 'level')
      */
-    private int[] unmapRegion(int dimension){
+    protected int[] unmapRegion(int dimension){
         int [] grids = new int[dimension + 1];
         for (int i = 1; i <= dimension; i++){
             grids[i] = 0;
