@@ -8,7 +8,7 @@ import java.util.Objects;
  */
 public interface Clustering {
 
-    void insertTuple(float[] tuple);
+    void insertTuple(double[] tuple);
 
     int getDimension();
 

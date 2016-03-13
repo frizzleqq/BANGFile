@@ -196,10 +196,10 @@ public class DirectoryEntry {
      *
      * @return regions population divided by its regions size
      */
-    protected float calculateRegionDensity() {
+    protected double calculateRegionDensity() {
 
-        float leftSize = (left != null) ? left.getRegionSize() : 0f;
-        float rightSize = (right != null) ? right.getRegionSize() : 0f;
+        double leftSize = (left != null) ? left.getRegionSize() : 0;
+        double rightSize = (right != null) ? right.getRegionSize() : 0;
 
         return (region.getPopulation() / (region.calculateSize() - leftSize - rightSize));
     }
@@ -212,15 +212,14 @@ public class DirectoryEntry {
      *
      * @return size of region including succeeding regions
      */
-    protected float getRegionSize() {
-        float size = 0;
+    protected double getRegionSize() {
+        double size = 0;
         if (region != null) {
             size = region.calculateSize();
         } else {
-            size += (left != null) ? left.getRegionSize() : 0f;
-            size += (right != null) ? right.getRegionSize() : 0f;
+            size += (left != null) ? left.getRegionSize() : 0;
+            size += (right != null) ? right.getRegionSize() : 0;
         }
-
         return size;
     }
 
@@ -240,8 +239,6 @@ public class DirectoryEntry {
         } else {
             region.getAliases().add(new TupleRegion(region.getRegion() + (1 << region.getLevel()), region.getLevel() + 1));
         }
-
-
     }
 
     /**
@@ -251,7 +248,7 @@ public class DirectoryEntry {
      * @param region
      * @param level
      */
-    protected void buildAlias(DirectoryEntry dirEntry, int region, int level) {
+    protected void buildAlias(DirectoryEntry dirEntry, long region, int level) {
         if (this.region == null) {
             if (left != null) {
                 buildAlias(left, region, level + 1);

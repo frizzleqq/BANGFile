@@ -7,14 +7,14 @@ import java.util.List;
 public class TupleRegion implements Comparable<TupleRegion> {
 
     private int population = 0;
-    private int region;
+    private long region;
     private int level;
     private int position;
-    private float density = 0;
-    private List<float[]> tupleList = new ArrayList<>();
+    private double density = 0;
+    private List<double[]> tupleList = new ArrayList<>();
     private List<TupleRegion> aliases = new ArrayList<>();
 
-    public TupleRegion(int region, int level) {
+    public TupleRegion(long region, int level) {
         this.region = region;
         this.level = level;
     }
@@ -27,11 +27,11 @@ public class TupleRegion implements Comparable<TupleRegion> {
         this.population = population;
     }
 
-    public int getRegion() {
+    public long getRegion() {
         return region;
     }
 
-    public void setRegion(int region) {
+    public void setRegion(long region) {
         this.region = region;
     }
 
@@ -51,19 +51,19 @@ public class TupleRegion implements Comparable<TupleRegion> {
         this.position = position;
     }
 
-    public float getDensity() {
+    public double getDensity() {
         return density;
     }
 
-    public void setDensity(float density) {
+    public void setDensity(double density) {
         this.density = density;
     }
 
-    public List<float[]> getTupleList() {
+    public List<double[]> getTupleList() {
         return tupleList;
     }
 
-    public void setTupleList(List<float[]> tupleList) {
+    public void setTupleList(List<double[]> tupleList) {
         this.tupleList = tupleList;
     }
 
@@ -80,7 +80,7 @@ public class TupleRegion implements Comparable<TupleRegion> {
      *
      * @param tuple
      */
-    public void insertTuple(float[] tuple) {
+    public void insertTuple(double[] tuple) {
 
         tupleList.add(tuple);
         population++;
@@ -102,8 +102,8 @@ public class TupleRegion implements Comparable<TupleRegion> {
      *
      * @return size of region
      */
-    public float calculateSize() {
-        return 1.0f / (1 << level);
+    public double calculateSize() {
+        return 1.0 / (1L << level);
     }
 
     /**
@@ -213,7 +213,7 @@ public class TupleRegion implements Comparable<TupleRegion> {
 
         //builder.append(tabs + "Alias: " + alias;
         String tupleString = "";
-        for (float[] tuple : tupleList) {
+        for (double[] tuple : tupleList) {
             tupleString += Arrays.toString(tuple) + "; ";
         }
 

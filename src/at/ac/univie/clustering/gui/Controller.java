@@ -128,7 +128,7 @@ public class Controller{
                         TupleRegion tupleReg;
                         for (Object o : cluster.getRegions()){
                             tupleReg = (TupleRegion) o;
-                            dendogramSeries.getData().add(new XYChart.Data<String, Float>(tupleReg.getRegion() + "," + tupleReg.getLevel(), tupleReg.getDensity()));
+                            dendogramSeries.getData().add(new XYChart.Data<String, Double>(tupleReg.getRegion() + "," + tupleReg.getLevel(), tupleReg.getDensity()));
                         }
                         dendogramChart.getData().add(dendogramSeries);
                         GridPane grid = buildDirectoryGrid((DirectoryEntry) cluster.getRootDirectory(), 0);
@@ -178,7 +178,7 @@ public class Controller{
             @Override
             public Boolean call() throws IOException {
                 Boolean result = true;
-                float[] tuple;
+                double[] tuple;
 
                 while ((tuple = data.readTuple()) != null) {
                     if (tuple.length != data.getDimension()) {
@@ -187,9 +187,9 @@ public class Controller{
                         result = false;
                     }
 
-                    for (float f : tuple) {
-                        if (f < 0 || f > 1) {
-                            infoLabel.setText(String.format("Incorrect tuple value found [%f].\n", f));
+                    for (double d : tuple) {
+                        if (d < 0 || d > 1) {
+                            infoLabel.setText(String.format("Incorrect tuple value found [%d].\n", d));
                             result = false;
                         }
                     }

@@ -19,7 +19,7 @@ public class CliMain {
 
     private static final Options options = new Options();
 
-    private static String filename = "src/resources/test2d_1.csv";
+    private static String filename = "src/resources/segment.dat.csv";
     private static char delimiter = ';';
     private static boolean header = false;
     private static int bucketsize = 17;
@@ -103,11 +103,11 @@ public class CliMain {
      */
     private static void readData(Clustering cluster, DataWorker data) throws IOException, NumberFormatException {
         int tuplesRead = 0;
-        float[] tuple;
+        double[] tuple;
 
 		/*
          * TODO: - NumberFormatException should be handled - should be caught in
-		 * DataWorker? - force range 0 - 1? or change to readFloat / readInt
+		 * DataWorker? - force range 0 - 1? or change to readdouble / readInt
 		 * etc. - add bool called "normalize"?
 		 */
         while ((tuple = data.readTuple()) != null) {
@@ -119,10 +119,10 @@ public class CliMain {
                 System.exit(ERR_EXCEPTION);
             }
 
-            for (float f : tuple) {
-                if (f < 0 || f > 1) {
+            for (double d : tuple) {
+                if (d < 0 || d > 1) {
                     System.err.println(Arrays.toString(tuple));
-                    System.err.println(String.format("Incorrect tuple value found [%f].\n", f));
+                    System.err.println(String.format("Incorrect tuple value found [%d].\n", d));
                     System.exit(ERR_EXCEPTION);
                 }
             }

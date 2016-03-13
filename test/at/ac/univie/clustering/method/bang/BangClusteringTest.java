@@ -30,14 +30,14 @@ public class BangClusteringTest {
 
 	@Test
 	public void testInsertTuple() {
-		ArrayList<float[]> tuples = new ArrayList<>();
-		tuples.add(new float[] { 0.1f, 0.2f });
-		tuples.add(new float[] { 0.2f, 0.3f });
-		tuples.add(new float[] { 0.3f, 0.4f });
+		ArrayList<double[]> tuples = new ArrayList<>();
+		tuples.add(new double[] { 0.1, 0.2 });
+		tuples.add(new double[] { 0.2, 0.3 });
+		tuples.add(new double[] { 0.3, 0.4 });
 
 		BangClustering bang = new BangClustering(2, 4, 10);
 
-		for (float[] tuple : tuples) {
+		for (double[] tuple : tuples) {
 			bang.insertTuple(tuple);
 		}
 
@@ -49,17 +49,17 @@ public class BangClusteringTest {
 
 	@Test
 	public void testBuddySplit() {
-		ArrayList<float[]> tuples = new ArrayList<>();
-		tuples.add(new float[] { 0.1f, 0.1f });
-		tuples.add(new float[] { 0.2f, 0.1f });
-		tuples.add(new float[] { 0.3f, 0.1f });
-		tuples.add(new float[] { 0.4f, 0.1f });
-		tuples.add(new float[] { 0.7f, 0.1f });
-		tuples.add(new float[] { 0.8f, 0.1f });
+		ArrayList<double[]> tuples = new ArrayList<>();
+		tuples.add(new double[] { 0.1f, 0.1f });
+		tuples.add(new double[] { 0.2f, 0.1f });
+		tuples.add(new double[] { 0.3f, 0.1f });
+		tuples.add(new double[] { 0.4f, 0.1f });
+		tuples.add(new double[] { 0.7f, 0.1f });
+		tuples.add(new double[] { 0.8f, 0.1f });
 
 		BangClustering bang = new BangClustering(2, 4, 6);
 
-		for (float[] tuple : tuples) {
+		for (double[] tuple : tuples) {
 			bang.insertTuple(tuple);
 		}
 

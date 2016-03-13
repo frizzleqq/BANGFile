@@ -36,6 +36,6 @@ public interface DataWorker {
     /**
      * @return
      */
-    float[] readTuple() throws IOException;
+    double[] readTuple() throws IOException;
 
 }

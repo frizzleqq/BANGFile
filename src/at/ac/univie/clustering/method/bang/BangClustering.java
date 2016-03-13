@@ -98,9 +98,9 @@ public class BangClustering implements Clustering {
      * TODO
      */
     @Override
-    public void insertTuple(float[] tuple) {
+    public void insertTuple(double[] tuple) {
 
-        int region = mapRegion(tuple);
+        long region = mapRegion(tuple);
 
         DirectoryEntry dirEntry = findRegion(region, levels[0]);
         if (dirEntry == null) {
@@ -144,15 +144,16 @@ public class BangClustering implements Clustering {
      * @param tuple
      * @return
      */
-    private int mapRegion(float[] tuple) {
-        int region = 0;
+    private long mapRegion(double[] tuple) {
+        long region = 0;
 
         // find placement in scale
         for (int i = 1; i <= dimension; i++) {
             grids[i] = (int) (tuple[i - 1] * (1 << levels[i]));
         }
 
-        int i, j, count = 0, offset = 1;
+        int i, j, count = 0;
+        long offset = 1;
 
         for (int k = 0; count < levels[0]; k++) {
             i = (k % dimension) + 1; // index starts with 1
@@ -176,7 +177,7 @@ public class BangClustering implements Clustering {
      * @param level
      * @return
      */
-    private DirectoryEntry findRegion(int region, int level) {
+    private DirectoryEntry findRegion(long region, int level) {
         DirectoryEntry tupleReg = bangFile;
         DirectoryEntry tupleTmp;
 
@@ -268,7 +269,7 @@ public class BangClustering implements Clustering {
             result = true;
         }
 
-        for (float[] tuple : dirEntry.getRegion().getTupleList()) {
+        for (double[] tuple : dirEntry.getRegion().getTupleList()) {
             insertTuple(tuple);
         }
 
@@ -347,7 +348,7 @@ public class BangClustering implements Clustering {
         if (enclosingPop < densePop) {
             dirEntry.setRegion(null);
 
-            for (float[] tuple : sparseEntry.getRegion().getTupleList()) {
+            for (double[] tuple : sparseEntry.getRegion().getTupleList()) {
                 enclosingEntry.getRegion().insertTuple(tuple);
             }
 
@@ -514,8 +515,8 @@ public class BangClustering implements Clustering {
         //System.out.println(diff);
 
         clusteredPop = (clusteredPop != 0) ? clusteredPop : 1;
-        float tuplesCount = (this.tuplesCount != 0) ? this.tuplesCount : 1;
-        float percentage = (clusteredPop * 100 ) / tuplesCount;
+        double tuplesCount = (this.tuplesCount != 0) ? this.tuplesCount : 1;
+        double percentage = (clusteredPop * 100 ) / tuplesCount;
         int counter = 0, population = 0, clusterNr = 0;
 
         //System.out.println(clusteredPop);

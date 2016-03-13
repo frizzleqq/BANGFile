@@ -16,9 +16,9 @@ public class TupleRegionTest {
 	public void testInsertTuple() {
 		TupleRegion tupleRegion = new TupleRegion(0, 0);
 		
-		tupleRegion.insertTuple(new float[] { 0.1f, 0.1f });
-		tupleRegion.insertTuple(new float[] { 0.2f, 0.2f });
-		tupleRegion.insertTuple(new float[] { 0.3f, 0.3f });
+		tupleRegion.insertTuple(new double[] { 0.1, 0.1 });
+		tupleRegion.insertTuple(new double[] { 0.2, 0.2 });
+		tupleRegion.insertTuple(new double[] { 0.3, 0.3 });
 		
 		assertEquals(3, tupleRegion.getPopulation());
 		
@@ -29,9 +29,9 @@ public class TupleRegionTest {
 	public void testClearTupleList() {
 		TupleRegion tupleRegion = new TupleRegion(0, 0);
 		
-		tupleRegion.insertTuple(new float[] { 0.1f, 0.1f });
-		tupleRegion.insertTuple(new float[] { 0.2f, 0.2f });
-		tupleRegion.insertTuple(new float[] { 0.3f, 0.3f });
+		tupleRegion.insertTuple(new double[] { 0.1, 0.1 });
+		tupleRegion.insertTuple(new double[] { 0.2, 0.2 });
+		tupleRegion.insertTuple(new double[] { 0.3, 0.3 });
 		
 		tupleRegion.clearTupleList();
 		
@@ -44,23 +44,23 @@ public class TupleRegionTest {
 	public void testCalculateSize() {
 		TupleRegion tupleRegion = new TupleRegion(0, 2);
 		
-		assertEquals(0.25f, tupleRegion.calculateSize(), 0);
+		assertEquals(0.25, tupleRegion.calculateSize(), 0);
 		
 		tupleRegion = new TupleRegion(0, 4);
 		
-		assertEquals(0.0625f, tupleRegion.calculateSize(), 0);
+		assertEquals(0.0625, tupleRegion.calculateSize(), 0);
 	}
 
     @Test
     public void testCompareTo(){
         TupleRegion sparseRegion = new TupleRegion(0, 0);
-        sparseRegion.setDensity(1f);
+        sparseRegion.setDensity(1);
 
         TupleRegion mediumRegion = new TupleRegion(0, 0);
-        mediumRegion.setDensity(4f);
+        mediumRegion.setDensity(4);
 
         TupleRegion denseRegion = new TupleRegion(0, 0);
-        denseRegion.setDensity(8f);
+        denseRegion.setDensity(8);
 
         List<TupleRegion> regArray = new ArrayList<TupleRegion>();
 

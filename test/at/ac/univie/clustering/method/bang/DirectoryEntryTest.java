@@ -58,8 +58,8 @@ public class DirectoryEntryTest {
 		DirectoryEntry dirEntry = new DirectoryEntry();
 		dirEntry.setRegion(new TupleRegion(3, 2));
 
-		dirEntry.getRegion().insertTuple(new float[] { 0.1f, 0.1f });
-		dirEntry.getRegion().insertTuple(new float[] { 0.2f, 0.2f });
+		dirEntry.getRegion().insertTuple(new double[] { 0.1, 0.1 });
+		dirEntry.getRegion().insertTuple(new double[] { 0.2, 0.2 });
 
 		dirEntry.moveToRight();
 
@@ -76,8 +76,8 @@ public class DirectoryEntryTest {
 		DirectoryEntry dirEntry = new DirectoryEntry();
 		dirEntry.setRegion(new TupleRegion(3, 2));
 
-		dirEntry.getRegion().insertTuple(new float[] { 0.1f, 0.1f });
-		dirEntry.getRegion().insertTuple(new float[] { 0.2f, 0.2f });
+		dirEntry.getRegion().insertTuple(new double[] { 0.1, 0.1 });
+		dirEntry.getRegion().insertTuple(new double[] { 0.2, 0.2 });
 
 		dirEntry.moveToLeft();
 
@@ -95,12 +95,12 @@ public class DirectoryEntryTest {
 		dirEntry.setRegion(new TupleRegion(0, 0));
 		dirEntry.createBuddySplit();
 
-		dirEntry.getLeft().getRegion().insertTuple(new float[] { 0.1f, 0.1f });
+		dirEntry.getLeft().getRegion().insertTuple(new double[] { 0.1, 0.1 });
 
 		assertEquals(dirEntry.getRight(), dirEntry.getSparseEntry());
 
-		dirEntry.getRight().getRegion().insertTuple(new float[] { 0.1f, 0.1f });
-		dirEntry.getRight().getRegion().insertTuple(new float[] { 0.1f, 0.1f });
+		dirEntry.getRight().getRegion().insertTuple(new double[] { 0.1, 0.1 });
+		dirEntry.getRight().getRegion().insertTuple(new double[] { 0.1, 0.1 });
 
 		assertEquals(dirEntry.getLeft(), dirEntry.getSparseEntry());
 	}
@@ -111,12 +111,12 @@ public class DirectoryEntryTest {
 		dirEntry.setRegion(new TupleRegion(0, 0));
 		dirEntry.createBuddySplit();
 
-		dirEntry.getLeft().getRegion().insertTuple(new float[] { 0.1f, 0.1f });
+		dirEntry.getLeft().getRegion().insertTuple(new double[] { 0.1, 0.1 });
 
 		assertEquals(dirEntry.getLeft(), dirEntry.getDenseEntry());
 
-		dirEntry.getRight().getRegion().insertTuple(new float[] { 0.1f, 0.1f });
-		dirEntry.getRight().getRegion().insertTuple(new float[] { 0.1f, 0.1f });
+		dirEntry.getRight().getRegion().insertTuple(new double[] { 0.1, 0.1 });
+		dirEntry.getRight().getRegion().insertTuple(new double[] { 0.1, 0.1 });
 
 		assertEquals(dirEntry.getRight(), dirEntry.getDenseEntry());
 	}
@@ -127,7 +127,7 @@ public class DirectoryEntryTest {
 		dirEntry.setRegion(new TupleRegion(0, 0));
 		dirEntry.createBuddySplit();
 
-		dirEntry.getLeft().getRegion().insertTuple(new float[] { 0.1f, 0.1f });
+		dirEntry.getLeft().getRegion().insertTuple(new double[] { 0.1, 0.1 });
 
 		dirEntry.clearSucceedingEntry(dirEntry.getRight());
 
@@ -144,17 +144,17 @@ public class DirectoryEntryTest {
 
         dirEntry.getLeft().getLeft().setRegion(new TupleRegion(0, 2));
 
-        dirEntry.getRegion().insertTuple(new float[] { 0.1f, 0.1f });
+        dirEntry.getRegion().insertTuple(new double[] { 0.1, 0.1 });
 
-        dirEntry.getLeft().getLeft().getRegion().insertTuple(new float[] { 0.1f, 0.1f });
-        dirEntry.getLeft().getLeft().getRegion().insertTuple(new float[] { 0.1f, 0.1f });
+        dirEntry.getLeft().getLeft().getRegion().insertTuple(new double[] { 0.1, 0.1 });
+        dirEntry.getLeft().getLeft().getRegion().insertTuple(new double[] { 0.1, 0.1 });
 
         dirEntry.calculateDensity();
         //main is size 0,75; main->left->left is size 0,25
 
-        assertEquals(1.333f, dirEntry.getRegion().getDensity(), 0.001f);
+        assertEquals(1.333, dirEntry.getRegion().getDensity(), 0.001);
 
-        assertEquals(8f, dirEntry.getLeft().getLeft().getRegion().getDensity(), 0f);
+        assertEquals(8, dirEntry.getLeft().getLeft().getRegion().getDensity(), 0);
 	}
 
     @Test
@@ -167,13 +167,13 @@ public class DirectoryEntryTest {
 
         dirEntry.getLeft().getLeft().setRegion(new TupleRegion(0, 2));
 
-        dirEntry.getRegion().insertTuple(new float[] { 0.1f, 0.1f });
+        dirEntry.getRegion().insertTuple(new double[] { 0.1, 0.1 });
 
-        dirEntry.getLeft().getLeft().getRegion().insertTuple(new float[] { 0.1f, 0.1f });
-        dirEntry.getLeft().getLeft().getRegion().insertTuple(new float[] { 0.1f, 0.1f });
+        dirEntry.getLeft().getLeft().getRegion().insertTuple(new double[] { 0.1, 0.1 });
+        dirEntry.getLeft().getLeft().getRegion().insertTuple(new double[] { 0.1, 0.1 });
 
-        assertEquals(1f, dirEntry.getRegionSize(), 0f);
-        assertEquals(0.25f, dirEntry.getLeft().getLeft().getRegionSize(), 0f);
+        assertEquals(1, dirEntry.getRegionSize(), 0);
+        assertEquals(0.25, dirEntry.getLeft().getLeft().getRegionSize(), 0);
     }
 
     @Test

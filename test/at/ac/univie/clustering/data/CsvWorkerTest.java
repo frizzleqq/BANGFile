@@ -75,11 +75,11 @@ public class CsvWorkerTest {
             Assert.fail();
         }
 
-        float[] x = new float[]{0.1F, 0.2F, 0.3F, 0.4F};
+        double[] x = new double[]{0.1, 0.2, 0.3, 0.4};
         assertArrayEquals(x, csv.readTuple(), 0);
         assertEquals(1, csv.getCurPosition(), 0);
 
-        x = new float[]{0.5F, 0.6F, 0.7F, 0.8F};
+        x = new double[]{0.5, 0.6, 0.7, 0.8};
         assertArrayEquals(x, csv.readTuple(), 0);
         assertEquals(2, csv.getCurPosition(), 0);
     }
@@ -94,11 +94,11 @@ public class CsvWorkerTest {
             Assert.fail();
         }
 
-        float[] x = new float[]{0.1F, 0.2F, 0.3F, 0.4F};
+        double[] x = new double[]{0.1, 0.2, 0.3, 0.4};
         assertArrayEquals(x, csv.readTuple(), 0);
         assertEquals(1, csv.getCurPosition(), 0);
 
-        x = new float[]{0.5F, 0.6F, 0.7F, 0.8F};
+        x = new double[]{0.5, 0.6, 0.7, 0.8};
         assertArrayEquals(x, csv.readTuple(), 0);
         assertEquals(2, csv.getCurPosition(), 0);
     }

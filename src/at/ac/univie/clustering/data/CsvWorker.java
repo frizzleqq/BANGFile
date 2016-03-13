@@ -176,8 +176,8 @@ public class CsvWorker implements DataWorker {
      * @see at.ac.univie.clustering.data.DataWorker#readTuple()
      */
     @Override
-    public float[] readTuple() throws IOException, NumberFormatException {
-        float[] tuple;
+    public double[] readTuple() throws IOException, NumberFormatException {
+        double[] tuple;
 
         current_position++;
 
@@ -189,9 +189,9 @@ public class CsvWorker implements DataWorker {
 
         String[] stringTuple = csv.parseLine(line);
 
-        tuple = new float[stringTuple.length];
+        tuple = new double[stringTuple.length];
         for (int i = 0; i < stringTuple.length; i++) {
-            tuple[i] = Float.parseFloat(stringTuple[i].replace(',', '.'));
+            tuple[i] = Double.parseDouble(stringTuple[i].replace(',', '.'));
         }
 
         if (tuple.length != dimension) {
