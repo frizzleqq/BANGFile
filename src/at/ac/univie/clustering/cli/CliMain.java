@@ -105,11 +105,6 @@ public class CliMain {
         int tuplesRead = 0;
         double[] tuple;
 
-		/*
-         * TODO: - NumberFormatException should be handled - should be caught in
-		 * DataWorker? - force range 0 - 1? or change to readdouble / readInt
-		 * etc. - add bool called "normalize"?
-		 */
         while ((tuple = data.readTuple()) != null) {
 
             if (tuple.length != data.getDimension()) {
@@ -137,7 +132,6 @@ public class CliMain {
     }
 
     public static void main(String[] args) {
-        // TODO Auto-generated method stub
         parse_options(args);
 
         DataWorker data = null;
@@ -145,7 +139,6 @@ public class CliMain {
         try {
             data = new CsvWorker(filename, delimiter, header);
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             System.err.println(e.getMessage());
             System.exit(ERR_EXCEPTION);
         }
@@ -153,13 +146,12 @@ public class CliMain {
         int dimension = data.getDimension();
         int tuplesCount = data.getnTuple();
 
-        // TODO: throw exceptions instead of system exit
         if (dimension == 0) {
             System.err.println("Could not determine dimensions of provided data.");
-            System.exit(1);
+            System.exit(ERR_EXCEPTION);
         } else if (dimension < 2) {
             System.err.println("Could not determine at least 2 dimensions.");
-            System.exit(1);
+            System.exit(ERR_EXCEPTION);
         }
 
         if (tuplesCount == 0) {

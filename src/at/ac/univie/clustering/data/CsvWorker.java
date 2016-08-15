@@ -12,11 +12,6 @@ import com.opencsv.CSVParser;
 
 public class CsvWorker implements DataWorker {
 
-	/*
-     * TODO: class-wide reader instance, use instance to determine current position,
-	 * tests!,
-	 */
-
     private final String filename;
     private final String shortFilename;
     private final char delimiter;
@@ -25,19 +20,9 @@ public class CsvWorker implements DataWorker {
     private int dimension = 0;
     private int current_position;
 
+    private File file;
     private CSVParser csv;
     private BufferedReader br;
-
-	/*
-     * public FileWorker(String filename) { this.filename = filename;
-	 * this.delimiter = '#'; this.header = false; }
-	 * 
-	 * public FileWorker(String filename, char delimiter) { this.filename =
-	 * filename; this.delimiter = delimiter; this.header = false; }
-	 * 
-	 * public FileWorker(String filename, boolean header) { this.filename =
-	 * filename; this.delimiter = '#'; this.header = header; }
-	 */
 
     /**
      * @param filename
@@ -55,15 +40,17 @@ public class CsvWorker implements DataWorker {
         if (!fileReadable())
             throw new IOException("File with provided filename is not readable.");
 
-        shortFilename = new File(filename).getName();
+        file = new File(filename);
+
+        shortFilename = file.getName();
         dimension = countDimension();
         nTuple = countTuples();
 
         csv = new CSVParser(delimiter);
         br = new BufferedReader(new FileReader(filename));
-        if (header)
+        if (header) {
             br.readLine();
-
+        }
     }
 
     /*
@@ -109,9 +96,7 @@ public class CsvWorker implements DataWorker {
      */
     private boolean fileReadable() {
         File f = new File(filename);
-
         return f.canRead() && Files.isReadable(FileSystems.getDefault().getPath(f.getAbsolutePath()));
-
     }
 
     /*
@@ -122,7 +107,7 @@ public class CsvWorker implements DataWorker {
     private int countTuples() throws IOException {
         int nTuple = 0;
 
-        File file = new File(filename);
+        file = new File(filename);
         FileReader fr = new FileReader(file);
         LineNumberReader lnr = new LineNumberReader(fr);
         String line;
@@ -206,7 +191,8 @@ public class CsvWorker implements DataWorker {
     public void reset() throws IOException{
         current_position = 0;
         br = new BufferedReader(new FileReader(filename));
-        if (header)
+        if (header) {
             br.readLine();
+        }
     }
 }

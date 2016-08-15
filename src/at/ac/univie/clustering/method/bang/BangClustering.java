@@ -22,20 +22,24 @@ public class BangClustering implements Clustering {
     private int nAlias;
 
     /**
-     * @param dimension
-     * @param bucketsize
-     * @param tuplesCount
+     * Create BangClustering with default neighbourCondition (1) and clusterPercent (50)
+     *
+     * @param dimension Dimensions of dataset
+     * @param bucketsize Maximum number of tuples in bucket
+     * @param tuplesCount Number of tuples
      */
     public BangClustering(int dimension, int bucketsize, int tuplesCount) {
         this(dimension, bucketsize, tuplesCount, 1, 50);
     }
 
     /**
-     * @param dimension
-     * @param bucketsize
-     * @param tuplesCount
-     * @param neighbourCondition
-     * @param clusterPercent
+     * Create BangClustering with provided neighbourhoodCondition and clusterPercent
+     *
+     * @param dimension Dimensions of dataset
+     * @param bucketsize Maximum number of tuples in bucket
+     * @param tuplesCount Number of tuples
+     * @param neighbourCondition Number of additional dimensions needed for neighbourhood condition (from 0 to dimensions-1)
+     * @param clusterPercent TODO
      */
     public BangClustering(int dimension, int bucketsize, int tuplesCount, int neighbourCondition, int clusterPercent) {
 
@@ -95,7 +99,8 @@ public class BangClustering implements Clustering {
 
 
     /**
-     * TODO
+     *
+     * @param tuple
      */
     @Override
     public void insertTuple(double[] tuple) {
@@ -525,7 +530,7 @@ public class BangClustering implements Clustering {
 
         boolean newCluster = false;
         Iterator<TupleRegion> dendoIterator = dendogram.iterator();
-        tupleReg = (TupleRegion) dendoIterator.next();
+        tupleReg = dendoIterator.next();
 
         if (clusteredRegions == 0){
             clusterInfo.add(0);
@@ -542,7 +547,7 @@ public class BangClustering implements Clustering {
                     newCluster = false;
 
                 }
-                tupleReg = (TupleRegion) dendoIterator.next();
+                tupleReg = dendoIterator.next();
             }
             clusterInfo.add(population);
         }
