@@ -14,8 +14,8 @@ public class BangClustering implements Clustering {
     private int bucketsize;
     private int neighbourCondition;
     private int clusterPercent;
-    private int[] levels = null;
-    private int[] grids = null;
+    private int[] dimensionLevels = null; // how often did we split a dimension? 0 is the sum of all dimensions
+    private int[] scaleCoordinates = null; // coordinate on every dimensions scale. 0 is a dummy value
     private DirectoryEntry bangFile;
     private List<TupleRegion> sortedRegions;
     private List<TupleRegion> dendogram;
@@ -54,11 +54,11 @@ public class BangClustering implements Clustering {
             this.neighbourCondition = dimension - neighbourCondition;
         }
 
-        levels = new int[dimension + 1]; // level[0] = sum level[i]
-        Arrays.fill(levels, 0);
+        dimensionLevels = new int[dimension + 1]; // level[0] = sum level[i]
+        Arrays.fill(dimensionLevels, 0);
 
-        grids = new int[dimension + 1]; // grid[0] = dummy
-        Arrays.fill(grids, 0);
+        scaleCoordinates = new int[dimension + 1]; // grid[0] = dummy
+        Arrays.fill(scaleCoordinates, 0);
 
         // create root of bang file
         bangFile = new DirectoryEntry();
@@ -89,12 +89,12 @@ public class BangClustering implements Clustering {
         return dendogramObjects;
     }
 
-    protected void setLevels(int[] levels) {
-        this.levels = levels;
+    protected void setDimensionLevels(int[] dimensionLevels) {
+        this.dimensionLevels = dimensionLevels;
     }
 
-    protected void setGrids(int[] grids) {
-        this.grids = grids;
+    protected void setScaleCoordinates(int[] scaleCoordinates) {
+        this.scaleCoordinates = scaleCoordinates;
     }
 
 
@@ -107,7 +107,7 @@ public class BangClustering implements Clustering {
 
         long region = mapRegion(tuple);
 
-        DirectoryEntry dirEntry = findRegion(region, levels[0]);
+        DirectoryEntry dirEntry = findRegion(region, dimensionLevels[0]);
         if (dirEntry == null) {
             System.err.println("Could not find directory entry.");
         }
@@ -129,7 +129,7 @@ public class BangClustering implements Clustering {
                 if (!redistribute(dirEntry, enclosingEntry)) {
                     region = mapRegion(tuple);
 
-                    dirEntry = findRegion(region, levels[0]);
+                    dirEntry = findRegion(region, dimensionLevels[0]);
                     if (dirEntry == null) {
                         System.err.println("Could not find directory entry.");
                     }
@@ -144,28 +144,31 @@ public class BangClustering implements Clustering {
     }
 
     /**
-     * TODO
+     * Based on the current partial levels of every dimension we determine the scale value representing
+     * the coordinate on each dimensions scale.
+     *
+     * See BangClusteringTest for examples.
      *
      * @param tuple
-     * @return
+     * @return region-number
      */
-    private long mapRegion(double[] tuple) {
+    protected long mapRegion(double[] tuple) {
         long region = 0;
 
         // find placement in scale
         for (int i = 1; i <= dimension; i++) {
-            grids[i] = (int) (tuple[i - 1] * (1 << levels[i]));
+            scaleCoordinates[i] = (int) (tuple[i - 1] * (1 << dimensionLevels[i]));
         }
 
         int i, j, count = 0;
         long offset = 1;
 
-        for (int k = 0; count < levels[0]; k++) {
+        for (int k = 0; count < dimensionLevels[0]; k++) {
             i = (k % dimension) + 1; // index starts with 1
-            j = k / dimension; // j ... from 0 to levels[i] - 1
+            j = k / dimension; // j ... from 0 to dimensionLevels[i] - 1
 
-            if (j < levels[i]) {
-                if ((grids[i] & (1 << (levels[i] - j - 1))) != 0) {
+            if (j < dimensionLevels[i]) {
+                if ((scaleCoordinates[i] & (1 << (dimensionLevels[i] - j - 1))) != 0) {
                     region += offset; // bit set - add power of 2
                 }
                 offset *= 2;
@@ -176,7 +179,7 @@ public class BangClustering implements Clustering {
     }
 
     /**
-     * TODO go backwards through levels to find left or right for the tuple
+     * TODO go backwards through dimensionLevels to find left or right for the tuple
      *
      * @param region
      * @param level
@@ -226,7 +229,7 @@ public class BangClustering implements Clustering {
      * <p/>
      * The split of a region is done via a Buddy-Split. Afterwards we check
      * whether the region-tree is correct, in which we move regions down one or
-     * more levels if they should be a buddy of a succeeding region.
+     * more dimensionLevels if they should be a buddy of a succeeding region.
      *
      * @param dirEntry
      */
@@ -256,7 +259,7 @@ public class BangClustering implements Clustering {
     /**
      * Split region into 2 buddy regions.
      * <p/>
-     * If the region was in max depth, we increase grid levels.
+     * If the region was in max depth, we increase grid dimensionLevels.
      * <p/>
      * Tuples are then moved from the original region to the new regions in the
      * new level.
@@ -269,7 +272,7 @@ public class BangClustering implements Clustering {
 
         dirEntry.createBuddySplit();
 
-        if (dirEntry.getRegion().getLevel() == levels[0]) {
+        if (dirEntry.getRegion().getLevel() == dimensionLevels[0]) {
             increaseGridLevel();
             result = true;
         }
@@ -285,7 +288,7 @@ public class BangClustering implements Clustering {
      * Ensure correct buddy-positions of regions.
      * <p/>
      * If a region only has one successor, make the region the buddy of it.
-     * This will be done over multiple levels.
+     * This will be done over multiple dimensionLevels.
      *
      * @param dirEntry Directory-Entry that will be made a buddy of its follow up if
      *                 possible
@@ -387,16 +390,16 @@ public class BangClustering implements Clustering {
      *
      */
     private void increaseGridLevel() {
-        levels[(levels[0] % dimension) + 1] += 1;
-        levels[0] += 1;
+        dimensionLevels[(dimensionLevels[0] % dimension) + 1] += 1;
+        dimensionLevels[0] += 1;
     }
 
     /**
      *
      */
     private void decreaseGridLevel() {
-        levels[((levels[0] - 1) % dimension) + 1] -= 1;
-        levels[0] -= 1;
+        dimensionLevels[((dimensionLevels[0] - 1) % dimension) + 1] -= 1;
+        dimensionLevels[0] -= 1;
     }
 
     @Override
@@ -405,7 +408,7 @@ public class BangClustering implements Clustering {
         sortedRegions = getSortedRegions();
         nAlias = countAliases();
         dendogram = createDendogram();
-        createClusters();
+        //createClusters();
     }
 
     /**

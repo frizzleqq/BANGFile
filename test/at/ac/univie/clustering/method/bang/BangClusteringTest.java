@@ -29,6 +29,42 @@ public class BangClusteringTest {
 	}
 
 	@Test
+    public void testMapRegion() {
+        BangClustering bang = new BangClustering(2, 4, 10);
+        bang.setDimensionLevels( new int[] {2, 1, 1});
+        /*
+            ---------
+            |2,2 |3,2|
+            |----|---|
+            |0,2 |1,2|
+            ---------
+         */
+
+        assertEquals(0, bang.mapRegion(new double[] {0.1, 0.1}));
+        assertEquals(1, bang.mapRegion(new double[] {0.6, 0.1}));
+        assertEquals(2, bang.mapRegion(new double[] {0.1, 0.6}));
+        assertEquals(3, bang.mapRegion(new double[] {0.6, 0.6}));
+
+        bang.setDimensionLevels( new int[] {3, 2, 1});
+        /*
+            --------------------
+            |2,3 |6,3 |3,3 |7,3 |
+            |----|----|----|----|
+            |0,3 |4,3 |1,3 |5,3 |
+            --------------------
+         */
+
+        assertEquals(0, bang.mapRegion(new double[] {0.1, 0.1}));
+        assertEquals(4, bang.mapRegion(new double[] {0.3, 0.1}));
+        assertEquals(1, bang.mapRegion(new double[] {0.6, 0.1}));
+        assertEquals(5, bang.mapRegion(new double[] {0.8, 0.1}));
+        assertEquals(2, bang.mapRegion(new double[] {0.1, 0.6}));
+        assertEquals(6, bang.mapRegion(new double[] {0.3, 0.6}));
+        assertEquals(3, bang.mapRegion(new double[] {0.6, 0.6}));
+        assertEquals(7, bang.mapRegion(new double[] {0.8, 0.6}));
+    }
+
+	@Test
 	public void testInsertTuple() {
 		ArrayList<double[]> tuples = new ArrayList<>();
 		tuples.add(new double[] { 0.1, 0.2 });
