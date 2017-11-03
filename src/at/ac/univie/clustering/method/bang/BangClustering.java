@@ -15,9 +15,8 @@ public class BangClustering implements Clustering {
     private int neighbourCondition;
     private int clusterPercent;
     private int[] dimensionLevels = null; // how often did we split a dimension? 0 is the sum of all dimensions
-    private int[] scaleCoordinates = null; // coordinate on every dimensions scale. 0 is a dummy value
+    private int[] scaleCoordinates = null; // coordinate on every dimensions scale (map value to region). 0 is a dummy value
     private DirectoryEntry bangFile;
-    private List<TupleRegion> sortedRegions;
     private List<TupleRegion> dendogram;
     private int nAlias;
 
@@ -99,6 +98,7 @@ public class BangClustering implements Clustering {
 
 
     /**
+     * TODO
      *
      * @param tuple
      */
@@ -179,7 +179,7 @@ public class BangClustering implements Clustering {
     }
 
     /**
-     * TODO go backwards through dimensionLevels to find left or right for the tuple
+     * TODO go backwards through levels in grid-directory to find left or right for the tuple
      *
      * @param region
      * @param level
@@ -229,7 +229,7 @@ public class BangClustering implements Clustering {
      * <p/>
      * The split of a region is done via a Buddy-Split. Afterwards we check
      * whether the region-tree is correct, in which we move regions down one or
-     * more dimensionLevels if they should be a buddy of a succeeding region.
+     * more levels if they should be a buddy of a succeeding region.
      *
      * @param dirEntry
      */
@@ -259,7 +259,7 @@ public class BangClustering implements Clustering {
     /**
      * Split region into 2 buddy regions.
      * <p/>
-     * If the region was in max depth, we increase grid dimensionLevels.
+     * If the region was in max depth, we increase level for dimension we split in.
      * <p/>
      * Tuples are then moved from the original region to the new regions in the
      * new level.
@@ -273,7 +273,10 @@ public class BangClustering implements Clustering {
         dirEntry.createBuddySplit();
 
         if (dirEntry.getRegion().getLevel() == dimensionLevels[0]) {
-            increaseGridLevel();
+            //increase level for dimension we split in (splits are done in cyclical order)
+            dimensionLevels[(dimensionLevels[0] % dimension) + 1] += 1;
+            // sum of all levels in all dimensions
+            dimensionLevels[0] += 1;
             result = true;
         }
 
@@ -288,7 +291,7 @@ public class BangClustering implements Clustering {
      * Ensure correct buddy-positions of regions.
      * <p/>
      * If a region only has one successor, make the region the buddy of it.
-     * This will be done over multiple dimensionLevels.
+     * This will be done over multiple levels.
      *
      * @param dirEntry Directory-Entry that will be made a buddy of its follow up if
      *                 possible
@@ -333,6 +336,9 @@ public class BangClustering implements Clustering {
      * region.
      * If the denser region has a lower population, we undo the buddy
      * split.
+     * <p/>
+     * If the region was in max depth, we decrease level for dimension where
+     * we merge.
      *
      * @param dirEntry
      * @param enclosingEntry
@@ -375,9 +381,11 @@ public class BangClustering implements Clustering {
             return true;
 
         } else {
-            // decrease grid level if buddy split done on deepest entry
+            //decrease level for dimension where we merge (splits were done in cyclical order)
             if (inc) {
-                decreaseGridLevel();
+                dimensionLevels[((dimensionLevels[0] - 1) % dimension) + 1] -= 1;
+                // sum of all levels in all dimensions
+                dimensionLevels[0] -= 1;
             }
 
             dirEntry.clearBuddySplit();
@@ -386,39 +394,23 @@ public class BangClustering implements Clustering {
         }
     }
 
-    /**
-     *
-     */
-    private void increaseGridLevel() {
-        dimensionLevels[(dimensionLevels[0] % dimension) + 1] += 1;
-        dimensionLevels[0] += 1;
-    }
-
-    /**
-     *
-     */
-    private void decreaseGridLevel() {
-        dimensionLevels[((dimensionLevels[0] - 1) % dimension) + 1] -= 1;
-        dimensionLevels[0] -= 1;
-    }
-
     @Override
     public void analyzeClusters() {
         bangFile.calculateDensity();
-        sortedRegions = getSortedRegions();
-        nAlias = countAliases();
-        dendogram = createDendogram();
+        List <TupleRegion> sortedRegions = getSortedRegions();
+        dendogram = createDendogram(sortedRegions);
         //createClusters();
     }
 
     /**
+     * Sort regions in our bang-file based on their density
      *
-     * @return
+     * @return sortedRegions
      */
     private List<TupleRegion> getSortedRegions(){
         List <TupleRegion> sortedRegions = new ArrayList<TupleRegion>();
         bangFile.collectRegions(sortedRegions);
-        Collections.sort(sortedRegions);
+        Collections.sort(sortedRegions, Collections.reverseOrder());
 
         for (int i = 0; i < sortedRegions.size(); i++){
             sortedRegions.get(i).setPosition(i + 1);
@@ -431,7 +423,7 @@ public class BangClustering implements Clustering {
      *
      * @return
      */
-    private int countAliases(){
+    private int countAliases(List <TupleRegion> sortedRegions){
         int[] nRegionsAlias = new int[sortedRegions.size()+1];
         int count = 0;
         nRegionsAlias[0] = count;
@@ -448,8 +440,10 @@ public class BangClustering implements Clustering {
 
     /**
      *
+     * @param sortedRegions
+     * @return dendogram
      */
-    private List<TupleRegion> createDendogram(){
+    private List<TupleRegion> createDendogram(List <TupleRegion> sortedRegions){
         List<TupleRegion> dendogram = new ArrayList<>();
         dendogram.add(sortedRegions.get(0));
 
@@ -495,7 +489,7 @@ public class BangClustering implements Clustering {
     /**
      *
      */
-    private void createClusters() {
+    private void createClusters(List <TupleRegion> sortedRegions) {
         List<Integer> clusterInfo = new ArrayList<>();
         int clusterGoal = ((clusterPercent * tuplesCount) + 50) / 100;
         int clusteredPop = 0, tmpPop = 0, clusteredRegions = 0;
@@ -572,7 +566,7 @@ public class BangClustering implements Clustering {
         builder.append("\n" + bangFile);
 
         builder.append("\n");
-        for (TupleRegion tupleReg : sortedRegions){
+        for (TupleRegion tupleReg : getSortedRegions()){
             builder.append("\nRegion " + tupleReg.getRegion() + ","  + tupleReg.getLevel() + " Density: " + tupleReg.getDensity());
         }
 

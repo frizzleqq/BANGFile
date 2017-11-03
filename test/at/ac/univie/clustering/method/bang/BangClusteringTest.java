@@ -4,11 +4,7 @@ import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
 public class BangClusteringTest {
 
@@ -106,5 +102,29 @@ public class BangClusteringTest {
 		assertEquals(2, file.getLeft().getLeft().getLeft().getRegion().getPopulation());
 
 	}
+
+    @Ignore("TODO")
+	@Test
+    public void testGetSortedRegions() {
+
+    }
+
+    @Ignore("TODO")
+    @Test
+    public void testCreateDendogram() {
+
+    }
+
+    @Ignore("TODO")
+    @Test
+    public void testAddNeighbours() {
+
+    }
+
+    @Ignore("TODO")
+    @Test
+    public void testCreateClusters() {
+
+    }
 
 }

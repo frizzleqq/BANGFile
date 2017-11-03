@@ -195,8 +195,7 @@ public class TupleRegion implements Comparable<TupleRegion> {
 
     @Override
     public int compareTo(TupleRegion o) {
-        //bigger region should come first
-        return (o.getDensity() > this.getDensity()) ? 1 : -1;
+        return (o.getDensity() < this.getDensity()) ? 1 : -1;
     }
 
     public String toStringHierarchy(int level) {

@@ -69,7 +69,7 @@ public class TupleRegionTest {
         regArray.add(sparseRegion);
 
 
-        Collections.sort(regArray);
+        Collections.sort(regArray, Collections.reverseOrder());
 
         assertEquals(0, regArray.indexOf(denseRegion));
         assertEquals(1, regArray.indexOf(mediumRegion));
