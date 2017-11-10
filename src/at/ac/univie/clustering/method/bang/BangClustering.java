@@ -9,6 +9,17 @@ import at.ac.univie.clustering.method.Clustering;
  */
 public class BangClustering implements Clustering {
 
+    private class Cluster{
+        public List<TupleRegion> regions = new ArrayList<>();
+        public int getPopulation(){
+            int population = 0;
+            for(TupleRegion r : regions){
+                population += r.getTupleList().size();
+            }
+            return population;
+        }
+    }
+
     private int tuplesCount;
     private int dimension;
     private int bucketsize;
@@ -18,7 +29,9 @@ public class BangClustering implements Clustering {
     private int[] scaleCoordinates = null; // coordinate on every dimensions scale (map value to region). 0 is a dummy value
     private DirectoryEntry bangFile;
     private List<TupleRegion> dendogram;
+    private List<Cluster> clusters;
     private int nAlias;
+
 
     /**
      * Create BangClustering with default neighbourCondition (1) and clusterPercent (50)
@@ -399,7 +412,25 @@ public class BangClustering implements Clustering {
         bangFile.calculateDensity();
         List <TupleRegion> sortedRegions = getSortedRegions();
         dendogram = createDendogram(sortedRegions);
-        //createClusters();
+        clusters = createClusters(sortedRegions);
+
+        /*
+        for(TupleRegion r : dendogram){
+            System.out.println("Region " + r.getRegion() + "," + r.getLevel() + " Density: " + r.getDensity());
+        }*/
+
+        for(Cluster c : clusters){
+            System.out.println("\nCluster-nr: " + clusters.indexOf(c));
+            System.out.println("Population: " + c.getPopulation());
+            for(TupleRegion r : c.regions){
+                for(double[] l : r.getTupleList()){
+                    for(double v : l){
+                        System.out.printf("%.6f\t", Math.round(v * 1000000.0)/1000000.0);
+                    }
+                    System.out.println();
+                }
+            }
+        }
     }
 
     /**
@@ -439,6 +470,8 @@ public class BangClustering implements Clustering {
     }
 
     /**
+     * Put region with highest density at first position of dendogram,
+     * then find neighbours and add them to dendogram in correct position.
      *
      * @param sortedRegions
      * @return dendogram
@@ -453,7 +486,7 @@ public class BangClustering implements Clustering {
         }
 
         for (int dendoPos = 0; remaining.size() > 0; dendoPos++){
-            addNeighbours(dendoPos, dendogram, remaining);
+            addRemaining(dendoPos, dendogram, remaining);
         }
 
         return dendogram;
@@ -461,17 +494,20 @@ public class BangClustering implements Clustering {
     }
 
     /**
+     * If neighbour region is found in "remaining" regions, determine position where we add it into dendogram.
+     * Position to insert is based on density and then the position from the original sorted region-list.
      *
      * @param dendoPos
+     * @param dendogram
      * @param remaining
-     * @return
      */
-    private void addNeighbours(int dendoPos, List<TupleRegion> dendogram, List<TupleRegion> remaining){
-        int startSearch = dendoPos + 1;
+    private void addRemaining(int dendoPos, List<TupleRegion> dendogram, List<TupleRegion> remaining){
+        int startSearchPos = dendoPos + 1;
         for (Iterator<TupleRegion> it = remaining.iterator(); it.hasNext(); ){
             TupleRegion tupleReg = it.next();
             if (dendogram.get(dendoPos).isNeighbour(tupleReg, dimension, neighbourCondition)) {
-                int insertPos = startSearch;
+                // determine position in dendogram
+                int insertPos = startSearchPos;
                 while (insertPos < dendogram.size() &&  dendogram.get(insertPos).getDensity() > tupleReg.getDensity()){
                     insertPos++;
                 }
@@ -481,77 +517,77 @@ public class BangClustering implements Clustering {
                 }
                 dendogram.add(insertPos, tupleReg);
                 it.remove();
-                startSearch++;
+                startSearchPos++;
             }
         }
     }
 
+
     /**
      *
+     * @param sortedRegions
+     * @return clusters
      */
-    private void createClusters(List <TupleRegion> sortedRegions) {
-        List<Integer> clusterInfo = new ArrayList<>();
-        int clusterGoal = ((clusterPercent * tuplesCount) + 50) / 100;
-        int clusteredPop = 0, tmpPop = 0, clusteredRegions = 0;
-        //System.out.println(clusterGoal);
+    private List<Cluster> createClusters(List <TupleRegion> sortedRegions) {
+        int clusteredGoal = ((clusterPercent * tuplesCount) + 50) / 100;
+        int clusteredPop = 0;
+        int clusteredRegions = 0;
 
-        Iterator<TupleRegion> sortedIterator = sortedRegions.iterator();
-        TupleRegion tupleReg = sortedIterator.next();
-        tmpPop = tupleReg.getPopulation();
-        //System.out.println(tmpPop);
-        while(tmpPop < (clusterGoal - clusteredPop)){
-            clusteredPop += tmpPop;
-            tupleReg = sortedIterator.next();
-            tmpPop = tupleReg.getPopulation();
-            //System.out.println(tmpPop);
+        Iterator<TupleRegion> sortedRegionsIterator = sortedRegions.iterator();
+        TupleRegion tupleReg = sortedRegionsIterator.next();
+        while(tupleReg.getPopulation() < (clusteredGoal - clusteredPop)){
+            clusteredPop += tupleReg.getPopulation();
             clusteredRegions++;
+            tupleReg = sortedRegionsIterator.next();
         }
-        int diff = clusterGoal - clusteredPop;
-        if ((tmpPop - diff) <= diff){
-            clusteredPop += tmpPop;
+        // add last region if it gets us closer to clusteredGoal (even if we exceed it)
+        int diff = clusteredGoal - clusteredPop;
+        if ((tupleReg.getPopulation() - diff) <= diff){
+            clusteredPop += tupleReg.getPopulation();
             clusteredRegions++;
         }
 
-        //System.out.println(clusteredPop);
-        //System.out.println(clusteredRegions);
-        //System.out.println(diff);
+        double clusteredPercentage = (clusteredPop * 100 ) / this.tuplesCount;
+        int counter = 0;
+        System.out.println("\nGoal-Clustered" + clusteredGoal);
+        System.out.println("Clustered: " + clusteredPop);
+        System.out.println("reg-clustered: " + clusteredRegions);
+        System.out.println("diff:" + diff);
+        System.out.println("tuplesCount " + this.tuplesCount);
+        System.out.println("percentage " + clusteredPercentage + "\n");
 
-        clusteredPop = (clusteredPop != 0) ? clusteredPop : 1;
-        double tuplesCount = (this.tuplesCount != 0) ? this.tuplesCount : 1;
-        double percentage = (clusteredPop * 100 ) / tuplesCount;
-        int counter = 0, population = 0, clusterNr = 0;
-
-        //System.out.println(clusteredPop);
-        //System.out.println(tuplesCount);
-        //System.out.println(percentage);
-
+        List<Cluster> clusters = new ArrayList<>();
         boolean newCluster = false;
-        Iterator<TupleRegion> dendoIterator = dendogram.iterator();
-        tupleReg = dendoIterator.next();
+        Iterator<TupleRegion> dendogramIterator = dendogram.iterator();
+        tupleReg = dendogramIterator.next();
 
         if (clusteredRegions == 0){
-            clusterInfo.add(0);
+            return clusters;
         } else{
+            Cluster cluster = new Cluster();
+            clusters.add(cluster);
             while (counter < clusteredRegions){
                 if(tupleReg.getPosition() <= clusteredRegions){
-                    population += tupleReg.getPopulation();
+                    cluster.regions.add(tupleReg);
                     counter++;
                     newCluster = true;
                 } else if (newCluster){
-                    clusterInfo.add(population);
-
-                    population = 0;
+                    cluster = new Cluster();
+                    clusters.add(cluster);
                     newCluster = false;
-
                 }
-                tupleReg = dendoIterator.next();
+                tupleReg = dendogramIterator.next();
             }
-            clusterInfo.add(population);
         }
 
-        Collections.reverse(clusterInfo);
-        //System.out.println(clusterInfo.size());
-
+        // Sort clusters on population
+        Collections.sort(clusters, new Comparator<Cluster>() {
+            @Override
+            public int compare(Cluster c1, Cluster c2) {
+                return c1.getPopulation() < c2.getPopulation() ? 1 : -1;
+            }
+        });
+        return clusters;
     }
 
     @Override

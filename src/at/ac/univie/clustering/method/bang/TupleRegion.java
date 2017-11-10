@@ -198,6 +198,11 @@ public class TupleRegion implements Comparable<TupleRegion> {
         return (o.getDensity() < this.getDensity()) ? 1 : -1;
     }
 
+    @Override
+    public String toString() {
+        return toStringHierarchy(0);
+    }
+
     public String toStringHierarchy(int level) {
         StringBuilder builder = new StringBuilder();
         String tabs = "\n";
@@ -207,7 +212,7 @@ public class TupleRegion implements Comparable<TupleRegion> {
         builder.append(tabs + "TupleRegion:");
         builder.append(tabs + "Region: " + region);
         builder.append(tabs + "Population: " + population);
-        builder.append(tabs + "Level: " + level);
+        builder.append(tabs + "Level: " + this.level);
         builder.append(tabs + "Density: " + density);
 
         //builder.append(tabs + "Alias: " + alias;
