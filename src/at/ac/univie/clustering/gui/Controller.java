@@ -1,13 +1,12 @@
 package at.ac.univie.clustering.gui;
 
+import at.ac.univie.clustering.clusterers.BANGClusterer.BANGClusterer;
+import at.ac.univie.clustering.clusterers.Clusterer;
 import at.ac.univie.clustering.data.CsvWorker;
 import at.ac.univie.clustering.data.DataWorker;
 import at.ac.univie.clustering.gui.dialogs.*;
-import at.ac.univie.clustering.method.Clustering;
-import at.ac.univie.clustering.method.bang.BangClustering;
-import at.ac.univie.clustering.method.bang.DirectoryEntry;
-import at.ac.univie.clustering.method.bang.TupleRegion;
-import com.sun.org.apache.xpath.internal.operations.Bool;
+import at.ac.univie.clustering.clusterers.BANGClusterer.DirectoryEntry;
+import at.ac.univie.clustering.clusterers.BANGClusterer.TupleRegion;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
@@ -22,7 +21,6 @@ import javafx.scene.layout.*;
 import javafx.stage.Modality;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 /**
  * Created by Fritzi on 10.01.2016.
@@ -54,7 +52,7 @@ public class Controller{
     private Label infoLabel;
 
     private static DataWorker data = null;
-    private static Clustering cluster = null;
+    private static Clusterer cluster = null;
 
     @FXML
     public void onSelectFileAction(ActionEvent event){
@@ -110,7 +108,7 @@ public class Controller{
             dendogramChart.getData().clear();
             dendogramChart.layout();
 
-            cluster = new BangClustering(data.getDimension(), Settings.getBucketsize(), data.getnTuple(), Settings.getNeighbourhood(), 50);
+            cluster = new BANGClusterer(data.getDimension(), Settings.getBucketsize(), data.getnTuple(), Settings.getNeighbourhood(), 50);
 
             Task<Boolean> runFactoryTask;
 

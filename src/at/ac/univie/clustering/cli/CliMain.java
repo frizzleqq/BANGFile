@@ -3,6 +3,7 @@ package at.ac.univie.clustering.cli;
 import java.io.IOException;
 import java.util.Arrays;
 
+import at.ac.univie.clustering.clusterers.BANGClusterer.BANGClusterer;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -12,8 +13,7 @@ import org.apache.commons.cli.ParseException;
 
 import at.ac.univie.clustering.data.CsvWorker;
 import at.ac.univie.clustering.data.DataWorker;
-import at.ac.univie.clustering.method.Clustering;
-import at.ac.univie.clustering.method.bang.BangClustering;
+import at.ac.univie.clustering.clusterers.Clusterer;
 
 public class CliMain {
 
@@ -89,7 +89,7 @@ public class CliMain {
     }
 
     private static void help() {
-        String header = "Bang Clustering:\n\n";
+        String header = "Bang Clusterer:\n\n";
         String footer = "\nTODO: write more help.";
         HelpFormatter formatter = new HelpFormatter();
         formatter.printHelp("Bang", header, options, footer, true);
@@ -101,7 +101,7 @@ public class CliMain {
      * @param data
      * @throws IOException, NumberFormatException
      */
-    private static void readData(Clustering cluster, DataWorker data) throws IOException, NumberFormatException {
+    private static void readData(Clusterer cluster, DataWorker data) throws IOException, NumberFormatException {
         int tuplesRead = 0;
         double[] tuple;
 
@@ -167,8 +167,8 @@ public class CliMain {
         System.out.println("Dimensions: " + dimension);
         System.out.println("Tuples: " + tuplesCount + "\n");
 
-        Clustering cluster;
-        cluster = new BangClustering(dimension, bucketsize, tuplesCount);
+        Clusterer cluster;
+        cluster = new BANGClusterer(dimension, bucketsize, tuplesCount);
 
         try {
             readData(cluster, data);
