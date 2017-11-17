@@ -10,7 +10,7 @@ import at.ac.univie.clustering.clusterers.Clusterer;
 public class BANGClusterer implements Clusterer {
 
     private class Cluster{
-        public List<TupleRegion> regions = new ArrayList<>();
+        public List<TupleRegion> regions = new ArrayList<TupleRegion>();
         public int getPopulation(){
             int population = 0;
             for(TupleRegion r : regions){
@@ -94,7 +94,7 @@ public class BANGClusterer implements Clusterer {
 
     @Override
     public List<Object> getRegions() {
-        List<Object> dendogramObjects = new ArrayList<>();
+        List<Object> dendogramObjects = new ArrayList<Object>();
         for (TupleRegion tupleRegion : dendogram){
             dendogramObjects.add(tupleRegion);
         }
@@ -477,10 +477,10 @@ public class BANGClusterer implements Clusterer {
      * @return dendogram
      */
     private List<TupleRegion> createDendogram(List <TupleRegion> sortedRegions){
-        List<TupleRegion> dendogram = new ArrayList<>();
+        List<TupleRegion> dendogram = new ArrayList<TupleRegion>();
         dendogram.add(sortedRegions.get(0));
 
-        List<TupleRegion> remaining = new ArrayList<>();
+        List<TupleRegion> remaining = new ArrayList<TupleRegion>();
         for (int i = 1; i < sortedRegions.size(); i++){
             remaining.add(sortedRegions.get(i));
         }
@@ -556,7 +556,7 @@ public class BANGClusterer implements Clusterer {
         System.out.println("tuplesCount " + this.tuplesCount);
         System.out.println("percentage " + clusteredPercentage + "\n");
 
-        List<Cluster> clusters = new ArrayList<>();
+        List<Cluster> clusters = new ArrayList<Cluster>();
         boolean newCluster = false;
         Iterator<TupleRegion> dendogramIterator = dendogram.iterator();
         tupleReg = dendogramIterator.next();
