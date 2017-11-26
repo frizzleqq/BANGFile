@@ -1,12 +1,17 @@
-package at.ac.univie.clustering.clusterers.BANGClusterer;
+package at.ac.univie.clustering.clusterers.bangfile;
 
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 
-import org.junit.*;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
+import org.junit.Test;
 
-public class BANGClustererTest {
+public class BANGFileTest {
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -26,8 +31,8 @@ public class BANGClustererTest {
 
 	@Test
     public void testMapRegion() {
-        BANGClusterer bang = new BANGClusterer(2, 4, 10);
-        bang.setDimensionLevels( new int[] {2, 1, 1});
+        BANGFile bangFile = new BANGFile(2, 4);
+        bangFile.setDimensionLevels( new int[] {2, 1, 1});
         /*
             ---------
             |2,2 |3,2|
@@ -36,12 +41,12 @@ public class BANGClustererTest {
             ---------
          */
 
-        assertEquals(0, bang.mapRegion(new double[] {0.1, 0.1}));
-        assertEquals(1, bang.mapRegion(new double[] {0.6, 0.1}));
-        assertEquals(2, bang.mapRegion(new double[] {0.1, 0.6}));
-        assertEquals(3, bang.mapRegion(new double[] {0.6, 0.6}));
+        assertEquals(0, bangFile.mapRegion(new double[] {0.1, 0.1}));
+        assertEquals(1, bangFile.mapRegion(new double[] {0.6, 0.1}));
+        assertEquals(2, bangFile.mapRegion(new double[] {0.1, 0.6}));
+        assertEquals(3, bangFile.mapRegion(new double[] {0.6, 0.6}));
 
-        bang.setDimensionLevels( new int[] {3, 2, 1});
+        bangFile.setDimensionLevels( new int[] {3, 2, 1});
         /*
             --------------------
             |2,3 |6,3 |3,3 |7,3 |
@@ -50,14 +55,14 @@ public class BANGClustererTest {
             --------------------
          */
 
-        assertEquals(0, bang.mapRegion(new double[] {0.1, 0.1}));
-        assertEquals(4, bang.mapRegion(new double[] {0.3, 0.1}));
-        assertEquals(1, bang.mapRegion(new double[] {0.6, 0.1}));
-        assertEquals(5, bang.mapRegion(new double[] {0.8, 0.1}));
-        assertEquals(2, bang.mapRegion(new double[] {0.1, 0.6}));
-        assertEquals(6, bang.mapRegion(new double[] {0.3, 0.6}));
-        assertEquals(3, bang.mapRegion(new double[] {0.6, 0.6}));
-        assertEquals(7, bang.mapRegion(new double[] {0.8, 0.6}));
+        assertEquals(0, bangFile.mapRegion(new double[] {0.1, 0.1}));
+        assertEquals(4, bangFile.mapRegion(new double[] {0.3, 0.1}));
+        assertEquals(1, bangFile.mapRegion(new double[] {0.6, 0.1}));
+        assertEquals(5, bangFile.mapRegion(new double[] {0.8, 0.1}));
+        assertEquals(2, bangFile.mapRegion(new double[] {0.1, 0.6}));
+        assertEquals(6, bangFile.mapRegion(new double[] {0.3, 0.6}));
+        assertEquals(3, bangFile.mapRegion(new double[] {0.6, 0.6}));
+        assertEquals(7, bangFile.mapRegion(new double[] {0.8, 0.6}));
     }
 
 	@Test
@@ -67,16 +72,30 @@ public class BANGClustererTest {
 		tuples.add(new double[] { 0.2, 0.3 });
 		tuples.add(new double[] { 0.3, 0.4 });
 
-		BANGClusterer bang = new BANGClusterer(2, 4, 10);
+		BANGFile bangFile = new BANGFile(2, 4);
 
 		for (double[] tuple : tuples) {
-			bang.insertTuple(tuple);
+			bangFile.insertTuple(tuple);
 		}
 
-		DirectoryEntry file = (DirectoryEntry) bang.getRootDirectory();
+		DirectoryEntry file = (DirectoryEntry) bangFile.getRootDirectory();
 
 		assertEquals(3, file.getRegion().getPopulation());
 		assertEquals(tuples, file.getRegion().getTupleList());
+	}
+
+	@Test
+	public void testNumberOfTuples(){
+		BANGFile bangFile = new BANGFile(2, 4);
+		assertEquals(0, bangFile.numberOfTuples());
+		double[] tuple;
+		for(float x = 0; x <= 1.0f; x = x + 0.1f){
+			for(float y = 0; y <= 1.0f; y = y + 0.1f){
+				tuple = new double[] {x, y};
+				bangFile.insertTuple(tuple);
+			}
+		}
+		assertEquals(100, bangFile.numberOfTuples());
 	}
 
 	@Test
@@ -89,18 +108,17 @@ public class BANGClustererTest {
 		tuples.add(new double[] { 0.7f, 0.1f });
 		tuples.add(new double[] { 0.8f, 0.1f });
 
-		BANGClusterer bang = new BANGClusterer(2, 4, 6);
+		BANGFile bangFile = new BANGFile(2, 4);
 
 		for (double[] tuple : tuples) {
-			bang.insertTuple(tuple);
+			bangFile.insertTuple(tuple);
 		}
 
-		DirectoryEntry file = (DirectoryEntry) bang.getRootDirectory();
+		DirectoryEntry file = (DirectoryEntry) bangFile.getRootDirectory();
 
 		assertEquals(4, file.getRegion().getPopulation());
 
 		assertEquals(2, file.getLeft().getLeft().getLeft().getRegion().getPopulation());
-
 	}
 
     @Ignore("TODO")

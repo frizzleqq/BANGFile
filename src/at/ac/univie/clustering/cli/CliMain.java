@@ -3,7 +3,7 @@ package at.ac.univie.clustering.cli;
 import java.io.IOException;
 import java.util.Arrays;
 
-import at.ac.univie.clustering.clusterers.BANGClusterer.BANGClusterer;
+import at.ac.univie.clustering.clusterers.bangfile.BANGFile;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -168,7 +168,7 @@ public class CliMain {
         System.out.println("Tuples: " + tuplesCount + "\n");
 
         Clusterer cluster;
-        cluster = new BANGClusterer(dimension, bucketsize, tuplesCount);
+        cluster = new BANGFile(dimension, bucketsize);
 
         try {
             readData(cluster, data);
@@ -180,7 +180,7 @@ public class CliMain {
             System.exit(ERR_EXCEPTION);
         }
 
-        cluster.analyzeClusters();
+        cluster.buildClusters();
 
 
         System.out.println("\n" + cluster);

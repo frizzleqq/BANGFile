@@ -1,4 +1,4 @@
-package at.ac.univie.clustering.clusterers.BANGClusterer;
+package at.ac.univie.clustering.clusterers.bangfile;
 
 import static org.junit.Assert.*;
 

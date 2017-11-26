@@ -20,7 +20,7 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception{
         Parent root = FXMLLoader.load(getClass().getResource("Design.fxml"));
-        primaryStage.setTitle("BANG-Clusterer");
+        primaryStage.setTitle("BANGFile-Clustering");
         primaryStage.getIcons().add(new Image("file:src/resources/uniwien_logo.png"));
         primaryStage.setScene(new Scene(root, 640, 480));
         primaryStage.setMinHeight(520);

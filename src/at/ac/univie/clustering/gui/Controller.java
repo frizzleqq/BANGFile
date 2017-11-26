@@ -1,12 +1,12 @@
 package at.ac.univie.clustering.gui;
 
-import at.ac.univie.clustering.clusterers.BANGClusterer.BANGClusterer;
+import at.ac.univie.clustering.clusterers.bangfile.BANGFile;
 import at.ac.univie.clustering.clusterers.Clusterer;
 import at.ac.univie.clustering.data.CsvWorker;
 import at.ac.univie.clustering.data.DataWorker;
 import at.ac.univie.clustering.gui.dialogs.*;
-import at.ac.univie.clustering.clusterers.BANGClusterer.DirectoryEntry;
-import at.ac.univie.clustering.clusterers.BANGClusterer.TupleRegion;
+import at.ac.univie.clustering.clusterers.bangfile.DirectoryEntry;
+import at.ac.univie.clustering.clusterers.bangfile.TupleRegion;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
@@ -80,7 +80,7 @@ public class Controller{
                 infoLabel.setText("Could not determine amount of records of provided data.");
             }
 
-            if (dimension <= Settings.getNeighbourhood()){
+            if (Settings.getNeighbourhood() >= dimension){
                 infoLabel.setText("Provided neighbourhood-condition has to be smaller than data dimension");
             }
 
@@ -108,7 +108,7 @@ public class Controller{
             dendogramChart.getData().clear();
             dendogramChart.layout();
 
-            cluster = new BANGClusterer(data.getDimension(), Settings.getBucketsize(), data.getnTuple(), Settings.getNeighbourhood(), 50);
+            cluster = new BANGFile(data.getDimension(), Settings.getBucketsize(), Settings.getNeighbourhood(), 50);
 
             Task<Boolean> runFactoryTask;
 
@@ -119,7 +119,7 @@ public class Controller{
                     @Override
                     public void handle(WorkerStateEvent t)
                     {
-                        cluster.analyzeClusters();
+                        cluster.buildClusters();
 
                         XYChart.Series dendogramSeries = new XYChart.Series();
                         dendogramSeries.setName("Dendogram");

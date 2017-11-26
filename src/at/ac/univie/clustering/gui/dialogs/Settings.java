@@ -71,21 +71,18 @@ public class Settings extends Stage {
     }
 
     public void onOkButtonAction(ActionEvent actionEvent) {
-        int buck, neigh;
         try{
-            buck = Integer.parseInt(bucketsizeField.getText());
-            neigh = Integer.parseInt(neighbourhoodField.getText());
+            if (Integer.parseInt(bucketsizeField.getText()) < 4){
+                infoLabel.setText("Bucketsize has to be at least 4");
+            } else {
+                bucketsize = Integer.parseInt(bucketsizeField.getText());
+                neighbourhood = Integer.parseInt(neighbourhoodField.getText());
+                debug = debugBox.isSelected();
+                close();
+            }
         } catch(Exception e){
             infoLabel.setText("Can not use non-numeric values");
             return;
-        }
-        if (buck < 4){
-            infoLabel.setText("Bucketsize has to be at least 4");
-        } else {
-            bucketsize = Integer.parseInt(bucketsizeField.getText());
-            neighbourhood = Integer.parseInt(neighbourhoodField.getText());
-            debug = debugBox.isSelected();
-            close();
         }
     }
 

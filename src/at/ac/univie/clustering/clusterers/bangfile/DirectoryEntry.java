@@ -1,4 +1,4 @@
-package at.ac.univie.clustering.clusterers.BANGClusterer;
+package at.ac.univie.clustering.clusterers.bangfile;
 
 import java.util.List;
 
@@ -13,7 +13,7 @@ public class DirectoryEntry {
         return left;
     }
 
-    public void setLeft(DirectoryEntry left) {
+    void setLeft(DirectoryEntry left) {
         this.left = left;
     }
 
@@ -21,7 +21,7 @@ public class DirectoryEntry {
         return right;
     }
 
-    public void setRight(DirectoryEntry right) {
+    void setRight(DirectoryEntry right) {
         this.right = right;
     }
 
@@ -29,7 +29,7 @@ public class DirectoryEntry {
         return back;
     }
 
-    public void setBack(DirectoryEntry back) {
+    void setBack(DirectoryEntry back) {
         this.back = back;
     }
 
@@ -37,7 +37,7 @@ public class DirectoryEntry {
         return region;
     }
 
-    public void setRegion(TupleRegion region) {
+    void setRegion(TupleRegion region) {
         this.region = region;
     }
 
@@ -138,7 +138,7 @@ public class DirectoryEntry {
      *
      * @return directory with less populated region
      */
-    DirectoryEntry getSparseEntry() {
+    public DirectoryEntry getSparseEntry() {
         return (left.getRegion().getPopulation() < right.getRegion().getPopulation()) ? left : right;
     }
 
@@ -147,7 +147,7 @@ public class DirectoryEntry {
      *
      * @return directory with more populated region
      */
-    DirectoryEntry getDenseEntry() {
+    public DirectoryEntry getDenseEntry() {
         return (left.getRegion().getPopulation() < right.getRegion().getPopulation()) ? right : left;
     }
 
@@ -196,7 +196,7 @@ public class DirectoryEntry {
      *
      * @return regions population divided by its regions size
      */
-    protected double calculateRegionDensity() {
+    public double calculateRegionDensity() {
 
         double leftSize = (left != null) ? left.getRegionSize() : 0;
         double rightSize = (right != null) ? right.getRegionSize() : 0;
@@ -212,7 +212,7 @@ public class DirectoryEntry {
      *
      * @return size of region including succeeding regions
      */
-    protected double getRegionSize() {
+    public double getRegionSize() {
         double size = 0;
         if (region != null) {
             size = region.calculateSize();
@@ -226,7 +226,7 @@ public class DirectoryEntry {
     /**
      * TODO
      */
-    protected void buildAliasEntry() {
+    void buildAliasEntry() {
 
         if (left != null) {
             buildAlias(left, region.getRegion(), region.getLevel() + 1);
@@ -248,7 +248,7 @@ public class DirectoryEntry {
      * @param region
      * @param level
      */
-    protected void buildAlias(DirectoryEntry dirEntry, long region, int level) {
+    void buildAlias(DirectoryEntry dirEntry, long region, int level) {
         if (this.region == null) {
             if (left != null) {
                 buildAlias(left, region, level + 1);
@@ -270,7 +270,7 @@ public class DirectoryEntry {
      *
      * @param regionArray   List used to store all regions
      */
-    protected void collectRegions(List<TupleRegion> regionArray) {
+    public void collectRegions(List<TupleRegion> regionArray) {
         if (left != null){
             left.collectRegions(regionArray);
         }

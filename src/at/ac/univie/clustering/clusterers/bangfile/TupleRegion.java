@@ -1,4 +1,4 @@
-package at.ac.univie.clustering.clusterers.BANGClusterer;
+package at.ac.univie.clustering.clusterers.bangfile;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,10 +11,10 @@ public class TupleRegion implements Comparable<TupleRegion> {
     private int level;
     private int position;
     private double density = 0;
-    private List<double[]> tupleList = new ArrayList<>();
-    private List<TupleRegion> aliases = new ArrayList<>();
+    private List<double[]> tupleList = new ArrayList<double[]>();
+    private List<TupleRegion> aliases = new ArrayList<TupleRegion>();
 
-    public TupleRegion(long region, int level) {
+    TupleRegion(long region, int level) {
         this.region = region;
         this.level = level;
     }
@@ -23,7 +23,7 @@ public class TupleRegion implements Comparable<TupleRegion> {
         return population;
     }
 
-    public void setPopulation(int population) {
+    void setPopulation(int population) {
         this.population = population;
     }
 
@@ -31,7 +31,7 @@ public class TupleRegion implements Comparable<TupleRegion> {
         return region;
     }
 
-    public void setRegion(long region) {
+    void setRegion(long region) {
         this.region = region;
     }
 
@@ -39,7 +39,7 @@ public class TupleRegion implements Comparable<TupleRegion> {
         return level;
     }
 
-    public void setLevel(int level) {
+    void setLevel(int level) {
         this.level = level;
     }
 
@@ -47,7 +47,7 @@ public class TupleRegion implements Comparable<TupleRegion> {
         return this.position;
     }
 
-    public void setPosition(int position) {
+    void setPosition(int position) {
         this.position = position;
     }
 
@@ -55,7 +55,7 @@ public class TupleRegion implements Comparable<TupleRegion> {
         return density;
     }
 
-    public void setDensity(double density) {
+    void setDensity(double density) {
         this.density = density;
     }
 
@@ -63,7 +63,7 @@ public class TupleRegion implements Comparable<TupleRegion> {
         return tupleList;
     }
 
-    public void setTupleList(List<double[]> tupleList) {
+    void setTupleList(List<double[]> tupleList) {
         this.tupleList = tupleList;
     }
 
@@ -71,7 +71,7 @@ public class TupleRegion implements Comparable<TupleRegion> {
         return aliases;
     }
 
-    public void setAliases(List<TupleRegion> aliases) {
+    void setAliases(List<TupleRegion> aliases) {
         this.aliases = aliases;
     }
 
@@ -80,7 +80,7 @@ public class TupleRegion implements Comparable<TupleRegion> {
      *
      * @param tuple
      */
-    public void insertTuple(double[] tuple) {
+    void insertTuple(double[] tuple) {
 
         tupleList.add(tuple);
         population++;
@@ -89,7 +89,7 @@ public class TupleRegion implements Comparable<TupleRegion> {
     /**
      * Clear tuple list of region and set population to 0.
      */
-    public void clearTupleList() {
+    void clearTupleList() {
         tupleList.clear();
         population = 0;
     }
@@ -176,7 +176,7 @@ public class TupleRegion implements Comparable<TupleRegion> {
      * @param dimension
      * @return array representing location in grid of regions level (first element set to 'level')
      */
-    protected int[] unmapRegion(int dimension){
+    int[] unmapRegion(int dimension){
         int [] grids = new int[dimension + 1];
         for (int i = 1; i <= dimension; i++){
             grids[i] = 0;

@@ -1,13 +1,38 @@
-package at.ac.univie.clustering.clusterers.BANGClusterer;
+package at.ac.univie.clustering.clusterers.bangfile;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
 
 import at.ac.univie.clustering.clusterers.Clusterer;
 
 /**
  * @author Florian Fritz
  */
-public class BANGClusterer implements Clusterer {
+public class BANGFile implements Clusterer {
+
+    //TODO comments for class variables
+
+    /** Single line description */
+    private int tuplesCount = 0;
+    private int dimension;
+    private int bucketsize;
+    private int neighbourCondition;
+    private int clusterPercent;
+
+    /**
+     * multi line description
+     * how often did we split a dimension? 0 is the sum of all dimensions
+     */
+    private int[] dimensionLevels = null;
+    private int[] scaleCoordinates = null; // coordinate on every dimensions scale (map value to region). 0 is a dummy value
+    private DirectoryEntry bangFile;
+    private List<TupleRegion> dendogram;
+    private List<Cluster> clusters;
+    private int nAlias;
 
     private class Cluster{
         public List<TupleRegion> regions = new ArrayList<TupleRegion>();
@@ -20,51 +45,31 @@ public class BANGClusterer implements Clusterer {
         }
     }
 
-    private int tuplesCount;
-    private int dimension;
-    private int bucketsize;
-    private int neighbourCondition;
-    private int clusterPercent;
-    private int[] dimensionLevels = null; // how often did we split a dimension? 0 is the sum of all dimensions
-    private int[] scaleCoordinates = null; // coordinate on every dimensions scale (map value to region). 0 is a dummy value
-    private DirectoryEntry bangFile;
-    private List<TupleRegion> dendogram;
-    private List<Cluster> clusters;
-    private int nAlias;
-
-
     /**
-     * Create BANGClusterer with default neighbourCondition (1) and clusterPercent (50)
+     * Create bangfile with default neighbourCondition (1) and clusterPercent (50)
      *
      * @param dimension Dimensions of dataset
      * @param bucketsize Maximum number of tuples in bucket
-     * @param tuplesCount Number of tuples
      */
-    public BANGClusterer(int dimension, int bucketsize, int tuplesCount) {
-        this(dimension, bucketsize, tuplesCount, 1, 50);
+    public BANGFile(int dimension, int bucketsize) {
+        this(dimension, bucketsize, 1, 50);
     }
 
     /**
-     * Create BANGClusterer with provided neighbourhoodCondition and clusterPercent
+     * Create bangfile with provided neighbourhoodCondition and clusterPercent
      *
      * @param dimension Dimensions of dataset
      * @param bucketsize Maximum number of tuples in bucket
-     * @param tuplesCount Number of tuples
      * @param neighbourCondition Number of additional dimensions needed for neighbourhood condition (from 0 to dimensions-1)
      * @param clusterPercent TODO
      */
-    public BANGClusterer(int dimension, int bucketsize, int tuplesCount, int neighbourCondition, int clusterPercent) {
+    public BANGFile(int dimension, int bucketsize, int neighbourCondition, int clusterPercent) {
 
         this.dimension = dimension;
         this.bucketsize = bucketsize;
-        this.tuplesCount = tuplesCount;
         this.clusterPercent = clusterPercent;
 
-        if (dimension <= neighbourCondition){
-            this.neighbourCondition = dimension - 1;
-        }else{
-            this.neighbourCondition = dimension - neighbourCondition;
-        }
+        this.neighbourCondition = dimension - neighbourCondition;
 
         dimensionLevels = new int[dimension + 1]; // level[0] = sum level[i]
         Arrays.fill(dimensionLevels, 0);
@@ -72,24 +77,38 @@ public class BANGClusterer implements Clusterer {
         scaleCoordinates = new int[dimension + 1]; // grid[0] = dummy
         Arrays.fill(scaleCoordinates, 0);
 
-        // create root of BANG file
+        // create root of BANGFile file
         bangFile = new DirectoryEntry();
         bangFile.setRegion(new TupleRegion(0, 0));
     }
 
     @Override
-    public int getDimension() {
+    public int numberOfDimensions() {
         return dimension;
     }
 
     @Override
-    public int getTuplesCount() {
-        return tuplesCount;
+    public int numberOfTuples() {
+        if (tuplesCount > 0){
+            return tuplesCount;
+        } else{
+            List <TupleRegion> regions = new ArrayList<TupleRegion>();
+            bangFile.collectRegions(regions);
+            for(TupleRegion r : regions){
+                tuplesCount += r.getPopulation();
+            }
+            return tuplesCount;
+        }
     }
 
     @Override
     public Object getRootDirectory() {
         return bangFile;
+    }
+
+    @Override
+    public int numberOfClusters() {
+        return clusters.size();
     }
 
     @Override
@@ -104,11 +123,6 @@ public class BANGClusterer implements Clusterer {
     protected void setDimensionLevels(int[] dimensionLevels) {
         this.dimensionLevels = dimensionLevels;
     }
-
-    protected void setScaleCoordinates(int[] scaleCoordinates) {
-        this.scaleCoordinates = scaleCoordinates;
-    }
-
 
     /**
      * TODO
@@ -408,29 +422,16 @@ public class BANGClusterer implements Clusterer {
     }
 
     @Override
-    public void analyzeClusters() {
+    public void buildClusters() {
         bangFile.calculateDensity();
         List <TupleRegion> sortedRegions = getSortedRegions();
-        dendogram = createDendogram(sortedRegions);
-        clusters = createClusters(sortedRegions);
-
-        /*
-        for(TupleRegion r : dendogram){
-            System.out.println("Region " + r.getRegion() + "," + r.getLevel() + " Density: " + r.getDensity());
-        }*/
-
-        for(Cluster c : clusters){
-            System.out.println("\nCluster-nr: " + clusters.indexOf(c));
-            System.out.println("Population: " + c.getPopulation());
-            for(TupleRegion r : c.regions){
-                for(double[] l : r.getTupleList()){
-                    for(double v : l){
-                        System.out.printf("%.6f\t", Math.round(v * 1000000.0)/1000000.0);
-                    }
-                    System.out.println();
-                }
+        if (tuplesCount == 0){
+            for(TupleRegion r : sortedRegions){
+                tuplesCount += r.getPopulation();
             }
         }
+        dendogram = createDendogram(sortedRegions);
+        clusters = createClusters(sortedRegions);
     }
 
     /**
@@ -547,19 +548,12 @@ public class BANGClusterer implements Clusterer {
             clusteredRegions++;
         }
 
-        double clusteredPercentage = (clusteredPop * 100 ) / this.tuplesCount;
-        int counter = 0;
-        System.out.println("\nGoal-Clustered" + clusteredGoal);
-        System.out.println("Clustered: " + clusteredPop);
-        System.out.println("reg-clustered: " + clusteredRegions);
-        System.out.println("diff:" + diff);
-        System.out.println("tuplesCount " + this.tuplesCount);
-        System.out.println("percentage " + clusteredPercentage + "\n");
-
         List<Cluster> clusters = new ArrayList<Cluster>();
         boolean newCluster = false;
         Iterator<TupleRegion> dendogramIterator = dendogram.iterator();
         tupleReg = dendogramIterator.next();
+
+        int counter = 0;
 
         if (clusteredRegions == 0){
             return clusters;
@@ -591,25 +585,51 @@ public class BANGClusterer implements Clusterer {
     }
 
     @Override
+    public int clusterTuple(double[] tuple){
+        long region = mapRegion(tuple);
+        DirectoryEntry dirEntry = findRegion(region, dimensionLevels[0]);
+        return clusters.indexOf(dirEntry.getRegion());
+    }
+
+    @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("Bang-File:");
 
-        builder.append("\n -Dimension: " + dimension);
-        builder.append("\n -BucketSize: " + bucketsize);
-        builder.append("\n -Tuples: " + tuplesCount);
+        builder.append("\nDimension: " + dimension);
+        builder.append("\nNeighbourhood-Condition: " + neighbourCondition);
+        builder.append("\nBucketsize: " + bucketsize);
+        builder.append("\nTuples: " + tuplesCount);
 
-        builder.append("\n" + bangFile);
+        builder.append("\n\nClusters: " + clusters.size());
+        builder.append("\n\t\tPopulation\tof Total %\tof Clustered");
 
-        builder.append("\n");
-        for (TupleRegion tupleReg : getSortedRegions()){
-            builder.append("\nRegion " + tupleReg.getRegion() + ","  + tupleReg.getLevel() + " Density: " + tupleReg.getDensity());
+        int population;
+        int populationToTotal;
+        int populationToClustered;
+        for (Cluster c : clusters){
+            builder.append("\nCluster " + clusters.indexOf(c) + ":");
+            population = c.getPopulation();
+            populationToTotal = (population * 100 / tuplesCount);
+            populationToClustered = (population * clusterPercent / tuplesCount);
+            builder.append("\t" + population);
+            builder.append("\t( " + populationToTotal + "%)");
+            builder.append("\t( " + populationToClustered + "%)");
         }
-
-        builder.append("\n");
-        for (TupleRegion tupleReg : dendogram){
-            builder.append("\nRegion " + tupleReg.getRegion() + ","  + tupleReg.getLevel() + " Density: " + tupleReg.getDensity());
+        /*
+        for(Cluster c : clusters){
+            System.out.println("\nCluster-nr: " + clusters.indexOf(c));
+            System.out.println("Population: " + c.getPopulation());
+            for(TupleRegion r : c.regions){
+                for(double[] l : r.getTupleList()){
+                    for(double v : l){
+                        System.out.printf("%.6f\t", Math.round(v * 1000000.0)/1000000.0);
+                    }
+                    System.out.println();
+                }
+            }
         }
+        */
 
         return builder.toString();
     }

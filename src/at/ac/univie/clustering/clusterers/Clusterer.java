@@ -9,11 +9,15 @@ public interface Clusterer {
 
     void insertTuple(double[] tuple);
 
-    int getDimension();
+    int numberOfDimensions();
 
-    int getTuplesCount();
+    int numberOfTuples();
 
-    void analyzeClusters();
+    int numberOfClusters();
+
+    void buildClusters();
+
+    int clusterTuple(double[] tuple);
 
     Object getRootDirectory();
 
