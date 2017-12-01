@@ -584,6 +584,7 @@ public class BANGFile implements Clusterer {
         return clusters;
     }
 
+    //TODO: this desperately needs to look for logical regions
     @Override
     public int clusterTuple(double[] tuple){
         long region = mapRegion(tuple);
@@ -602,7 +603,7 @@ public class BANGFile implements Clusterer {
         builder.append("\nTuples: " + tuplesCount);
 
         builder.append("\n\nClusters: " + clusters.size());
-        builder.append("\n\t\tPopulation\tof Total %\tof Clustered");
+        builder.append("\n\t\t\tPopulation\t\tof Total %\t\tof Clustered");
 
         int population;
         int populationToTotal;
@@ -613,8 +614,8 @@ public class BANGFile implements Clusterer {
             populationToTotal = (population * 100 / tuplesCount);
             populationToClustered = (population * clusterPercent / tuplesCount);
             builder.append("\t" + population);
-            builder.append("\t( " + populationToTotal + "%)");
-            builder.append("\t( " + populationToClustered + "%)");
+            builder.append("\t\t\t\t( " + populationToTotal + "%)");
+            builder.append("\t\t\t( " + populationToClustered + "%)");
         }
         /*
         for(Cluster c : clusters){

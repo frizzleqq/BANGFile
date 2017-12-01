@@ -2,10 +2,14 @@ package at.ac.univie.clustering.clusterers.bangfile;
 
 import static org.junit.Assert.*;
 
+import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 
+import at.ac.univie.clustering.data.CsvWorker;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -13,7 +17,9 @@ import org.junit.Test;
 
 public class BANGFileTest {
 
-	@BeforeClass
+    private static final String CSV_FILE_CLUSTERS = "test/resources/3d_2clusters.csv";
+
+    @BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 	}
 
@@ -89,13 +95,13 @@ public class BANGFileTest {
 		BANGFile bangFile = new BANGFile(2, 4);
 		assertEquals(0, bangFile.numberOfTuples());
 		double[] tuple;
-		for(float x = 0; x <= 1.0f; x = x + 0.1f){
-			for(float y = 0; y <= 1.0f; y = y + 0.1f){
-				tuple = new double[] {x, y};
+		for(int x = 0; x < 100; x++){
+			for(int y = 0; y < 100; y++){
+				tuple = new double[] {x/100.0f, y/100.0f};
 				bangFile.insertTuple(tuple);
 			}
 		}
-		assertEquals(100, bangFile.numberOfTuples());
+		assertEquals(10000, bangFile.numberOfTuples());
 	}
 
 	@Test
@@ -122,20 +128,8 @@ public class BANGFileTest {
 	}
 
     @Ignore("TODO")
-	@Test
-    public void testGetSortedRegions() {
-
-    }
-
-    @Ignore("TODO")
     @Test
     public void testCreateDendogram() {
-
-    }
-
-    @Ignore("TODO")
-    @Test
-    public void testAddNeighbours() {
 
     }
 
@@ -144,5 +138,40 @@ public class BANGFileTest {
     public void testCreateClusters() {
 
     }
+
+	@Test
+	public void testNumberOfClusters() throws IOException, ParseException {
+        CsvWorker csv = new CsvWorker(CSV_FILE_CLUSTERS, ';', ',', true);
+        BANGFile bangFile = new BANGFile(csv.getDimension(), 4, 1, 50);
+
+        double[] tuple;
+        while ((tuple = csv.readTuple()) != null) {
+            bangFile.insertTuple(tuple);
+        }
+
+        bangFile.buildClusters();
+        assertEquals(2, bangFile.numberOfClusters());
+	}
+
+	@Test
+	public void testClusterTuple() throws IOException, ParseException  {
+        CsvWorker csv = new CsvWorker(CSV_FILE_CLUSTERS, ';', ',', true);
+        BANGFile bangFile = new BANGFile(csv.getDimension(), 4, 1,90);
+
+        double[] tuple;
+        while ((tuple = csv.readTuple()) != null) {
+            bangFile.insertTuple(tuple);
+        }
+
+        bangFile.buildClusters();
+
+        assertEquals(0, bangFile.clusterTuple(new double[] {0.25, 0.25, 0.25}));
+        assertEquals(0, bangFile.clusterTuple(new double[] {0.2, 0.2, 0.2}));
+        assertEquals(0, bangFile.clusterTuple(new double[] {0.3, 0.3, 0.3}));
+        assertEquals(1, bangFile.clusterTuple(new double[] {0.7, 0.7, 0.7}));
+        assertEquals(1, bangFile.clusterTuple(new double[] {0.75, 0.75, 0.75}));
+        assertEquals(1, bangFile.clusterTuple(new double[] {0.8, 0.8, 0.8}));
+
+	}
 
 }

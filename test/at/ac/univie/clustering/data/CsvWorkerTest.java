@@ -3,17 +3,16 @@ package at.ac.univie.clustering.data;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.text.ParseException;
 
 import org.junit.Test;
-
-import at.ac.univie.clustering.data.CsvWorker;
 
 import org.junit.Assert;
 
 public class CsvWorkerTest {
 
-    private static final String CSV_FILE_NO_HEADER = "test/resources/4_col_no_h.csv";
-    private static final String CSV_FILE_NO_HEADER_HEADER = "test/resources/4_col_h.csv";
+    private static final String CSV_FILE_NO_HEADER = "test/resources/4d_noheader.csv";
+    private static final String CSV_FILE_HEADER = "test/resources/4d_header.csv";
     private static final String CSV_FILE_NO_HEADER_CHAR = "test/resources/char_value.csv";
     private static final String CSV_FILE_NO_HEADER_NULL = "test/resources/null_value.csv";
 
@@ -21,7 +20,7 @@ public class CsvWorkerTest {
     public void testGetRecords() {
         CsvWorker csv = null;
         try {
-            csv = new CsvWorker(CSV_FILE_NO_HEADER, ';', false);
+            csv = new CsvWorker(CSV_FILE_NO_HEADER, ';', ',', false);
         } catch (IOException e) {
             e.printStackTrace();
             Assert.fail();
@@ -33,7 +32,7 @@ public class CsvWorkerTest {
     public void testGetRecordsHeader() {
         CsvWorker csv = null;
         try {
-            csv = new CsvWorker(CSV_FILE_NO_HEADER_HEADER, ';', true);
+            csv = new CsvWorker(CSV_FILE_HEADER, ';', ',', true);
         } catch (IOException e) {
             e.printStackTrace();
             Assert.fail();
@@ -45,7 +44,7 @@ public class CsvWorkerTest {
     public void testGetDimensions() {
         CsvWorker csv = null;
         try {
-            csv = new CsvWorker(CSV_FILE_NO_HEADER, ';', false);
+            csv = new CsvWorker(CSV_FILE_NO_HEADER, ';', ',', false);
         } catch (IOException e) {
             e.printStackTrace();
             Assert.fail();
@@ -57,7 +56,7 @@ public class CsvWorkerTest {
     public void testGetDimensionsHeader() {
         CsvWorker csv = null;
         try {
-            csv = new CsvWorker(CSV_FILE_NO_HEADER_HEADER, ';', true);
+            csv = new CsvWorker(CSV_FILE_HEADER, ';', ',', true);
         } catch (IOException e) {
             e.printStackTrace();
             Assert.fail();
@@ -66,10 +65,10 @@ public class CsvWorkerTest {
     }
 
     @Test
-    public void testReadTuple() throws IOException {
+    public void testReadTuple() throws IOException, ParseException {
         CsvWorker csv = null;
         try {
-            csv = new CsvWorker(CSV_FILE_NO_HEADER, ';', false);
+            csv = new CsvWorker(CSV_FILE_NO_HEADER, ';', ',', false);
         } catch (IOException e) {
             e.printStackTrace();
             Assert.fail();
@@ -85,10 +84,10 @@ public class CsvWorkerTest {
     }
 
     @Test
-    public void testReadTupleHeader() throws IOException {
+    public void testReadTupleHeader() throws IOException, ParseException {
         CsvWorker csv = null;
         try {
-            csv = new CsvWorker(CSV_FILE_NO_HEADER_HEADER, ';', true);
+            csv = new CsvWorker(CSV_FILE_HEADER, ';', ',', true);
         } catch (IOException e) {
             e.printStackTrace();
             Assert.fail();
@@ -104,10 +103,10 @@ public class CsvWorkerTest {
     }
 
     @Test
-    public void testReadTupleReturnNull() throws IOException {
+    public void testReadTupleReturnNull() throws IOException, ParseException {
         CsvWorker csv = null;
         try {
-            csv = new CsvWorker(CSV_FILE_NO_HEADER, ';', false);
+            csv = new CsvWorker(CSV_FILE_NO_HEADER, ';', ',', false);
         } catch (IOException e) {
             e.printStackTrace();
             Assert.fail();
@@ -118,11 +117,11 @@ public class CsvWorkerTest {
         assertEquals(null, csv.readTuple());
     }
 
-    @Test(expected = NumberFormatException.class)
-    public void testReadTupleChar() throws IOException {
+    @Test(expected = ParseException.class)
+    public void testReadTupleChar() throws IOException, ParseException {
         CsvWorker csv = null;
         try {
-            csv = new CsvWorker(CSV_FILE_NO_HEADER_CHAR, ';', false);
+            csv = new CsvWorker(CSV_FILE_NO_HEADER_CHAR, ';', ',', false);
         } catch (IOException e) {
             e.printStackTrace();
             Assert.fail();
@@ -132,11 +131,11 @@ public class CsvWorkerTest {
         csv.readTuple();
     }
 
-    @Test(expected = NumberFormatException.class)
-    public void testReadTupleNull() throws IOException {
+    @Test(expected = ParseException.class)
+    public void testReadTupleNull() throws IOException, ParseException {
         CsvWorker csv = null;
         try {
-            csv = new CsvWorker(CSV_FILE_NO_HEADER_NULL, ';', false);
+            csv = new CsvWorker(CSV_FILE_NO_HEADER_NULL, ';', ',', false);
         } catch (IOException e) {
             e.printStackTrace();
             Assert.fail();
@@ -150,7 +149,7 @@ public class CsvWorkerTest {
     public void testFileNotExisting() {
         CsvWorker csv = null;
         try {
-            csv = new CsvWorker("notExistingFile.csv", ';', false);
+            csv = new CsvWorker("notExistingFile.csv", ';', ',', false);
             Assert.fail();
         } catch (IOException e) {
             e.printStackTrace();

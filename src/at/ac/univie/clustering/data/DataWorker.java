@@ -1,6 +1,7 @@
 package at.ac.univie.clustering.data;
 
 import java.io.IOException;
+import java.text.ParseException;
 
 /**
  * @author Fritzi
@@ -36,6 +37,6 @@ public interface DataWorker {
     /**
      * @return
      */
-    double[] readTuple() throws IOException;
+    double[] readTuple() throws IOException, ParseException;
 
 }

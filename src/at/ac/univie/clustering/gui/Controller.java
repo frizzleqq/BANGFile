@@ -4,9 +4,11 @@ import at.ac.univie.clustering.clusterers.bangfile.BANGFile;
 import at.ac.univie.clustering.clusterers.Clusterer;
 import at.ac.univie.clustering.data.CsvWorker;
 import at.ac.univie.clustering.data.DataWorker;
-import at.ac.univie.clustering.gui.dialogs.*;
 import at.ac.univie.clustering.clusterers.bangfile.DirectoryEntry;
 import at.ac.univie.clustering.clusterers.bangfile.TupleRegion;
+import at.ac.univie.clustering.gui.dialogs.FileDialog;
+import at.ac.univie.clustering.gui.dialogs.GridDialog;
+import at.ac.univie.clustering.gui.dialogs.Settings;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
@@ -17,10 +19,15 @@ import javafx.scene.chart.BarChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
-import javafx.scene.layout.*;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.RowConstraints;
 import javafx.stage.Modality;
 
 import java.io.IOException;
+import java.text.ParseException;
 
 /**
  * Created by Fritzi on 10.01.2016.
@@ -56,13 +63,13 @@ public class Controller{
 
     @FXML
     public void onSelectFileAction(ActionEvent event){
-        at.ac.univie.clustering.gui.dialogs.FileDialog fileDialog = new at.ac.univie.clustering.gui.dialogs.FileDialog();
+        FileDialog fileDialog = new FileDialog();
         fileDialog.initModality(Modality.APPLICATION_MODAL);
         fileDialog.showAndWait();
 
         if(fileDialog.isComplete()){
             try {
-                data = new CsvWorker(at.ac.univie.clustering.gui.dialogs.FileDialog.getFilepath(), at.ac.univie.clustering.gui.dialogs.FileDialog.getDelimiter(), at.ac.univie.clustering.gui.dialogs.FileDialog.getHeader());
+                data = new CsvWorker(FileDialog.getFilepath(), FileDialog.getDelimiter(), FileDialog.getDecimal(), FileDialog.getHeader());
             } catch (IOException e) {
                 infoLabel.setText(e.getMessage());
             }
@@ -174,7 +181,7 @@ public class Controller{
     public Task<Boolean> readAllDataFactory() throws InterruptedException {
         return new Task<Boolean>() {
             @Override
-            public Boolean call() throws IOException {
+            public Boolean call() throws IOException, ParseException {
                 Boolean result = true;
                 double[] tuple;
 

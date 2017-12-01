@@ -1,14 +1,18 @@
 package at.ac.univie.clustering.data;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.LineNumberReader;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
+import java.text.ParseException;
+import java.util.Locale;
 
-import com.opencsv.CSVParser;
+import com.opencsv.CSVReader;
 
 public class CsvWorker implements DataWorker {
 
@@ -19,10 +23,10 @@ public class CsvWorker implements DataWorker {
     private int nTuple = 0;
     private int dimension = 0;
     private int current_position;
+    private DecimalFormat decimalFormat;
 
     private File file;
-    private CSVParser csv;
-    private BufferedReader br;
+    CSVReader reader;
 
     /**
      * @param filename
@@ -30,10 +34,18 @@ public class CsvWorker implements DataWorker {
      * @param header
      * @throws IOException
      */
-    public CsvWorker(String filename, char delimiter, boolean header) throws IOException {
+    public CsvWorker(String filename, char delimiter, char decimal, boolean header) throws IOException {
         this.filename = filename;
         this.delimiter = delimiter;
         this.header = header;
+
+        // Set formatter with desired decimal symbol
+        // TODO: option for decimal symbol
+        decimalFormat = new DecimalFormat();
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+        symbols.setDecimalSeparator(decimal);
+        decimalFormat.setGroupingUsed(false);
+        decimalFormat.setDecimalFormatSymbols(symbols);
 
         if (!fileExists())
             throw new IOException("Could not find file with provided filename.");
@@ -46,10 +58,9 @@ public class CsvWorker implements DataWorker {
         dimension = countDimension();
         nTuple = countTuples();
 
-        csv = new CSVParser(delimiter);
-        br = new BufferedReader(new FileReader(filename));
+        reader = new CSVReader(new FileReader(filename), delimiter);
         if (header) {
-            br.readLine();
+            reader.readNext();
         }
     }
 
@@ -131,14 +142,12 @@ public class CsvWorker implements DataWorker {
     private int countDimension() {
         int dimension = 0;
         try {
-            CSVParser csv = new CSVParser(delimiter);
-            BufferedReader br = new BufferedReader(new FileReader(filename));
-            String line;
-            line = br.readLine();
+            CSVReader cr = new CSVReader(new FileReader(filename), delimiter);
+            String[] stringTuple;
             if (header)
-                line = br.readLine(); // maybe file has unusual header
-            br.close();
-            dimension = csv.parseLine(line).length;
+                stringTuple = cr.readNext(); // maybe file has unusual header
+            stringTuple = cr.readNext();
+            dimension = stringTuple.length;
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -161,38 +170,31 @@ public class CsvWorker implements DataWorker {
      * @see at.ac.univie.clustering.data.DataWorker#readTuple()
      */
     @Override
-    public double[] readTuple() throws IOException, NumberFormatException {
+    public double[] readTuple() throws IOException, ParseException {
         double[] tuple;
-
         current_position++;
-
-        String line = br.readLine();
-
         if (current_position > nTuple) {
             return null;
         }
 
-        String[] stringTuple = csv.parseLine(line);
-
+        String[] stringTuple = reader.readNext();
         tuple = new double[stringTuple.length];
         for (int i = 0; i < stringTuple.length; i++) {
-            tuple[i] = Double.parseDouble(stringTuple[i].replace(',', '.'));
+            tuple[i] = decimalFormat.parse(stringTuple[i]).doubleValue();
         }
-
         if (tuple.length != dimension) {
             throw new IOException("ERROR: Tuple with differeng dimension than originally determined at line "
                     + current_position + ".");
         }
-
         return tuple;
     }
 
     @Override
     public void reset() throws IOException{
         current_position = 0;
-        br = new BufferedReader(new FileReader(filename));
+        reader = new CSVReader(new FileReader(filename), delimiter);
         if (header) {
-            br.readLine();
+            reader.readNext();
         }
     }
 }

@@ -24,6 +24,7 @@ public class FileDialog extends Stage {
 
     private static String filepath = "";
     private static char delimiter = ';';
+    private static char decimal = ',';
     private static boolean header = false;
 
     @FXML
@@ -31,6 +32,9 @@ public class FileDialog extends Stage {
 
     @FXML
     private TextField delimiterField;
+
+    @FXML
+    private TextField decimalField;
 
     @FXML
     private CheckBox headerBox;
@@ -59,6 +63,7 @@ public class FileDialog extends Stage {
 
         filepathField.setText(filepath);
         delimiterField.setText(Character.toString(delimiter));
+        decimalField.setText(Character.toString(decimal));
         headerBox.setSelected(header);
 
     }
@@ -69,6 +74,10 @@ public class FileDialog extends Stage {
 
     public static char getDelimiter() {
         return delimiter;
+    }
+
+    public static char getDecimal() {
+        return decimal;
     }
 
     public static boolean getHeader() {
@@ -84,10 +93,15 @@ public class FileDialog extends Stage {
             infoLabel.setText("Delimiter can not be empty.");
         } else if (delimiterField.getText().length() > 1){
             infoLabel.setText("Delimiter can only be 1 character.");
+        } else if (decimalField.getText() == ""){
+            infoLabel.setText("Decimal can not be empty.");
+        } else if (decimalField.getText().length() > 1){
+            infoLabel.setText("Decimal can only be 1 character.");
         } else if (!new File(filepathField.getText()).isFile()){
             infoLabel.setText("File not found.");
         } else{
             delimiter = delimiterField.getText().charAt(0);
+            decimal = decimalField.getText().charAt(0);
             filepath = filepathField.getText();
             header = headerBox.isSelected();
 

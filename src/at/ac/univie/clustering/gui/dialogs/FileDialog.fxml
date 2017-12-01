@@ -23,7 +23,7 @@
       </Separator>
       <HBox>
          <children>
-            <Label text="Delimiter:">
+            <Label prefWidth="80.0" text="Delimiter:">
                <HBox.margin>
                   <Insets />
                </HBox.margin>
@@ -31,18 +31,33 @@
                   <Insets left="10.0" />
                </padding>
             </Label>
-            <Region prefWidth="65.0" HBox.hgrow="SOMETIMES" />
+            <Region prefWidth="60.0" HBox.hgrow="SOMETIMES" />
             <TextField fx:id="delimiterField" onAction="#onTextfieldAction" prefColumnCount="2" />
+            <Region HBox.hgrow="ALWAYS" />
+         </children>
+      </HBox>
+      <HBox>
+         <children>
+            <Label prefWidth="80.0" text="Decimal:">
+               <padding>
+                  <Insets left="10.0" />
+               </padding>
+               <HBox.margin>
+                  <Insets />
+               </HBox.margin>
+            </Label>
+            <Region prefWidth="60.0" HBox.hgrow="SOMETIMES" />
+            <TextField fx:id="decimalField" onAction="#onTextfieldAction" prefColumnCount="2" />
             <Region HBox.hgrow="ALWAYS" />
          </children>
       </HBox>
       <HBox layoutX="15.0" layoutY="65.0">
          <children>
-            <Label text="Header:">
+            <Label prefWidth="80.0" text="Header:">
                <padding>
                   <Insets left="10.0" />
                </padding></Label>
-            <Region prefWidth="90.0" HBox.hgrow="SOMETIMES" />
+            <Region prefWidth="70.0" HBox.hgrow="SOMETIMES" />
             <CheckBox fx:id="headerBox" mnemonicParsing="false" onAction="#onTextfieldAction" />
             <Region HBox.hgrow="ALWAYS" />
          </children>

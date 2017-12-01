@@ -1,6 +1,7 @@
 package at.ac.univie.clustering.cli;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.Arrays;
 
 import at.ac.univie.clustering.clusterers.bangfile.BANGFile;
@@ -8,8 +9,8 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
 
 import at.ac.univie.clustering.data.CsvWorker;
 import at.ac.univie.clustering.data.DataWorker;
@@ -19,8 +20,9 @@ public class CliMain {
 
     private static final Options options = new Options();
 
-    private static String filename = "src/resources/segment.dat.csv";
+    private static String filename;
     private static char delimiter = ';';
+    private static char decimal = ',';
     private static boolean header = false;
     private static int bucketsize = 17;
     private static int neighbourhood = 1;
@@ -33,20 +35,26 @@ public class CliMain {
     private static void parse_options(String[] args) {
 
         options.addOption("h", "help", false, "show help.");
-        options.addOption("f", true, "filename");
-        options.addOption("d", true, "delimiter");
+        options.addOption(Option.builder("f")
+                .longOpt("filename")
+                .hasArg(true)
+                .required(true)
+                .desc("filename")
+                .build());
+        options.addOption("d", "delimiter", true, "delimiter");
+        options.addOption(null, "decimal", true, "decimal");
         options.addOption(null, "header", false, "header");
-        options.addOption("s", true, "bucketsize (max population)");
-        options.addOption("n", true, "neighbourhood");
-        options.addOption("c", true, "cluster-percent");
-        options.addOption("a", false, "alias");
+        options.addOption("s", "bucketsize", true, "bucketsize (max population)");
+        options.addOption("n", "neighbourhood", true, "neighbourhood");
+        options.addOption("c", "cluster-percent", true, "cluster-percent");
+        options.addOption("a", "alias", false, "alias");
 
         CommandLineParser parser = new DefaultParser();
         CommandLine cmd = null;
 
         try {
             cmd = parser.parse(options, args);
-        } catch (ParseException e) {
+        } catch (org.apache.commons.cli.ParseException e) {
             e.printStackTrace();
             System.exit(ERR_PARAM);
         }
@@ -59,21 +67,30 @@ public class CliMain {
             header = true;
         }
 
-        if (cmd.hasOption("f"))
+        if (cmd.hasOption("f")){
             filename = cmd.getOptionValue("f");
+        }
 
-        if (cmd.hasOption("d"))
+        if (cmd.hasOption("d")){
             delimiter = cmd.getOptionValue("d").charAt(0);
+        }
 
-        if (cmd.hasOption("s"))
+        if (cmd.hasOption("decimal")){
+            decimal = cmd.getOptionValue("decimal").charAt(0);
+        }
+
+        if (cmd.hasOption("s")){
             bucketsize = Integer.parseInt(cmd.getOptionValue("s"));
+        }
+
         if (bucketsize < 4) {
             System.err.println("'bucketsize' has to be at least 4");
             System.exit(ERR_PARAM);
         }
 
-        if (cmd.hasOption("n"))
+        if (cmd.hasOption("n")){
             neighbourhood = Integer.parseInt(cmd.getOptionValue("n"));
+        }
 
         if (cmd.hasOption("c")) {
             clusterPercent = Integer.parseInt(cmd.getOptionValue("s"));
@@ -83,9 +100,9 @@ public class CliMain {
             }
         }
 
-        if (cmd.hasOption("a"))
+        if (cmd.hasOption("a")){
             bangAlias = true;
-
+        }
     }
 
     private static void help() {
@@ -101,7 +118,7 @@ public class CliMain {
      * @param data
      * @throws IOException, NumberFormatException
      */
-    private static void readData(Clusterer cluster, DataWorker data) throws IOException, NumberFormatException {
+    private static void readData(Clusterer cluster, DataWorker data) throws IOException, ParseException {
         int tuplesRead = 0;
         double[] tuple;
 
@@ -137,7 +154,7 @@ public class CliMain {
         DataWorker data = null;
 
         try {
-            data = new CsvWorker(filename, delimiter, header);
+            data = new CsvWorker(filename, delimiter, decimal, header);
         } catch (IOException e) {
             System.err.println(e.getMessage());
             System.exit(ERR_EXCEPTION);
@@ -173,10 +190,10 @@ public class CliMain {
         try {
             readData(cluster, data);
         } catch (IOException e) {
-            System.err.println("Problem while reading file: " + e.getMessage());
+            System.err.println("ERROR: Problem while reading file: " + e.getMessage());
             System.exit(ERR_EXCEPTION);
-        } catch (NumberFormatException e) {
-            System.err.println("ERROR: Wrong format of data: " + e.getMessage());
+        } catch (ParseException e) {
+            System.err.println("ERROR: " + e.getMessage());
             System.exit(ERR_EXCEPTION);
         }
 
