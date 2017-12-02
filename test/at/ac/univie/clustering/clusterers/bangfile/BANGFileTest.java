@@ -165,12 +165,24 @@ public class BANGFileTest {
 
         bangFile.buildClusters();
 
-        assertEquals(0, bangFile.clusterTuple(new double[] {0.25, 0.25, 0.25}));
-        assertEquals(0, bangFile.clusterTuple(new double[] {0.2, 0.2, 0.2}));
-        assertEquals(0, bangFile.clusterTuple(new double[] {0.3, 0.3, 0.3}));
-        assertEquals(1, bangFile.clusterTuple(new double[] {0.7, 0.7, 0.7}));
-        assertEquals(1, bangFile.clusterTuple(new double[] {0.75, 0.75, 0.75}));
-        assertEquals(1, bangFile.clusterTuple(new double[] {0.8, 0.8, 0.8}));
+        assertEquals(1, bangFile.clusterTuple(new double[] {0.23, 0.23, 0.23}));
+        assertEquals(1, bangFile.clusterTuple(new double[] {0.25, 0.25, 0.25}));
+        assertEquals(1, bangFile.clusterTuple(new double[] {0.27, 0.27, 0.27}));
+        assertEquals(1, bangFile.clusterTuple(new double[] {0.22, 0.28, 0.22}));
+        assertEquals(1, bangFile.clusterTuple(new double[] {0.28, 0.22, 0.28}));
+
+        assertEquals(0, bangFile.clusterTuple(new double[] {0.73, 0.73, 0.73}));
+        assertEquals(0, bangFile.clusterTuple(new double[] {0.75, 0.75, 0.75}));
+        assertEquals(0, bangFile.clusterTuple(new double[] {0.77, 0.77, 0.77}));
+        assertEquals(0, bangFile.clusterTuple(new double[] {0.72, 0.78, 0.72}));
+        assertEquals(0, bangFile.clusterTuple(new double[] {0.78, 0.72, 0.78}));
+
+        assertEquals(-1, bangFile.clusterTuple(new double[] {0.1, 0.1, 0.1}));
+        assertEquals(-1, bangFile.clusterTuple(new double[] {0.5, 0.5, 0.5}));
+        assertEquals(-1, bangFile.clusterTuple(new double[] {0.9, 0.9, 0.9}));
+        assertEquals(-1, bangFile.clusterTuple(new double[] {0.75, 0.75, 0.1}));
+        assertEquals(-1, bangFile.clusterTuple(new double[] {0.9, 0.25, 0.25}));
+        assertEquals(-1, bangFile.clusterTuple(new double[] {0.25, 0.5, 0.25}));
 
 	}
 

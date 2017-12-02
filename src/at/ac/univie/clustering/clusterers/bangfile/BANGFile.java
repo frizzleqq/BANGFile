@@ -589,7 +589,12 @@ public class BANGFile implements Clusterer {
     public int clusterTuple(double[] tuple){
         long region = mapRegion(tuple);
         DirectoryEntry dirEntry = findRegion(region, dimensionLevels[0]);
-        return clusters.indexOf(dirEntry.getRegion());
+        for(Cluster c : clusters){
+            if(c.regions.indexOf(dirEntry.getRegion()) >= 0){
+                return clusters.indexOf(c);
+            }
+        }
+        return -1;
     }
 
     @Override
