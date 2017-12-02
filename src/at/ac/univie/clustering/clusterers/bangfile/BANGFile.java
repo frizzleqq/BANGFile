@@ -31,17 +31,26 @@ public class BANGFile implements Clusterer {
     private int[] scaleCoordinates = null; // coordinate on every dimensions scale (map value to region). 0 is a dummy value
     private DirectoryEntry bangFile;
     private List<TupleRegion> dendogram;
-    private List<Cluster> clusters;
+    private List<Cluster> clusters = new ArrayList<Cluster>();
     private int nAlias;
 
     private class Cluster{
         public List<TupleRegion> regions = new ArrayList<TupleRegion>();
+
         public int getPopulation(){
             int population = 0;
             for(TupleRegion r : regions){
                 population += r.getTupleList().size();
             }
             return population;
+        }
+
+        public List<double[]> getTuples(){
+            List<double[]> tuples = new ArrayList<double[]>();
+            for(TupleRegion r :regions){
+                tuples.addAll(r.getTupleList());
+            }
+            return tuples;
         }
     }
 
@@ -582,6 +591,11 @@ public class BANGFile implements Clusterer {
             }
         });
         return clusters;
+    }
+
+    @Override
+    public List<double[]> getCluster(int index) throws IndexOutOfBoundsException{
+        return clusters.get(index).getTuples();
     }
 
     //TODO: this desperately needs to look for logical regions

@@ -17,6 +17,8 @@ public interface Clusterer {
 
     void buildClusters();
 
+    List<double[]> getCluster(int index) throws IndexOutOfBoundsException;
+
     int clusterTuple(double[] tuple);
 
     Object getRootDirectory();
