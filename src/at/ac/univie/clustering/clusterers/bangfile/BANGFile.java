@@ -4,10 +4,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import at.ac.univie.clustering.clusterers.Clusterer;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 
 /**
  * @author Florian Fritz
@@ -17,15 +24,15 @@ public class BANGFile implements Clusterer {
     //TODO comments for class variables
 
     /** Single line description */
-    private int tuplesCount = 0;
-    private int dimension;
+    private int tuplesCount;
+    private int dimensions;
     private int bucketsize;
     private int neighbourCondition;
     private int clusterPercent;
 
     /**
      * multi line description
-     * how often did we split a dimension? 0 is the sum of all dimensions
+     * how often did we split a dimensions? 0 is the sum of all dimensions
      */
     private int[] dimensionLevels = null;
     private int[] scaleCoordinates = null; // coordinate on every dimensions scale (map value to region). 0 is a dummy value
@@ -47,7 +54,7 @@ public class BANGFile implements Clusterer {
 
         public List<double[]> getTuples(){
             List<double[]> tuples = new ArrayList<double[]>();
-            for(TupleRegion r :regions){
+            for(TupleRegion r : regions){
                 tuples.addAll(r.getTupleList());
             }
             return tuples;
@@ -55,45 +62,97 @@ public class BANGFile implements Clusterer {
     }
 
     /**
-     * Create bangfile with default neighbourCondition (1) and clusterPercent (50)
-     *
-     * @param dimension Dimensions of dataset
-     * @param bucketsize Maximum number of tuples in bucket
+     * Build options object used to parse provided arguments
+     * @return options
      */
-    public BANGFile(int dimension, int bucketsize) {
-        this(dimension, bucketsize, 1, 50);
+    @Override
+    public Options listOptions(){
+        Options options = new Options();
+        options.addOption("s", "bucketsize", true, "Max population of a single " +
+                "data bucket. Depending on the size of the dataset, a smaller bucketsize may yield more accurate " +
+                "clusters for the cost of performance. Defaults to '4'.");
+        options.addOption("n", "neighbourhood", true, "Defines amount of dimensions that " +
+                "need to touch to determine neighbourhood (1 is a line, 2 is a plane, etc.). Defaults to strictest possible value 'dimension - 1'.");
+        options.addOption("c", "cluster-percent", true, "Percentage of tuples that will be " +
+                "considered when building the cluster model. Ignoring 'outliers' could lead to better " +
+                "cluster centers. Defaults to 50.");
+        //options.addOption("a", "alias", false, "alias");
+
+        return options;
     }
 
     /**
-     * Create bangfile with provided neighbourhoodCondition and clusterPercent
-     *
-     * @param dimension Dimensions of dataset
-     * @param bucketsize Maximum number of tuples in bucket
-     * @param neighbourCondition Number of additional dimensions needed for neighbourhood condition (from 0 to dimensions-1)
-     * @param clusterPercent TODO
+     * Parse arguments and assaign values to variables while verifying allowed values.
+     * @param args
      */
-    public BANGFile(int dimension, int bucketsize, int neighbourCondition, int clusterPercent) {
+    @Override
+    public void setOptions(String[] args) throws ParseException {
+        CommandLineParser parser = new DefaultParser();
+        CommandLine cmdLine = parser.parse(listOptions(), args);
 
-        this.dimension = dimension;
-        this.bucketsize = bucketsize;
-        this.clusterPercent = clusterPercent;
+        if (cmdLine.hasOption("s")){
+            bucketsize = Integer.parseInt(cmdLine.getOptionValue("s", "4"));
+            if (bucketsize < 4) {
+                throw new ParseException("'bucketsize' has to be at least 4");
+            }
+        }
 
-        this.neighbourCondition = dimension - neighbourCondition;
+        if (cmdLine.hasOption("n")){
+            neighbourCondition = Integer.parseInt(cmdLine.getOptionValue("n", Integer.toString(dimensions - 1)));
+            if (neighbourCondition < 1){
+                throw new ParseException("'neighbourhood' has to be at least 0");
+            }
+            if (neighbourCondition >= dimensions){
+                throw new ParseException("Provided neighbourhood-condition must be smaller than amount of dimensions");
+            }
+        }
 
-        dimensionLevels = new int[dimension + 1]; // level[0] = sum level[i]
+        if (cmdLine.hasOption("c")) {
+            clusterPercent = Integer.parseInt(cmdLine.getOptionValue("c", "50"));
+            if (clusterPercent < 0 || clusterPercent > 100) {
+                throw new ParseException("'cluster-percent' has to be between 0 and 100.");
+            }
+        }
+
+        /*
+        if (cmdLine.hasOption("a")){
+            bangAlias = true;
+        }*/
+    }
+
+    /**
+     * Lists available options with provided or default values.
+     * @return Map containing option and argument
+     */
+    @Override
+    public Map<String, String> getOptions() {
+        Map<String, String> options = new HashMap<String, String>();
+        options.put("bucketsize", "" + bucketsize);
+        options.put("neighbourhood", "" + neighbourCondition);
+        options.put("cluster-percent", "" + clusterPercent);
+        return options;
+    }
+
+    /**
+     * Create root of bangfile with provided number of dimensions.
+     * Set default values for options.
+     *
+     * @param dimensions Dimensions of dataset
+     */
+    public BANGFile(int dimensions) {
+        this.dimensions = dimensions;
+        this.bucketsize = 4;
+        this.neighbourCondition = dimensions - 1;
+        this.clusterPercent = 50;
+
+        dimensionLevels = new int[this.dimensions + 1]; // level[0] = sum level[i]
         Arrays.fill(dimensionLevels, 0);
-
-        scaleCoordinates = new int[dimension + 1]; // grid[0] = dummy
+        scaleCoordinates = new int[this.dimensions + 1]; // grid[0] = dummy
         Arrays.fill(scaleCoordinates, 0);
 
         // create root of BANGFile file
         bangFile = new DirectoryEntry();
         bangFile.setRegion(new TupleRegion(0, 0));
-    }
-
-    @Override
-    public int numberOfDimensions() {
-        return dimension;
     }
 
     @Override
@@ -180,7 +239,7 @@ public class BANGFile implements Clusterer {
     }
 
     /**
-     * Based on the current partial levels of every dimension we determine the scale value representing
+     * Based on the current partial levels of every dimensions we determine the scale value representing
      * the coordinate on each dimensions scale.
      *
      * See BANGClustererTest for examples.
@@ -192,7 +251,7 @@ public class BANGFile implements Clusterer {
         long region = 0;
 
         // find placement in scale
-        for (int i = 1; i <= dimension; i++) {
+        for (int i = 1; i <= dimensions; i++) {
             scaleCoordinates[i] = (int) (tuple[i - 1] * (1 << dimensionLevels[i]));
         }
 
@@ -200,8 +259,8 @@ public class BANGFile implements Clusterer {
         long offset = 1;
 
         for (int k = 0; count < dimensionLevels[0]; k++) {
-            i = (k % dimension) + 1; // index starts with 1
-            j = k / dimension; // j ... from 0 to dimensionLevels[i] - 1
+            i = (k % dimensions) + 1; // index starts with 1
+            j = k / dimensions; // j ... from 0 to dimensionLevels[i] - 1
 
             if (j < dimensionLevels[i]) {
                 if ((scaleCoordinates[i] & (1 << (dimensionLevels[i] - j - 1))) != 0) {
@@ -295,7 +354,7 @@ public class BANGFile implements Clusterer {
     /**
      * Split region into 2 buddy regions.
      * <p/>
-     * If the region was in max depth, we increase level for dimension we split in.
+     * If the region was in max depth, we increase level for dimensions we split in.
      * <p/>
      * Tuples are then moved from the original region to the new regions in the
      * new level.
@@ -309,8 +368,8 @@ public class BANGFile implements Clusterer {
         dirEntry.createBuddySplit();
 
         if (dirEntry.getRegion().getLevel() == dimensionLevels[0]) {
-            //increase level for dimension we split in (splits are done in cyclical order)
-            dimensionLevels[(dimensionLevels[0] % dimension) + 1] += 1;
+            //increase level for dimensions we split in (splits are done in cyclical order)
+            dimensionLevels[(dimensionLevels[0] % dimensions) + 1] += 1;
             // sum of all levels in all dimensions
             dimensionLevels[0] += 1;
             result = true;
@@ -373,7 +432,7 @@ public class BANGFile implements Clusterer {
      * If the denser region has a lower population, we undo the buddy
      * split.
      * <p/>
-     * If the region was in max depth, we decrease level for dimension where
+     * If the region was in max depth, we decrease level for dimensions where
      * we merge.
      *
      * @param dirEntry
@@ -387,15 +446,12 @@ public class BANGFile implements Clusterer {
         DirectoryEntry sparseEntry = dirEntry.getSparseEntry();
         DirectoryEntry denseEntry = dirEntry.getDenseEntry();
 
-        int densePop = denseEntry.getRegion().getPopulation();
-        int enclosingPop = enclosingEntry.getRegion().getPopulation();
-
 		/*
          * If the population of the dense region is greater than the population
 		 * of the enclosing region, the enclosing and sparse regions can be
 		 * merged. Otherwise, undo the buddy split.
 		 */
-        if (enclosingPop < densePop) {
+        if (enclosingEntry.getRegion().getPopulation() < denseEntry.getRegion().getPopulation()) {
             dirEntry.setRegion(null);
 
             for (double[] tuple : sparseEntry.getRegion().getTupleList()) {
@@ -410,16 +466,16 @@ public class BANGFile implements Clusterer {
             // If the dense region has a follow up we move it down as a buddy
             denseEntry = checkTree(denseEntry);
 
-            if (enclosingEntry.getRegion().getPopulation() < densePop) {
+            if (enclosingEntry.getRegion().getPopulation() < denseEntry.getRegion().getPopulation()) {
                 redistribute(denseEntry, enclosingEntry);
             }
 
             return true;
 
         } else {
-            //decrease level for dimension where we merge (splits were done in cyclical order)
+            //decrease level for dimensions where we merge (splits were done in cyclical order)
             if (inc) {
-                dimensionLevels[((dimensionLevels[0] - 1) % dimension) + 1] -= 1;
+                dimensionLevels[((dimensionLevels[0] - 1) % dimensions) + 1] -= 1;
                 // sum of all levels in all dimensions
                 dimensionLevels[0] -= 1;
             }
@@ -515,7 +571,7 @@ public class BANGFile implements Clusterer {
         int startSearchPos = dendoPos + 1;
         for (Iterator<TupleRegion> it = remaining.iterator(); it.hasNext(); ){
             TupleRegion tupleReg = it.next();
-            if (dendogram.get(dendoPos).isNeighbour(tupleReg, dimension, neighbourCondition)) {
+            if (dendogram.get(dendoPos).isNeighbour(tupleReg, dimensions, neighbourCondition)) {
                 // determine position in dendogram
                 int insertPos = startSearchPos;
                 while (insertPos < dendogram.size() &&  dendogram.get(insertPos).getDensity() > tupleReg.getDensity()){
@@ -616,9 +672,10 @@ public class BANGFile implements Clusterer {
         StringBuilder builder = new StringBuilder();
         builder.append("Bang-File:");
 
-        builder.append("\nDimension: " + dimension);
+        builder.append("\nDimension: " + dimensions);
         builder.append("\nNeighbourhood-Condition: " + neighbourCondition);
         builder.append("\nBucketsize: " + bucketsize);
+        builder.append("\nCluster-Percent: " + clusterPercent);
         builder.append("\nTuples: " + tuplesCount);
 
         builder.append("\n\nClusters: " + clusters.size());

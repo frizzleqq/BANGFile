@@ -84,8 +84,8 @@
                         </HBox>
                         <HBox spacing="10.0">
                            <children>
-                              <Button mnemonicParsing="false" onAction="#onStartAction" prefWidth="70.0" text="Start" />
-                              <Button mnemonicParsing="false" onAction="#onSettingsAction" prefWidth="70.0" text="Settings" />
+                              <Button fx:id="startButton" disable="true" mnemonicParsing="false" onAction="#onStartAction" prefWidth="70.0" text="Start" />
+                              <Button fx:id="settingsButton" disable="true" mnemonicParsing="false" onAction="#onSettingsAction" prefWidth="70.0" text="Settings" />
                            </children>
                         </HBox>
                      </children>

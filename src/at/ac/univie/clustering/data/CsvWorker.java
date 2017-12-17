@@ -8,9 +8,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.text.NumberFormat;
 import java.text.ParseException;
-import java.util.Locale;
 
 import com.opencsv.CSVReader;
 
@@ -20,8 +18,8 @@ public class CsvWorker implements DataWorker {
     private final String shortFilename;
     private final char delimiter;
     private final boolean header;
-    private int nTuple = 0;
-    private int dimension = 0;
+    private int tupleCount;
+    private int dimensions;
     private int current_position;
     private DecimalFormat decimalFormat;
 
@@ -40,7 +38,6 @@ public class CsvWorker implements DataWorker {
         this.header = header;
 
         // Set formatter with desired decimal symbol
-        // TODO: option for decimal symbol
         decimalFormat = new DecimalFormat();
         DecimalFormatSymbols symbols = new DecimalFormatSymbols();
         symbols.setDecimalSeparator(decimal);
@@ -55,8 +52,8 @@ public class CsvWorker implements DataWorker {
         file = new File(filename);
 
         shortFilename = file.getName();
-        dimension = countDimension();
-        nTuple = countTuples();
+        dimensions = countDimensions();
+        tupleCount = countTuples();
 
         reader = new CSVReader(new FileReader(filename), delimiter);
         if (header) {
@@ -64,38 +61,24 @@ public class CsvWorker implements DataWorker {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see at.ac.univie.clustering.data.DataWorker#getName()
-     */
     @Override
     public String getName() {
         return shortFilename;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see at.ac.univie.clustering.data.DataWorker#getDimensions()
-     */
     @Override
-    public int getDimension() {
-        return dimension;
+    public int getDimensions() {
+        return dimensions;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see at.ac.univie.clustering.data.DataWorker#getnTuple()
-     */
     @Override
-    public int getnTuple() {
-        return nTuple;
+    public int getTupleCount() {
+        return tupleCount;
     }
 
     /**
-     * @return
+     * Verify that file exists and is not a directory.
+     * @return boolean
      */
     private boolean fileExists() {
         File f = new File(filename);
@@ -103,23 +86,23 @@ public class CsvWorker implements DataWorker {
     }
 
     /**
-     * @return
+     * Verify that file is readable.
+     * @return boolean
      */
     private boolean fileReadable() {
         File f = new File(filename);
         return f.canRead() && Files.isReadable(FileSystems.getDefault().getPath(f.getAbsolutePath()));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see at.ac.univie.clustering.data.DataWorker#countTuples()
+    /**
+     * Read entire file and count tuples. Do not count header
+     * @return tupleCount
+     * @throws IOException
      */
     private int countTuples() throws IOException {
-        int nTuple = 0;
+        int tupleCount = 0;
 
-        file = new File(filename);
-        FileReader fr = new FileReader(file);
+        FileReader fr = new FileReader(new File(filename));
         LineNumberReader lnr = new LineNumberReader(fr);
         String line;
 
@@ -127,53 +110,42 @@ public class CsvWorker implements DataWorker {
             if (line.isEmpty()) {
                 break;
             }
-            nTuple++;
+            tupleCount++;
         }
         lnr.close();
 
-        if (this.header && nTuple > 0)
-            nTuple -= 1;
-        return nTuple;
+        if (this.header && tupleCount > 0)
+            tupleCount -= 1;
+        return tupleCount;
     }
 
     /**
-     * @return
+     * Count dimensions in file based on first data tuple.
+     * @return countDimensions
+     * @throws IOException
      */
-    private int countDimension() {
-        int dimension = 0;
-        try {
-            CSVReader cr = new CSVReader(new FileReader(filename), delimiter);
-            String[] stringTuple;
-            if (header)
-                stringTuple = cr.readNext(); // maybe file has unusual header
-            stringTuple = cr.readNext();
-            dimension = stringTuple.length;
-        } catch (IOException e) {
-            e.printStackTrace();
+    private int countDimensions() throws IOException {
+        int dimensions = 0;
+        CSVReader cr = new CSVReader(new FileReader(filename), delimiter);
+        String[] stringTuple;
+        if (header){
+            cr.readNext(); // maybe file has unusual header
         }
-        return dimension;
+        stringTuple = cr.readNext();
+        dimensions = stringTuple.length;
+        return dimensions;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see at.ac.univie.clustering.data.DataWorker#getCurPosition()
-     */
     @Override
-    public int getCurPosition() {
+    public int getCurrentPosition() {
         return current_position;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see at.ac.univie.clustering.data.DataWorker#readTuple()
-     */
     @Override
     public double[] readTuple() throws IOException, ParseException {
         double[] tuple;
         current_position++;
-        if (current_position > nTuple) {
+        if (current_position > tupleCount) {
             return null;
         }
 
@@ -182,8 +154,8 @@ public class CsvWorker implements DataWorker {
         for (int i = 0; i < stringTuple.length; i++) {
             tuple[i] = decimalFormat.parse(stringTuple[i]).doubleValue();
         }
-        if (tuple.length != dimension) {
-            throw new IOException("ERROR: Tuple with differeng dimension than originally determined at line "
+        if (tuple.length != dimensions) {
+            throw new IOException("ERROR: Tuple with differeng dimensions than originally determined at line "
                     + current_position + ".");
         }
         return tuple;
@@ -196,5 +168,19 @@ public class CsvWorker implements DataWorker {
         if (header) {
             reader.readNext();
         }
+    }
+
+    @Override
+    public String toString(){
+        StringBuilder builder = new StringBuilder();
+
+        builder.append("\nFilename: " + shortFilename);
+        builder.append("\nHeader: " + header);
+        builder.append("\nDelimiter: " + delimiter);
+        builder.append("\nDecimal symbol: " + decimalFormat);
+        builder.append("\nDimensions: " + dimensions);
+        builder.append("\nTuples count: " + tupleCount);
+
+        return builder.toString();
     }
 }

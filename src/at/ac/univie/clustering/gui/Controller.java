@@ -17,6 +17,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.BorderPane;
@@ -28,6 +29,7 @@ import javafx.stage.Modality;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.Arrays;
 
 /**
  * Created by Fritzi on 10.01.2016.
@@ -58,8 +60,16 @@ public class Controller{
     @FXML
     private Label infoLabel;
 
+    @FXML
+    private Button startButton;
+
+    @FXML
+    private Button settingsButton;
+
+
     private static DataWorker data = null;
     private static Clusterer cluster = null;
+    private static Settings settings;
 
     @FXML
     public void onSelectFileAction(ActionEvent event){
@@ -74,48 +84,67 @@ public class Controller{
                 infoLabel.setText(e.getMessage());
             }
 
-            int dimension = data.getDimension();
-            int tuplesCount = data.getnTuple();
+            int dimension = data.getDimensions();
+            int tuplesCount = data.getTupleCount();
 
             if (dimension == 0) {
-                infoLabel.setText("Could not determine dimensions of provided data.");
+                infoLabel.setText("Could not determine amount of dimensions in provided dataset.");
             } else if (dimension < 2) {
-                infoLabel.setText("Could not determine at least 2 dimensions.");
+                infoLabel.setText("Could not determine minimum of 2 dimensions.");
             }
 
             if (tuplesCount == 0) {
-                infoLabel.setText("Could not determine amount of records of provided data.");
-            }
-
-            if (Settings.getNeighbourhood() >= dimension){
-                infoLabel.setText("Provided neighbourhood-condition has to be smaller than data dimension");
+                infoLabel.setText("Could not determine amount of records in provided dataset.");
             }
 
             dataLabel.setText(data.getName());
-            dimensionLabel.setText(Integer.toString(data.getDimension()));
-            recordsLabel.setText(Integer.toString(data.getnTuple()));
+            dimensionLabel.setText(Integer.toString(data.getDimensions()));
+            recordsLabel.setText(Integer.toString(data.getTupleCount()));
+
+            if (dimension > 1 && tuplesCount > 0){
+                cluster = new BANGFile(data.getDimensions());
+                startButton.setDisable(false);
+                settingsButton.setDisable(false);
+            } else{
+                startButton.setDisable(true);
+                settingsButton.setDisable(true);
+            }
         }
     }
 
     @FXML
     public void onSettingsAction(ActionEvent event){
-        Settings settings = new Settings();
+        settings = new Settings();
+        settings.createSettings(cluster.listOptions(), cluster.getOptions());
         settings.initModality(Modality.APPLICATION_MODAL);
         settings.showAndWait();
+
+        try{
+            cluster.setOptions(settings.getSettings());
+        } catch (org.apache.commons.cli.ParseException e){
+            System.out.println(e.getMessage());
+        }
     }
 
     @FXML
     public void onStartAction(ActionEvent event) throws IOException {
         if (data != null){
-            if (data.getCurPosition() > 0){
+            if (data.getCurrentPosition() > 0){
                 data.reset();
+            }
+
+            cluster = new BANGFile(data.getDimensions());
+            if (settings != null && settings.getSettings().length > 0){
+                try{
+                    cluster.setOptions(settings.getSettings());
+                } catch (org.apache.commons.cli.ParseException e){
+                    System.out.println(e.getMessage());
+                }
             }
 
             //reset ui elements
             dendogramChart.getData().clear();
             dendogramChart.layout();
-
-            cluster = new BANGFile(data.getDimension(), Settings.getBucketsize(), Settings.getNeighbourhood(), 50);
 
             Task<Boolean> runFactoryTask;
 
@@ -127,6 +156,7 @@ public class Controller{
                     public void handle(WorkerStateEvent t)
                     {
                         cluster.buildClusters();
+                        System.out.println(cluster.toString());
 
                         XYChart.Series dendogramSeries = new XYChart.Series();
                         dendogramSeries.setName("Dendogram");
@@ -186,21 +216,21 @@ public class Controller{
                 double[] tuple;
 
                 while ((tuple = data.readTuple()) != null) {
-                    if (tuple.length != data.getDimension()) {
+                    if (tuple.length != data.getDimensions()) {
                         infoLabel.setText(String.format("Tuple-dimension [%d] differs from predetermined dimension [%d].\n",
-                                tuple.length, data.getDimension()));
+                                tuple.length, data.getDimensions()));
                         result = false;
                     }
 
                     for (double d : tuple) {
                         if (d < 0 || d > 1) {
-                            infoLabel.setText(String.format("Incorrect tuple value found [%d].\n", d));
+                            infoLabel.setText(String.format("Incorrect tuple value found [%f].\n", d));
                             result = false;
                         }
                     }
 
                     cluster.insertTuple(tuple);
-                    updateProgress(data.getCurPosition() * 1 / data.getnTuple(), data.getnTuple());
+                    updateProgress(data.getCurrentPosition() * 1 / data.getTupleCount(), data.getTupleCount());
                 }
                 return result;
             }

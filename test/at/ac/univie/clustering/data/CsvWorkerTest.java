@@ -25,7 +25,7 @@ public class CsvWorkerTest {
             e.printStackTrace();
             Assert.fail();
         }
-        assertEquals(2, csv.getnTuple(), 0);
+        assertEquals(2, csv.getTupleCount(), 0);
     }
 
     @Test
@@ -37,7 +37,7 @@ public class CsvWorkerTest {
             e.printStackTrace();
             Assert.fail();
         }
-        assertEquals(2, csv.getnTuple(), 0);
+        assertEquals(2, csv.getTupleCount(), 0);
     }
 
     @Test
@@ -49,7 +49,7 @@ public class CsvWorkerTest {
             e.printStackTrace();
             Assert.fail();
         }
-        assertEquals(4, csv.getDimension(), 0);
+        assertEquals(4, csv.getDimensions(), 0);
     }
 
     @Test
@@ -61,7 +61,7 @@ public class CsvWorkerTest {
             e.printStackTrace();
             Assert.fail();
         }
-        assertEquals(4, csv.getDimension(), 0);
+        assertEquals(4, csv.getDimensions(), 0);
     }
 
     @Test
@@ -76,11 +76,11 @@ public class CsvWorkerTest {
 
         double[] x = new double[]{0.1, 0.2, 0.3, 0.4};
         assertArrayEquals(x, csv.readTuple(), 0);
-        assertEquals(1, csv.getCurPosition(), 0);
+        assertEquals(1, csv.getCurrentPosition(), 0);
 
         x = new double[]{0.5, 0.6, 0.7, 0.8};
         assertArrayEquals(x, csv.readTuple(), 0);
-        assertEquals(2, csv.getCurPosition(), 0);
+        assertEquals(2, csv.getCurrentPosition(), 0);
     }
 
     @Test
@@ -95,11 +95,11 @@ public class CsvWorkerTest {
 
         double[] x = new double[]{0.1, 0.2, 0.3, 0.4};
         assertArrayEquals(x, csv.readTuple(), 0);
-        assertEquals(1, csv.getCurPosition(), 0);
+        assertEquals(1, csv.getCurrentPosition(), 0);
 
         x = new double[]{0.5, 0.6, 0.7, 0.8};
         assertArrayEquals(x, csv.readTuple(), 0);
-        assertEquals(2, csv.getCurPosition(), 0);
+        assertEquals(2, csv.getCurrentPosition(), 0);
     }
 
     @Test

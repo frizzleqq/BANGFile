@@ -1,8 +1,6 @@
 package at.ac.univie.clustering.gui.dialogs;
 
 import javafx.event.ActionEvent;
-import javafx.event.Event;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -10,7 +8,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.input.KeyEvent;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -89,11 +86,11 @@ public class FileDialog extends Stage {
     }
 
     public void onOkButtonAction(ActionEvent actionEvent) {
-        if (delimiterField.getText() == ""){
+        if (delimiterField.getText().equals("")){
             infoLabel.setText("Delimiter can not be empty.");
         } else if (delimiterField.getText().length() > 1){
             infoLabel.setText("Delimiter can only be 1 character.");
-        } else if (decimalField.getText() == ""){
+        } else if (decimalField.getText().equals("")){
             infoLabel.setText("Decimal can not be empty.");
         } else if (decimalField.getText().length() > 1){
             infoLabel.setText("Decimal can only be 1 character.");
@@ -116,7 +113,7 @@ public class FileDialog extends Stage {
 
     public void onBrowseButtonAction(ActionEvent actionEvent) {
         FileChooser fileChooser = new FileChooser();
-        if (filepath != ""){
+        if (!filepath.equals("")){
             fileChooser.setInitialDirectory(new File(filepath).getParentFile());
         } else{
             fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));

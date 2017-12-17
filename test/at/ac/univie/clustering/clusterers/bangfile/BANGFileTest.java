@@ -7,37 +7,16 @@ import java.text.ParseException;
 import java.util.ArrayList;
 
 import at.ac.univie.clustering.data.CsvWorker;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class BANGFileTest {
 
     private static final String CSV_FILE_CLUSTERS = "test/resources/3d_2clusters.csv";
 
-    @BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-	}
-
-	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
-	}
-
-	@Before
-	public void setUp() throws Exception {
-	}
-
-	@After
-	public void tearDown() throws Exception {
-	}
-
 	@Test
-    public void testMapRegion() {
-        BANGFile bangFile = new BANGFile(2, 4);
+    public void testMapRegion() throws org.apache.commons.cli.ParseException {
+        BANGFile bangFile = new BANGFile(2);
+        bangFile.setOptions(new String[] {});
         bangFile.setDimensionLevels( new int[] {2, 1, 1});
         /*
             ---------
@@ -72,13 +51,14 @@ public class BANGFileTest {
     }
 
 	@Test
-	public void testInsertTuple() {
+	public void testInsertTuple() throws org.apache.commons.cli.ParseException {
 		ArrayList<double[]> tuples = new ArrayList<>();
 		tuples.add(new double[] { 0.1, 0.2 });
 		tuples.add(new double[] { 0.2, 0.3 });
 		tuples.add(new double[] { 0.3, 0.4 });
 
-		BANGFile bangFile = new BANGFile(2, 4);
+		BANGFile bangFile = new BANGFile(2);
+        bangFile.setOptions(new String[] {});
 
 		for (double[] tuple : tuples) {
 			bangFile.insertTuple(tuple);
@@ -91,8 +71,9 @@ public class BANGFileTest {
 	}
 
 	@Test
-	public void testNumberOfTuples(){
-		BANGFile bangFile = new BANGFile(2, 4);
+	public void testNumberOfTuples() throws org.apache.commons.cli.ParseException {
+		BANGFile bangFile = new BANGFile(2);
+        bangFile.setOptions(new String[] {});
 		assertEquals(0, bangFile.numberOfTuples());
 		double[] tuple;
 		for(int x = 0; x < 100; x++){
@@ -105,7 +86,7 @@ public class BANGFileTest {
 	}
 
 	@Test
-	public void testBuddySplit() {
+	public void testBuddySplit() throws org.apache.commons.cli.ParseException {
 		ArrayList<double[]> tuples = new ArrayList<>();
 		tuples.add(new double[] { 0.1f, 0.1f });
 		tuples.add(new double[] { 0.2f, 0.1f });
@@ -114,7 +95,8 @@ public class BANGFileTest {
 		tuples.add(new double[] { 0.7f, 0.1f });
 		tuples.add(new double[] { 0.8f, 0.1f });
 
-		BANGFile bangFile = new BANGFile(2, 4);
+		BANGFile bangFile = new BANGFile(2);
+        bangFile.setOptions(new String[] {});
 
 		for (double[] tuple : tuples) {
 			bangFile.insertTuple(tuple);
@@ -127,9 +109,10 @@ public class BANGFileTest {
 	}
 
 	@Test
-	public void testNumberOfClusters() throws IOException, ParseException {
+	public void testNumberOfClusters() throws IOException, ParseException, org.apache.commons.cli.ParseException {
         CsvWorker csv = new CsvWorker(CSV_FILE_CLUSTERS, ';', ',', true);
-        BANGFile bangFile = new BANGFile(csv.getDimension(), 4, 1, 50);
+        BANGFile bangFile = new BANGFile(csv.getDimensions());
+        bangFile.setOptions(new String[] {});
 
         double[] tuple;
         while ((tuple = csv.readTuple()) != null) {
@@ -141,9 +124,10 @@ public class BANGFileTest {
 	}
 
     @Test
-    public void testBuildClusters() throws IOException, ParseException {
+    public void testBuildClusters() throws IOException, ParseException, org.apache.commons.cli.ParseException {
         CsvWorker csv = new CsvWorker(CSV_FILE_CLUSTERS, ';', ',', true);
-        BANGFile bangFile = new BANGFile(csv.getDimension(), 4, 1,90);
+        BANGFile bangFile = new BANGFile(csv.getDimensions());
+        bangFile.setOptions(new String[] {"-c", "90"});
 
         double[] tuple;
         while ((tuple = csv.readTuple()) != null) {
@@ -164,9 +148,10 @@ public class BANGFileTest {
     }
 
 	@Test
-	public void testClusterTuple() throws IOException, ParseException  {
+	public void testClusterTuple() throws IOException, ParseException, org.apache.commons.cli.ParseException  {
         CsvWorker csv = new CsvWorker(CSV_FILE_CLUSTERS, ';', ',', true);
-        BANGFile bangFile = new BANGFile(csv.getDimension(), 4, 1,90);
+        BANGFile bangFile = new BANGFile(csv.getDimensions());
+        bangFile.setOptions(new String[] {"-c", "90"});
 
         double[] tuple;
         while ((tuple = csv.readTuple()) != null) {
