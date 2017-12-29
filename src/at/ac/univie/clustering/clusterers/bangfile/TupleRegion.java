@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * @author Florian Fritz
+ */
 public class TupleRegion implements Comparable<TupleRegion> {
 
     private int population = 0;

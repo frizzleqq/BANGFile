@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * @author Florian Fritz
+ */
 public class TupleRegionTest {
 
 	@Test

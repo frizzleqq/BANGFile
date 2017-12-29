@@ -17,24 +17,30 @@ import org.apache.commons.cli.Options;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Created by Fritzi on 10.01.2016.
+ * @author Florian Fritz
  */
 public class Settings extends Stage {
+
+    public static void setSettings(Map<String, String> settings) {
+        Settings.settings = settings;
+    }
+
+    private static Map<String, String> settings;
 
     @FXML
     private VBox settingsVBox;
 
-    private String[] settings = new String[]{};
+    @FXML
+    private Label infoLabel;
 
-    public String[] getSettings() {
-        return settings;
-    }
+    private boolean complete = false;
 
-    public Settings()
+    public Settings(Options options)
     {
         setTitle("Settings");
 
@@ -52,6 +58,22 @@ public class Settings extends Stage {
             e.printStackTrace();
         }
 
+        createSettings(options, Settings.settings);
+    }
+
+    public boolean isComplete() {
+        return complete;
+    }
+
+    public String[] getSettings() {
+        List<String> settingsList = new ArrayList<String>();
+        for (String s : settings.keySet()){
+            if(!settings.get(s).equals("false")){
+                settingsList.add("--" + s);
+                settingsList.add(settings.get(s));
+            }
+        }
+        return settingsList.toArray(new String[0]);
     }
 
     public void createSettings(Options options, Map<String, String> optionArgs){
@@ -80,7 +102,7 @@ public class Settings extends Stage {
     }
 
     public void onOkButtonAction(ActionEvent actionEvent) {
-        List<String> settings = new ArrayList<String>();
+        Map<String, String> settings = new HashMap<String, String>();
         HBox optionHBox;
         Label optionLabel;
         for (Node node : settingsVBox.getChildren()){
@@ -88,15 +110,17 @@ public class Settings extends Stage {
             optionLabel = (Label) optionHBox.getChildren().get(0);
 
             if (optionHBox.getChildren().get(1) instanceof TextField){
-                if (!((TextField) optionHBox.getChildren().get(1)).getText().equals("")){
-                    settings.add("--" + optionLabel.getText());
-                    settings.add(((TextField) optionHBox.getChildren().get(1)).getText());
+                if (((TextField) optionHBox.getChildren().get(1)).getText().equals("")){
+                    infoLabel.setText(optionLabel.getText() + " can not be empty.");
+                    return;
                 }
-            } else if(((CheckBox) optionHBox.getChildren().get(1)).isSelected()){
-                settings.add("--" + optionLabel.getText());
+                settings.put(optionLabel.getText(), ((TextField) optionHBox.getChildren().get(1)).getText());
+            } else if(optionHBox.getChildren().get(1) instanceof CheckBox){
+                settings.put(optionLabel.getText(), String.valueOf(((CheckBox) optionHBox.getChildren().get(1)).isSelected()));
             }
         }
-        this.settings = settings.toArray(new String[0]);
+        Settings.settings = settings;
+        complete = true;
         close();
     }
 

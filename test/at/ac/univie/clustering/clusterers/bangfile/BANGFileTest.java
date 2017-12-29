@@ -9,9 +9,13 @@ import java.util.ArrayList;
 import at.ac.univie.clustering.data.CsvWorker;
 import org.junit.Test;
 
+/**
+ * @author Florian Fritz
+ */
 public class BANGFileTest {
 
     private static final String CSV_FILE_CLUSTERS = "test/resources/3d_2clusters.csv";
+    private static final String CSV_FILE_NO_HEADER = "test/resources/4d_noheader.csv";
 
 	@Test
     public void testMapRegion() throws org.apache.commons.cli.ParseException {
@@ -109,9 +113,9 @@ public class BANGFileTest {
 	}
 
 	@Test
-	public void testNumberOfClusters() throws IOException, ParseException, org.apache.commons.cli.ParseException {
+	public void testNumberOfClusters() throws Exception {
         CsvWorker csv = new CsvWorker(CSV_FILE_CLUSTERS, ';', ',', true);
-        BANGFile bangFile = new BANGFile(csv.getDimensions());
+        BANGFile bangFile = new BANGFile(csv.numberOfDimensions());
         bangFile.setOptions(new String[] {});
 
         double[] tuple;
@@ -124,9 +128,9 @@ public class BANGFileTest {
 	}
 
     @Test
-    public void testBuildClusters() throws IOException, ParseException, org.apache.commons.cli.ParseException {
+    public void testBuildClusters() throws Exception {
         CsvWorker csv = new CsvWorker(CSV_FILE_CLUSTERS, ';', ',', true);
-        BANGFile bangFile = new BANGFile(csv.getDimensions());
+        BANGFile bangFile = new BANGFile(csv.numberOfDimensions());
         bangFile.setOptions(new String[] {"-c", "90"});
 
         double[] tuple;
@@ -148,9 +152,9 @@ public class BANGFileTest {
     }
 
 	@Test
-	public void testClusterTuple() throws IOException, ParseException, org.apache.commons.cli.ParseException  {
+	public void testClusterTuple() throws Exception  {
         CsvWorker csv = new CsvWorker(CSV_FILE_CLUSTERS, ';', ',', true);
-        BANGFile bangFile = new BANGFile(csv.getDimensions());
+        BANGFile bangFile = new BANGFile(csv.numberOfDimensions());
         bangFile.setOptions(new String[] {"-c", "90"});
 
         double[] tuple;
@@ -179,5 +183,18 @@ public class BANGFileTest {
         assertEquals(-1, bangFile.clusterTuple(new double[] {0.25, 0.5, 0.25}));
 
 	}
+
+    @Test
+    public void testClusterSingleRegion() throws Exception {
+        CsvWorker csv = new CsvWorker(CSV_FILE_NO_HEADER, ';', ',', false);
+        BANGFile bangFile = new BANGFile(csv.numberOfDimensions());
+        bangFile.setOptions(new String[] {"-c", "90"});
+
+        double[] tuple;
+        while ((tuple = csv.readTuple()) != null) {
+            bangFile.insertTuple(tuple);
+        }
+        bangFile.buildClusters();
+    }
 
 }

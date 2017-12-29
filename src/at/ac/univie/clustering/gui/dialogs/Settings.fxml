@@ -16,7 +16,7 @@
          <children>
             <HBox>
                <children>
-                  <Label fx:id="infoLabel" prefWidth="220.0" textFill="#fc0000" />
+                  <Label fx:id="infoLabel" prefWidth="358.0" textFill="#fc0000" />
                </children>
             </HBox>
             <HBox alignment="CENTER_RIGHT" spacing="8.0">
@@ -30,7 +30,7 @@
             </HBox>
          </children>
          <padding>
-            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+            <Insets top="10.0" />
          </padding>
       </VBox>
     </children>

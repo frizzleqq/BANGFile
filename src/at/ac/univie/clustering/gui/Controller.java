@@ -8,7 +8,9 @@ import at.ac.univie.clustering.clusterers.bangfile.DirectoryEntry;
 import at.ac.univie.clustering.clusterers.bangfile.TupleRegion;
 import at.ac.univie.clustering.gui.dialogs.FileDialog;
 import at.ac.univie.clustering.gui.dialogs.GridDialog;
+import at.ac.univie.clustering.gui.dialogs.SaveDialog;
 import at.ac.univie.clustering.gui.dialogs.Settings;
+import com.opencsv.CSVWriter;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
@@ -17,9 +19,11 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.TextArea;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
@@ -27,12 +31,17 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
 import javafx.stage.Modality;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.text.ParseException;
-import java.util.Arrays;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
- * Created by Fritzi on 10.01.2016.
+ * @author Florian Fritz
  */
 public class Controller{
 
@@ -58,18 +67,29 @@ public class Controller{
     private ProgressBar progressBar;
 
     @FXML
-    private Label infoLabel;
-
-    @FXML
     private Button startButton;
 
     @FXML
     private Button settingsButton;
 
+    @FXML
+    private Button saveButton;
+
+    @FXML
+    private TextArea logArea;
+
 
     private static DataWorker data = null;
-    private static Clusterer cluster = null;
-    private static Settings settings;
+    private static Clusterer clusterer = null;
+
+    private void errorDialog(String errorType, String errorMessage){
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText(errorType);
+        alert.setContentText(errorMessage);
+
+        alert.showAndWait();
+    }
 
     @FXML
     public void onSelectFileAction(ActionEvent event){
@@ -79,67 +99,75 @@ public class Controller{
 
         if(fileDialog.isComplete()){
             try {
-                data = new CsvWorker(FileDialog.getFilepath(), FileDialog.getDelimiter(), FileDialog.getDecimal(), FileDialog.getHeader());
-            } catch (IOException e) {
-                infoLabel.setText(e.getMessage());
-            }
+                data = new CsvWorker(FileDialog.getFilename(), FileDialog.getDelimiter(), FileDialog.getDecimal(), FileDialog.getHeader());
 
-            int dimension = data.getDimensions();
-            int tuplesCount = data.getTupleCount();
+                int tuplesCount = data.numberOfTuples();
+                dataLabel.setText(data.getName());
+                dimensionLabel.setText(Integer.toString(data.numberOfDimensions()));
+                recordsLabel.setText(Integer.toString(tuplesCount));
 
-            if (dimension == 0) {
-                infoLabel.setText("Could not determine amount of dimensions in provided dataset.");
-            } else if (dimension < 2) {
-                infoLabel.setText("Could not determine minimum of 2 dimensions.");
-            }
+                if (data.numberOfDimensions() == 0) {
+                    throw new Exception("Could not determine amount of dimensions in provided dataset.");
+                }
+                if (data.numberOfDimensions() < 2) {
+                    throw new Exception("Could not determine minimum of 2 dimensions.");
+                }
+                if (tuplesCount == 0) {
+                    throw new Exception("Could not determine amount of records in provided dataset.");
+                }
 
-            if (tuplesCount == 0) {
-                infoLabel.setText("Could not determine amount of records in provided dataset.");
-            }
+                clusterer = new BANGFile(data.numberOfDimensions());
+                Settings.setSettings(clusterer.getOptions());
 
-            dataLabel.setText(data.getName());
-            dimensionLabel.setText(Integer.toString(data.getDimensions()));
-            recordsLabel.setText(Integer.toString(data.getTupleCount()));
-
-            if (dimension > 1 && tuplesCount > 0){
-                cluster = new BANGFile(data.getDimensions());
                 startButton.setDisable(false);
                 settingsButton.setDisable(false);
-            } else{
+                saveButton.setDisable(true);
+
+            } catch (IOException e) {
+                errorDialog("Error while selecting file", e.getMessage());
                 startButton.setDisable(true);
                 settingsButton.setDisable(true);
+                saveButton.setDisable(true);
+            } catch (Exception e){
+                errorDialog( "Error while reading file", e.getMessage());
+                startButton.setDisable(true);
+                settingsButton.setDisable(true);
+                saveButton.setDisable(true);
             }
         }
     }
 
     @FXML
     public void onSettingsAction(ActionEvent event){
-        settings = new Settings();
-        settings.createSettings(cluster.listOptions(), cluster.getOptions());
+        Settings settings = new Settings(clusterer.listOptions());
         settings.initModality(Modality.APPLICATION_MODAL);
         settings.showAndWait();
 
-        try{
-            cluster.setOptions(settings.getSettings());
-        } catch (org.apache.commons.cli.ParseException e){
-            System.out.println(e.getMessage());
+        if(settings.isComplete()) {
+            try {
+                clusterer.setOptions(settings.getSettings());
+            } catch (org.apache.commons.cli.ParseException e) {
+                errorDialog("Error while setting options", e.getMessage());
+            }
         }
     }
 
     @FXML
-    public void onStartAction(ActionEvent event) throws IOException {
+    public void onStartAction(ActionEvent event) throws IOException, org.apache.commons.cli.ParseException {
         if (data != null){
             if (data.getCurrentPosition() > 0){
                 data.reset();
             }
 
-            cluster = new BANGFile(data.getDimensions());
-            if (settings != null && settings.getSettings().length > 0){
-                try{
-                    cluster.setOptions(settings.getSettings());
-                } catch (org.apache.commons.cli.ParseException e){
-                    System.out.println(e.getMessage());
+            if(clusterer.numberOfTuples() > 0){
+                Map<String, String> currentOptions = clusterer.getOptions();
+                List<String> settings = new ArrayList<String>();
+                for (String s : currentOptions.keySet()){
+                    settings.add("--" + s);
+                    settings.add(currentOptions.get(s));
                 }
+                clusterer = new BANGFile(data.numberOfDimensions());
+                clusterer.setOptions(settings.toArray(new String[0]));
             }
 
             //reset ui elements
@@ -155,18 +183,18 @@ public class Controller{
                     @Override
                     public void handle(WorkerStateEvent t)
                     {
-                        cluster.buildClusters();
-                        System.out.println(cluster.toString());
+                        clusterer.buildClusters();
+                        logArea.setText(clusterer.toString());
 
                         XYChart.Series dendogramSeries = new XYChart.Series();
                         dendogramSeries.setName("Dendogram");
                         TupleRegion tupleReg;
-                        for (Object o : cluster.getRegions()){
+                        for (Object o : clusterer.getRegions()){
                             tupleReg = (TupleRegion) o;
                             dendogramSeries.getData().add(new XYChart.Data<String, Double>(tupleReg.getRegion() + "," + tupleReg.getLevel(), tupleReg.getDensity()));
                         }
                         dendogramChart.getData().add(dendogramSeries);
-                        GridPane grid = buildDirectoryGrid((DirectoryEntry) cluster.getRootDirectory(), 0);
+                        GridPane grid = buildDirectoryGrid((DirectoryEntry) clusterer.getRootDirectory(), 0);
                         gridBorderPane.setCenter(grid);
                         gridBorderPane.layout();
                     }
@@ -181,11 +209,69 @@ public class Controller{
                 });
                 progressBar.progressProperty().bind(runFactoryTask.progressProperty());
                 new Thread(runFactoryTask).start();
-
+                saveButton.setDisable(false);
             }catch (InterruptedException e) {
                 e.printStackTrace();
             }
+        }
+    }
 
+    @FXML
+    public void onSaveAction(ActionEvent event){
+        SaveDialog saveDialog = new SaveDialog(FileDialog.getDelimiter(), FileDialog.getDecimal());
+        saveDialog.initModality(Modality.APPLICATION_MODAL);
+        saveDialog.showAndWait();
+
+        if(saveDialog.isComplete()){
+            String filenameWithoutExtension;
+            if (data.getName().indexOf(".") > 0) {
+                filenameWithoutExtension = data.getName().substring(0, data.getName().lastIndexOf("."));
+            } else {
+                filenameWithoutExtension = data.getName();
+            }
+            String savePath = SaveDialog.getDirectory() + File.separator + filenameWithoutExtension;
+
+            FileWriter fileWriter = null;
+            try {
+                fileWriter = new FileWriter(savePath + ".log");
+                fileWriter.write(clusterer.toString());
+                fileWriter.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            CSVWriter writer = null;
+            String[] tuple;
+
+            DecimalFormat decimalFormat = new DecimalFormat();
+            DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+            symbols.setDecimalSeparator(saveDialog.getDecimal());
+            decimalFormat.setGroupingUsed(false);
+            decimalFormat.setDecimalFormatSymbols(symbols);
+
+            for(int i = 0; i < clusterer.numberOfClusters(); i++){
+                try {
+                    writer = new CSVWriter(new FileWriter(savePath + ".cl" + i + ".csv"),
+                            saveDialog.getDelimiter(),
+                            CSVWriter.NO_QUOTE_CHARACTER,
+                            CSVWriter.NO_ESCAPE_CHARACTER);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                for (double[] doubleTuple : clusterer.getCluster(i)){
+                    tuple = new String[doubleTuple.length];
+                    for (int j = 0; j < doubleTuple.length; j++) {
+                        tuple[j] = decimalFormat.format(doubleTuple[j]);
+                    }
+
+                    writer.writeNext(tuple);
+                }
+                try {
+                    writer.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
@@ -211,26 +297,28 @@ public class Controller{
     public Task<Boolean> readAllDataFactory() throws InterruptedException {
         return new Task<Boolean>() {
             @Override
-            public Boolean call() throws IOException, ParseException {
+            public Boolean call() throws Exception {
                 Boolean result = true;
                 double[] tuple;
 
+                String errorType = "Error while reading data";
+
                 while ((tuple = data.readTuple()) != null) {
-                    if (tuple.length != data.getDimensions()) {
-                        infoLabel.setText(String.format("Tuple-dimension [%d] differs from predetermined dimension [%d].\n",
-                                tuple.length, data.getDimensions()));
+                    if (tuple.length != data.numberOfDimensions()) {
+                        errorDialog(errorType, String.format("Tuple-dimension [%d] differs from predetermined dimension [%d].\n",
+                                tuple.length, data.numberOfDimensions()));
                         result = false;
                     }
 
                     for (double d : tuple) {
                         if (d < 0 || d > 1) {
-                            infoLabel.setText(String.format("Incorrect tuple value found [%f].\n", d));
+                            errorDialog(errorType, String.format("Incorrect tuple value found [%f].\n", d));
                             result = false;
                         }
                     }
 
-                    cluster.insertTuple(tuple);
-                    updateProgress(data.getCurrentPosition() * 1 / data.getTupleCount(), data.getTupleCount());
+                    clusterer.insertTuple(tuple);
+                    updateProgress(data.getCurrentPosition() * 1 / data.numberOfTuples(), data.numberOfTuples());
                 }
                 return result;
             }
@@ -272,10 +360,10 @@ public class Controller{
                 row2.setMinHeight(0.2);
                 grid.getRowConstraints().addAll(row1, row2);
                 if (dirEntry.getLeft() != null) {
-                    grid.add(buildDirectoryGrid(dirEntry.getLeft(), 1 - axis), 0, 0);
+                    grid.add(buildDirectoryGrid(dirEntry.getLeft(), 1 - axis), 0, 1);
                 }
                 if (dirEntry.getRight() != null) {
-                    grid.add(buildDirectoryGrid(dirEntry.getRight(), 1 - axis), 0, 1);
+                    grid.add(buildDirectoryGrid(dirEntry.getRight(), 1 - axis), 0, 0);
                 }
             }
         } else{

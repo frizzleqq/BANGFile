@@ -5,10 +5,9 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.stage.FileChooser;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 
 import java.io.File;
@@ -17,15 +16,14 @@ import java.io.IOException;
 /**
  * @author Florian Fritz
  */
-public class FileDialog extends Stage {
+public class SaveDialog extends Stage {
 
-    private static String filename = "";
-    private static char delimiter = ';';
-    private static char decimal = ',';
-    private static boolean header = false;
+    private static String directory = "";
+    private char delimiter = ';';
+    private char decimal = ',';
 
     @FXML
-    private TextField filenameField;
+    private TextField directoryField;
 
     @FXML
     private TextField delimiterField;
@@ -34,19 +32,16 @@ public class FileDialog extends Stage {
     private TextField decimalField;
 
     @FXML
-    private CheckBox headerBox;
-
-    @FXML
     private Label infoLabel;
 
     private boolean complete = false;
 
-    public FileDialog()
+    public SaveDialog(char delimiter, char decimal)
     {
-        setTitle("Select a file...");
+        setTitle("Select a save location...");
         setResizable(false);
 
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("FileDialog.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("SaveDialog.fxml"));
         fxmlLoader.setController(this);
 
         try
@@ -58,27 +53,22 @@ public class FileDialog extends Stage {
             e.printStackTrace();
         }
 
-        filenameField.setText(filename);
+        directoryField.setText(directory);
         delimiterField.setText(Character.toString(delimiter));
         decimalField.setText(Character.toString(decimal));
-        headerBox.setSelected(header);
 
     }
 
-    public static String getFilename() {
-        return filename;
+    public static String getDirectory() {
+        return directory;
     }
 
-    public static char getDelimiter() {
+    public char getDelimiter() {
         return delimiter;
     }
 
-    public static char getDecimal() {
+    public char getDecimal() {
         return decimal;
-    }
-
-    public static boolean getHeader() {
-        return header;
     }
 
     public boolean isComplete(){
@@ -94,13 +84,12 @@ public class FileDialog extends Stage {
             infoLabel.setText("Decimal can not be empty.");
         } else if (decimalField.getText().length() > 1){
             infoLabel.setText("Decimal can only be 1 character.");
-        } else if (!new File(filenameField.getText()).isFile()){
-            infoLabel.setText("File not found.");
+        } else if (!new File(directoryField.getText()).isDirectory()){
+            infoLabel.setText("Directory not found.");
         } else{
             delimiter = delimiterField.getText().charAt(0);
             decimal = decimalField.getText().charAt(0);
-            filename = filenameField.getText();
-            header = headerBox.isSelected();
+            directory = directoryField.getText();
 
             complete = true;
             close();
@@ -112,18 +101,18 @@ public class FileDialog extends Stage {
     }
 
     public void onBrowseButtonAction(ActionEvent actionEvent) {
-        FileChooser fileChooser = new FileChooser();
-        if (!filename.equals("")){
-            fileChooser.setInitialDirectory(new File(filename).getParentFile());
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        if (!directory.equals("")){
+            directoryChooser.setInitialDirectory(new File(directory).getParentFile());
         } else{
-            fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+            directoryChooser.setInitialDirectory(new File(System.getProperty("user.home")));
         }
-        File selectedFile = fileChooser.showOpenDialog(null);
+        File selectedFile = directoryChooser.showDialog(null);
         if (selectedFile != null) {
-            filenameField.setText(selectedFile.getAbsolutePath());
+            directoryField.setText(selectedFile.getAbsolutePath());
         }
         else {
-            filenameField.setText("");
+            directoryField.setText("");
         }
 
     }

@@ -9,7 +9,7 @@ import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 /**
- * Created by Florian Fritz on 04.01.2016.
+ * @author Florian Fritz
  */
 public class Main extends Application {
 

@@ -12,6 +12,9 @@ import java.text.ParseException;
 
 import com.opencsv.CSVReader;
 
+/**
+ * @author Florian Fritz
+ */
 public class CsvWorker implements DataWorker {
 
     private final String filename;
@@ -67,12 +70,12 @@ public class CsvWorker implements DataWorker {
     }
 
     @Override
-    public int getDimensions() {
+    public int numberOfDimensions() {
         return dimensions;
     }
 
     @Override
-    public int getTupleCount() {
+    public int numberOfTuples() {
         return tupleCount;
     }
 
@@ -142,7 +145,7 @@ public class CsvWorker implements DataWorker {
     }
 
     @Override
-    public double[] readTuple() throws IOException, ParseException {
+    public double[] readTuple() throws Exception {
         double[] tuple;
         current_position++;
         if (current_position > tupleCount) {
@@ -155,7 +158,7 @@ public class CsvWorker implements DataWorker {
             tuple[i] = decimalFormat.parse(stringTuple[i]).doubleValue();
         }
         if (tuple.length != dimensions) {
-            throw new IOException("ERROR: Tuple with differeng dimensions than originally determined at line "
+            throw new Exception("ERROR: Tuple with differeng dimensions than originally determined at line "
                     + current_position + ".");
         }
         return tuple;

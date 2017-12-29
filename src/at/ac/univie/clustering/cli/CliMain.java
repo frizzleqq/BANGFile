@@ -1,6 +1,10 @@
 package at.ac.univie.clustering.cli;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 import at.ac.univie.clustering.clusterers.bangfile.BANGFile;
+import com.opencsv.CSVWriter;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -21,6 +26,9 @@ import at.ac.univie.clustering.data.CsvWorker;
 import at.ac.univie.clustering.data.DataWorker;
 import at.ac.univie.clustering.clusterers.Clusterer;
 
+/**
+ * @author Florian Fritz
+ */
 public class CliMain {
 
     private static String filename;
@@ -100,10 +108,10 @@ public class CliMain {
     }
 
     private static void help() {
-        String header = "Bang Clusterer:\n\n";
+        String header = "BANG-File Clusterer:\n\n";
         String footer = "\nTODO: write more help.";
         HelpFormatter formatter = new HelpFormatter();
-        formatter.printHelp("Bang", header, listOptions(), footer, true);
+        formatter.printHelp("BANG", header, listOptions(), footer, true);
         System.exit(0);
     }
 
@@ -118,15 +126,15 @@ public class CliMain {
      * @throws IOException
      * @throws ParseException
      */
-    private static void readData(Clusterer cluster, DataWorker data) throws IOException, ParseException {
+    private static void readData(Clusterer cluster, DataWorker data) throws Exception {
         double[] tuple;
 
         while ((tuple = data.readTuple()) != null) {
 
-            if (tuple.length != data.getDimensions()) {
+            if (tuple.length != data.numberOfDimensions()) {
                 System.err.println(Arrays.toString(tuple));
                 System.err.println(String.format("Tuple-dimension [%d] differs from predetermined dimension [%d].\n",
-                        tuple.length, data.getDimensions()));
+                        tuple.length, data.numberOfDimensions()));
                 System.exit(ERR_EXCEPTION);
             }
 
@@ -181,8 +189,8 @@ public class CliMain {
             System.exit(ERR_EXCEPTION);
         }
 
-        int dimension = data.getDimensions();
-        int tuplesCount = data.getTupleCount();
+        int dimension = data.numberOfDimensions();
+        int tuplesCount = data.numberOfTuples();
 
         if (dimension == 0) {
             System.err.println("Could not determine amount of dimensions in provided dataset.");
@@ -212,16 +220,64 @@ public class CliMain {
 
         try {
             readData(cluster, data);
-        } catch (IOException e) {
+        } catch (Exception e) {
             System.err.println("ERROR: Problem while reading file: " + e.getMessage());
-            System.exit(ERR_EXCEPTION);
-        } catch (ParseException e) {
-            System.err.println("ERROR: " + e.getMessage());
             System.exit(ERR_EXCEPTION);
         }
 
         cluster.buildClusters();
         System.out.println("\n" + cluster);
+
+
+        String filenameWithoutExtension;
+        if (data.getName().indexOf(".") > 0) {
+            filenameWithoutExtension = data.getName().substring(0, data.getName().lastIndexOf("."));
+        } else {
+            filenameWithoutExtension = data.getName();
+        }
+        String savePath = System.getProperty("user.dir") + File.separator + filenameWithoutExtension;
+
+        FileWriter fileWriter = null;
+        try {
+            fileWriter = new FileWriter(savePath + ".log");
+            fileWriter.write(cluster.toString());
+            fileWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        CSVWriter writer = null;
+        String[] tuple;
+
+        DecimalFormat decimalFormat = new DecimalFormat();
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+        symbols.setDecimalSeparator(decimal);
+        decimalFormat.setGroupingUsed(false);
+        decimalFormat.setDecimalFormatSymbols(symbols);
+
+        for(int i = 0; i < cluster.numberOfClusters(); i++){
+            try {
+                writer = new CSVWriter(new FileWriter(savePath + ".cl" + i + ".csv"),
+                        delimiter,
+                        CSVWriter.NO_QUOTE_CHARACTER,
+                        CSVWriter.NO_ESCAPE_CHARACTER);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            for (double[] doubleTuple : cluster.getCluster(i)){
+                tuple = new String[doubleTuple.length];
+                for (int j = 0; j < doubleTuple.length; j++) {
+                    tuple[j] = decimalFormat.format(doubleTuple[j]);
+                }
+
+                writer.writeNext(tuple);
+            }
+            try {
+                writer.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
 
     }
 }

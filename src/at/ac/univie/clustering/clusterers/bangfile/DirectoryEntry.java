@@ -2,6 +2,9 @@ package at.ac.univie.clustering.clusterers.bangfile;
 
 import java.util.List;
 
+/**
+ * @author Florian Fritz
+ */
 public class DirectoryEntry {
 
     private DirectoryEntry left = null;

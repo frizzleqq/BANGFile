@@ -23,21 +23,26 @@ public class BANGFile implements Clusterer {
 
     //TODO comments for class variables
 
-    /** Single line description */
+    /* Total tuples inside directory */
     private int tuplesCount;
+    /* Number of dimensions in data-set */
     private int dimensions;
+    /* Max number of tuples within a single region */
     private int bucketsize;
+    /* Degree of neighborhood necessary to determine neighborhood */
     private int neighbourCondition;
+    /* Amount of tuples to be included in clusters */
     private int clusterPercent;
 
-    /**
-     * multi line description
-     * how often did we split a dimensions? 0 is the sum of all dimensions
-     */
+     /* Number of splits in dimension x. (0 is the sum of all dimensions) */
     private int[] dimensionLevels = null;
-    private int[] scaleCoordinates = null; // coordinate on every dimensions scale (map value to region). 0 is a dummy value
+    /* Coordinate on every dimensions scale (map value to region). 0 is a dummy value */
+    private int[] scaleCoordinates = null;
+    /* Directory containing all regions */
     private DirectoryEntry bangFile;
+    /* List of regions used for final clustering */
     private List<TupleRegion> dendogram;
+    /* List of clusters */
     private List<Cluster> clusters = new ArrayList<Cluster>();
     private int nAlias;
 
@@ -61,10 +66,6 @@ public class BANGFile implements Clusterer {
         }
     }
 
-    /**
-     * Build options object used to parse provided arguments
-     * @return options
-     */
     @Override
     public Options listOptions(){
         Options options = new Options();
@@ -81,37 +82,37 @@ public class BANGFile implements Clusterer {
         return options;
     }
 
-    /**
-     * Parse arguments and assaign values to variables while verifying allowed values.
-     * @param args
-     */
     @Override
     public void setOptions(String[] args) throws ParseException {
         CommandLineParser parser = new DefaultParser();
         CommandLine cmdLine = parser.parse(listOptions(), args);
 
         if (cmdLine.hasOption("s")){
-            bucketsize = Integer.parseInt(cmdLine.getOptionValue("s", "4"));
-            if (bucketsize < 4) {
-                throw new ParseException("'bucketsize' has to be at least 4");
+            int s = Integer.parseInt(cmdLine.getOptionValue("s", "4"));
+            if (s < 4) {
+                throw new ParseException("Bucketsize must be 4 or higher");
             }
+            bucketsize = s;
         }
 
         if (cmdLine.hasOption("n")){
-            neighbourCondition = Integer.parseInt(cmdLine.getOptionValue("n", Integer.toString(dimensions - 1)));
-            if (neighbourCondition < 1){
-                throw new ParseException("'neighbourhood' has to be at least 0");
+            int n = Integer.parseInt(cmdLine.getOptionValue("n", Integer.toString(dimensions - 1)));
+            if (n < 1){
+                throw new ParseException("Neighbourhood-condition must be 0 or higher");
             }
-            if (neighbourCondition >= dimensions){
-                throw new ParseException("Provided neighbourhood-condition must be smaller than amount of dimensions");
+            if (n >= dimensions){
+                throw new ParseException("Neighbourhood-condition must be smaller than amount of dimensions");
             }
+            neighbourCondition = n;
+
         }
 
         if (cmdLine.hasOption("c")) {
-            clusterPercent = Integer.parseInt(cmdLine.getOptionValue("c", "50"));
-            if (clusterPercent < 0 || clusterPercent > 100) {
-                throw new ParseException("'cluster-percent' has to be between 0 and 100.");
+            int c = Integer.parseInt(cmdLine.getOptionValue("c", "50"));
+            if (c < 0 || c > 100) {
+                throw new ParseException("Cluster-Percent' must be between 0 and 100.");
             }
+            clusterPercent = c;
         }
 
         /*
@@ -120,10 +121,6 @@ public class BANGFile implements Clusterer {
         }*/
     }
 
-    /**
-     * Lists available options with provided or default values.
-     * @return Map containing option and argument
-     */
     @Override
     public Map<String, String> getOptions() {
         Map<String, String> options = new HashMap<String, String>();
@@ -193,19 +190,15 @@ public class BANGFile implements Clusterer {
     }
 
     /**
-     * TODO
+     * When inserting a tuple into the directory we need to map it to the correct region in the correct level.
+     * If the tuple causes the region to overflow, the region needs to be split and tuples need to be redistributed.
      *
      * @param tuple
      */
     @Override
     public void insertTuple(double[] tuple) {
-
         long region = mapRegion(tuple);
-
         DirectoryEntry dirEntry = findRegion(region, dimensionLevels[0]);
-        if (dirEntry == null) {
-            System.err.println("Could not find directory entry.");
-        }
 
         if (dirEntry.getRegion().getPopulation() < bucketsize) {
             dirEntry.getRegion().insertTuple(tuple);
@@ -225,10 +218,6 @@ public class BANGFile implements Clusterer {
                     region = mapRegion(tuple);
 
                     dirEntry = findRegion(region, dimensionLevels[0]);
-                    if (dirEntry == null) {
-                        System.err.println("Could not find directory entry.");
-                    }
-
                     splitRegion(dirEntry);
                 }
             }
@@ -239,8 +228,10 @@ public class BANGFile implements Clusterer {
     }
 
     /**
-     * Based on the current partial levels of every dimensions we determine the scale value representing
+     * Based on the current levels of granularity of every dimensions we determine the scale value representing
      * the coordinate on each dimensions scale.
+     * With these scale values we determine the region-number of the region in the deepest level
+     * (regardless if that region actually exists).
      *
      * See BANGClustererTest for examples.
      *
@@ -274,11 +265,12 @@ public class BANGFile implements Clusterer {
     }
 
     /**
-     * TODO go backwards through levels in grid-directory to find left or right for the tuple
+     * With the region-number, we search for the tuple's region by going, beginning from the deepest level,
+     * backwards through the directory until we find a region.
      *
-     * @param region
+     * @param region-number
      * @param level
-     * @return
+     * @return region
      */
     private DirectoryEntry findRegion(long region, int level) {
         DirectoryEntry tupleReg = bangFile;
@@ -348,7 +340,6 @@ public class BANGFile implements Clusterer {
 
         redistribute(denseEntry, dirEntry);
         checkTree(dirEntry);
-
     }
 
     /**
@@ -437,7 +428,7 @@ public class BANGFile implements Clusterer {
      *
      * @param dirEntry
      * @param enclosingEntry
-     * @return
+     * @return true if buddy-split confirmed
      */
     private boolean redistribute(DirectoryEntry dirEntry, DirectoryEntry enclosingEntry) {
         // two new regions, sparse and dense
@@ -517,6 +508,7 @@ public class BANGFile implements Clusterer {
     }
 
     /**
+     * ???
      *
      * @return
      */
@@ -594,7 +586,7 @@ public class BANGFile implements Clusterer {
      * @param sortedRegions
      * @return clusters
      */
-    private List<Cluster> createClusters(List <TupleRegion> sortedRegions) {
+    private List<Cluster> createClusters(List<TupleRegion> sortedRegions) {
         int clusteredGoal = ((clusterPercent * tuplesCount) + 50) / 100;
         int clusteredPop = 0;
         int clusteredRegions = 0;
@@ -625,7 +617,7 @@ public class BANGFile implements Clusterer {
         } else{
             Cluster cluster = new Cluster();
             clusters.add(cluster);
-            while (counter < clusteredRegions){
+            while (counter < clusteredRegions && dendogramIterator.hasNext()){
                 if(tupleReg.getPosition() <= clusteredRegions){
                     cluster.regions.add(tupleReg);
                     counter++;
@@ -654,7 +646,6 @@ public class BANGFile implements Clusterer {
         return clusters.get(index).getTuples();
     }
 
-    //TODO: this desperately needs to look for logical regions
     @Override
     public int clusterTuple(double[] tuple){
         long region = mapRegion(tuple);
@@ -670,13 +661,13 @@ public class BANGFile implements Clusterer {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("Bang-File:");
+        builder.append("BANG-File:");
 
-        builder.append("\nDimension: " + dimensions);
-        builder.append("\nNeighbourhood-Condition: " + neighbourCondition);
-        builder.append("\nBucketsize: " + bucketsize);
-        builder.append("\nCluster-Percent: " + clusterPercent);
-        builder.append("\nTuples: " + tuplesCount);
+        builder.append("\n\tDimension: " + dimensions);
+        builder.append("\n\tNeighbourhood-Condition: " + neighbourCondition);
+        builder.append("\n\tBucketsize: " + bucketsize);
+        builder.append("\n\tCluster-Percent: " + clusterPercent);
+        builder.append("\n\tTuples: " + tuplesCount);
 
         builder.append("\n\nClusters: " + clusters.size());
         builder.append("\n\t\t\tPopulation\t\tof Total %\t\tof Clustered");
@@ -693,20 +684,6 @@ public class BANGFile implements Clusterer {
             builder.append("\t\t\t\t( " + populationToTotal + "%)");
             builder.append("\t\t\t( " + populationToClustered + "%)");
         }
-        /*
-        for(Cluster c : clusters){
-            System.out.println("\nCluster-nr: " + clusters.indexOf(c));
-            System.out.println("Population: " + c.getPopulation());
-            for(TupleRegion r : c.regions){
-                for(double[] l : r.getTupleList()){
-                    for(double v : l){
-                        System.out.printf("%.6f\t", Math.round(v * 1000000.0)/1000000.0);
-                    }
-                    System.out.println();
-                }
-            }
-        }
-        */
 
         return builder.toString();
     }

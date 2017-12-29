@@ -4,27 +4,30 @@ import java.io.IOException;
 import java.text.ParseException;
 
 /**
- * @author Fritzi
+ * @author Florian Fritz
  */
 public interface DataWorker {
 
     /**
-     * Get name of current data source. For a file this refers to the short filename.
-     * @return name
+     * Get name of current data source.
+     *
+     * @return name the name of the data source
      */
     String getName();
 
     /**
      * Get total count of tuples available in data source.
-     * @return tupleCount
+     *
+     * @return tupleCount   number of tuples in data source
      */
-    int getTupleCount();
+    int numberOfTuples();
 
     /**
      * Get number of dimensions in dataset.
-     * @return dimensions
+     *
+     * @return dimensions   number of dimensions
      */
-    int getDimensions();
+    int numberOfDimensions();
 
     /**
      * Reset to beginning of dataset.
@@ -33,16 +36,17 @@ public interface DataWorker {
     void reset() throws IOException;
 
     /**
-     * Get count of read tuples since beginning or last reset
-     * @return currentPosition
+     * Get number of tuples read since last reset
+     *
+     * @return currentPosition  current position in dataset
      */
     int getCurrentPosition();
 
     /**
-     * Read one tuple from dataset
-     * @return tuple
-     * @throws IOException
-     * @throws ParseException
+     * Read the next tuple from dataset
+     *
+     * @return tuple    next tuple in dataset
+     * @throws Exception  If next tuple in dataset cannot be read
      */
-    double[] readTuple() throws IOException, ParseException;
+    double[] readTuple() throws Exception;
 }

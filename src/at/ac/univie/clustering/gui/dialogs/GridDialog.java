@@ -10,7 +10,7 @@ import javafx.stage.Stage;
 import java.io.IOException;
 
 /**
- * Created by Fritzi on 17.01.2016.
+ * @author Florian Fritz
  */
 public class GridDialog extends Stage {
 

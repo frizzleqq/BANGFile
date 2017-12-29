@@ -7,6 +7,9 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author Florian Fritz
+ */
 public class DirectoryEntryTest {
 
 	@Test
