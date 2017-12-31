@@ -5,7 +5,10 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * @author Florian Fritz
+ * Manage the grid region containing the tuples.
+ *
+ * @author Florian Fritz (florian.fritzi@gmail.com)
+ * @version 1.0
  */
 public class TupleRegion implements Comparable<TupleRegion> {
 
@@ -34,16 +37,8 @@ public class TupleRegion implements Comparable<TupleRegion> {
         return region;
     }
 
-    void setRegion(long region) {
-        this.region = region;
-    }
-
     public int getLevel() {
         return level;
-    }
-
-    void setLevel(int level) {
-        this.level = level;
     }
 
     public int getPosition(){
@@ -79,9 +74,9 @@ public class TupleRegion implements Comparable<TupleRegion> {
     }
 
     /**
-     * Insert tuple into region and increment population.
+     * Insert tuple into region and increment regions population.
      *
-     * @param tuple
+     * @param tuple tuple to be inserted
      */
     void insertTuple(double[] tuple) {
 
@@ -98,10 +93,10 @@ public class TupleRegion implements Comparable<TupleRegion> {
     }
 
     /**
-     * The size of a region is calculated with:
+     * The size of a region is calculated with: size = 1 / (2 ^ level)
      * Size of root directory is 1.
-     *
-     * size = 1 / (2 ^ level)
+     * <p>
+     * (Note that the size of logical regions is calculated in DirectoryEntry)
      *
      * @return size of region
      */
@@ -116,7 +111,7 @@ public class TupleRegion implements Comparable<TupleRegion> {
      * with the higher level (as in: above in the directory) to the one with
      * deeper level. The comparison is then done with the region resulting
      * from the transformation.
-     *
+     * <p>
      * Default neighbourhood-condition is 1. In a 2 dimensional grid this equals to
      * region-edges touching. With neighbourhood-condition of 2 the region-corners touching
      * is enough for neighbourhood to be true.
@@ -173,7 +168,7 @@ public class TupleRegion implements Comparable<TupleRegion> {
     /**
      * Calculate the grid values of a region within its level.
      * These grid values are the value for each dimension and represent the location of the region in its level.
-     *
+     * <p>
      * The first element of the array is set to the value of level.
      *
      * @param dimension
@@ -206,6 +201,12 @@ public class TupleRegion implements Comparable<TupleRegion> {
         return toStringHierarchy(0);
     }
 
+    /**
+     * Used by DirectoryEntry.toStringHierarchy to get desired indentation
+     *
+     * @param level indentation level
+     * @return  string representation of region
+     */
     public String toStringHierarchy(int level) {
         StringBuilder builder = new StringBuilder();
         String tabs = "\n";

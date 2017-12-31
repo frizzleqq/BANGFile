@@ -17,7 +17,11 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 /**
- * @author Florian Fritz
+ * Manage the BANG-file directory structure and balance tuple distribution.
+ * Build clustering model from BANG-file directory.
+ *
+ * @author Florian Fritz (florian.fritzi@gmail.com)
+ * @version 1.0
  */
 public class BANGFile implements Clusterer {
 
@@ -34,7 +38,7 @@ public class BANGFile implements Clusterer {
     /* Amount of tuples to be included in clusters */
     private int clusterPercent;
 
-     /* Number of splits in dimension x. (0 is the sum of all dimensions) */
+     /* Number of splits(levels of granularity) in dimension x. (0 is the sum of all dimensions) */
     private int[] dimensionLevels = null;
     /* Coordinate on every dimensions scale (map value to region). 0 is a dummy value */
     private int[] scaleCoordinates = null;
@@ -46,9 +50,17 @@ public class BANGFile implements Clusterer {
     private List<Cluster> clusters = new ArrayList<Cluster>();
     private int nAlias;
 
+    /**
+     * Create clusters with references to contained regions.
+     */
     private class Cluster{
         public List<TupleRegion> regions = new ArrayList<TupleRegion>();
 
+        /**
+         * Add up population of all regions in cluster.
+         *
+         * @return  total population in cluster
+         */
         public int getPopulation(){
             int population = 0;
             for(TupleRegion r : regions){
@@ -57,6 +69,11 @@ public class BANGFile implements Clusterer {
             return population;
         }
 
+        /**
+         * Get List of all tuples contained in cluster
+         *
+         * @return  list of all tuples in cluster
+         */
         public List<double[]> getTuples(){
             List<double[]> tuples = new ArrayList<double[]>();
             for(TupleRegion r : regions){
@@ -134,7 +151,7 @@ public class BANGFile implements Clusterer {
      * Create root of bangfile with provided number of dimensions.
      * Set default values for options.
      *
-     * @param dimensions Dimensions of dataset
+     * @param dimensions dimensions of dataset
      */
     public BANGFile(int dimensions) {
         this.dimensions = dimensions;
@@ -193,7 +210,7 @@ public class BANGFile implements Clusterer {
      * When inserting a tuple into the directory we need to map it to the correct region in the correct level.
      * If the tuple causes the region to overflow, the region needs to be split and tuples need to be redistributed.
      *
-     * @param tuple
+     * @param tuple tuple to be inserted
      */
     @Override
     public void insertTuple(double[] tuple) {
@@ -232,11 +249,11 @@ public class BANGFile implements Clusterer {
      * the coordinate on each dimensions scale.
      * With these scale values we determine the region-number of the region in the deepest level
      * (regardless if that region actually exists).
-     *
+     *  <p>
      * See BANGClustererTest for examples.
      *
-     * @param tuple
-     * @return region-number
+     * @param tuple tuple to be mapped
+     * @return mapped region-number
      */
     protected long mapRegion(double[] tuple) {
         long region = 0;
@@ -265,12 +282,12 @@ public class BANGFile implements Clusterer {
     }
 
     /**
-     * With the region-number, we search for the tuple's region by going, beginning from the deepest level,
-     * backwards through the directory until we find a region.
+     * With the region-number, we search for the tuple's actual region by going, beginning from the deepest level,
+     * backwards through the directory until we find an existing region.
      *
-     * @param region-number
-     * @param level
-     * @return region
+     * @param region mapped region-number
+     * @param level amount of levels in directory
+     * @return  deepest (smallest) region found
      */
     private DirectoryEntry findRegion(long region, int level) {
         DirectoryEntry tupleReg = bangFile;
@@ -295,11 +312,11 @@ public class BANGFile implements Clusterer {
         }
 
 		/*
-         * lowest (smallest possible) region reached now it must be tested, if
+         * highest level (smallest) possible region reached now it must be tested, if
 		 * empty dir_entry if empty -> go back until a valid entry found
 		 */
         while ((tupleReg.getRegion() == null) && (tupleReg.getBack() != null)) {
-            // because root has no back, we also check region (which is
+            // because root has no 'back', we also check region (which is
             // initialized for root)
             tupleReg = tupleReg.getBack();
         }
@@ -312,13 +329,13 @@ public class BANGFile implements Clusterer {
     }
 
     /**
-     * Manage the split of the region and the following redistribution.
+     * Manage the split of a directory entries region and the following redistribution.
      * <p/>
      * The split of a region is done via a Buddy-Split. Afterwards we check
      * whether the region-tree is correct, in which we move regions down one or
      * more levels if they should be a buddy of a succeeding region.
      *
-     * @param dirEntry
+     * @param dirEntry  directory-entry containing the region to split
      */
     private void splitRegion(DirectoryEntry dirEntry) {
 
@@ -344,13 +361,12 @@ public class BANGFile implements Clusterer {
 
     /**
      * Split region into 2 buddy regions.
-     * <p/>
-     * If the region was in max depth, we increase level for dimensions we split in.
-     * <p/>
      * Tuples are then moved from the original region to the new regions in the
      * new level.
+     * <p/>
+     * If the region was in max depth, we increase level for dimensions we split in.
      *
-     * @param dirEntry Directory-Entry to perform buddy-split on
+     * @param dirEntry directory-entry to perform buddy-split on
      * @return true if successfully done on max depth region
      */
     private boolean manageBuddySplit(DirectoryEntry dirEntry) {
@@ -379,9 +395,9 @@ public class BANGFile implements Clusterer {
      * If a region only has one successor, make the region the buddy of it.
      * This will be done over multiple levels.
      *
-     * @param dirEntry Directory-Entry that will be made a buddy of its follow up if
+     * @param dirEntry directory-entry that will be made a buddy of its follow up if
      *                 possible
-     * @return dirEntry
+     * @return  new position of directory-entry
      */
     private DirectoryEntry checkTree(DirectoryEntry dirEntry) {
         if (dirEntry.getLeft() != null && dirEntry.getLeft().getRegion() != null) {
@@ -426,9 +442,9 @@ public class BANGFile implements Clusterer {
      * If the region was in max depth, we decrease level for dimensions where
      * we merge.
      *
-     * @param dirEntry
-     * @param enclosingEntry
-     * @return true if buddy-split confirmed
+     * @param dirEntry  directory-entry with dense region population
+     * @param enclosingEntry    enclosing directory-entry
+     * @return true if buddy-split confirmed, false if reverted
      */
     private boolean redistribute(DirectoryEntry dirEntry, DirectoryEntry enclosingEntry) {
         // two new regions, sparse and dense
@@ -491,9 +507,9 @@ public class BANGFile implements Clusterer {
     }
 
     /**
-     * Sort regions in our Bang-file based on their density
+     * Sort regions in our Bang-file based on their density in descending order.
      *
-     * @return sortedRegions
+     * @return regions sorted by density in descending order
      */
     private List<TupleRegion> getSortedRegions(){
         List <TupleRegion> sortedRegions = new ArrayList<TupleRegion>();
@@ -508,7 +524,7 @@ public class BANGFile implements Clusterer {
     }
 
     /**
-     * ???
+     * TODO
      *
      * @return
      */
@@ -529,10 +545,12 @@ public class BANGFile implements Clusterer {
 
     /**
      * Put region with highest density at first position of dendogram,
-     * then find neighbours and add them to dendogram in correct position.
+     * then find region's neighbours and add them to dendogram in descending order behind the region.
+     * <p>
+     * Repeat this for every region added to the dendogram.
      *
-     * @param sortedRegions
-     * @return dendogram
+     * @param sortedRegions regions sorted by density in descending order
+     * @return dendogram of regions
      */
     private List<TupleRegion> createDendogram(List <TupleRegion> sortedRegions){
         List<TupleRegion> dendogram = new ArrayList<TupleRegion>();
@@ -548,16 +566,16 @@ public class BANGFile implements Clusterer {
         }
 
         return dendogram;
-
     }
 
     /**
      * If neighbour region is found in "remaining" regions, determine position where we add it into dendogram.
-     * Position to insert is based on density and then the position from the original sorted region-list.
+     * Position to insert, after current dendogram-position, is based on density and the position
+     * of the original sorted region-list.
      *
-     * @param dendoPos
-     * @param dendogram
-     * @param remaining
+     * @param dendoPos  position of currently currently processing region in dendogram
+     * @param dendogram dendogram of regions
+     * @param remaining remaining regions not yet in dendogram
      */
     private void addRemaining(int dendoPos, List<TupleRegion> dendogram, List<TupleRegion> remaining){
         int startSearchPos = dendoPos + 1;
@@ -580,11 +598,15 @@ public class BANGFile implements Clusterer {
         }
     }
 
-
     /**
+     * Determine amount of regions to cluster based on provided clustering-percent.
+     * Set a cut-off point for regions with too low density that will not be clustered.
      *
-     * @param sortedRegions
-     * @return clusters
+     * Create clusters by iterating through regions in dendogram.
+     * If a region encountered is outside cut-off point, skip region and start with new cluster.
+     *
+     * @param sortedRegions regions sorted by density in descending order
+     * @return  list of clusters
      */
     private List<Cluster> createClusters(List<TupleRegion> sortedRegions) {
         int clusteredGoal = ((clusterPercent * tuplesCount) + 50) / 100;
@@ -601,26 +623,25 @@ public class BANGFile implements Clusterer {
         // add last region if it gets us closer to clusteredGoal (even if we exceed it)
         int diff = clusteredGoal - clusteredPop;
         if ((tupleReg.getPopulation() - diff) <= diff){
-            clusteredPop += tupleReg.getPopulation();
             clusteredRegions++;
         }
 
         List<Cluster> clusters = new ArrayList<Cluster>();
-        boolean newCluster = false;
-        Iterator<TupleRegion> dendogramIterator = dendogram.iterator();
-        tupleReg = dendogramIterator.next();
-
-        int counter = 0;
-
         if (clusteredRegions == 0){
             return clusters;
         } else{
+            boolean newCluster = false;
+            int clusteredCounter = 0;
+            Iterator<TupleRegion> dendogramIterator = dendogram.iterator();
+
             Cluster cluster = new Cluster();
             clusters.add(cluster);
-            while (counter < clusteredRegions && dendogramIterator.hasNext()){
+
+            tupleReg = dendogramIterator.next();
+            while (clusteredCounter < clusteredRegions && dendogramIterator.hasNext()){
                 if(tupleReg.getPosition() <= clusteredRegions){
                     cluster.regions.add(tupleReg);
-                    counter++;
+                    clusteredCounter++;
                     newCluster = true;
                 } else if (newCluster){
                     cluster = new Cluster();

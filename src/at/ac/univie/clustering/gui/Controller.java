@@ -82,6 +82,15 @@ public class Controller{
     private static DataWorker data = null;
     private static Clusterer clusterer = null;
 
+    private void informationDialog(String infoType, String infoMessage){
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Information");
+        alert.setHeaderText(infoType);
+        alert.setContentText(infoMessage);
+
+        alert.showAndWait();
+    }
+
     private void errorDialog(String errorType, String errorMessage){
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Error");
@@ -153,7 +162,7 @@ public class Controller{
     }
 
     @FXML
-    public void onStartAction(ActionEvent event) throws IOException, org.apache.commons.cli.ParseException {
+    public void onStartAction(ActionEvent event) throws Exception {
         if (data != null){
             if (data.getCurrentPosition() > 0){
                 data.reset();
@@ -222,7 +231,7 @@ public class Controller{
         saveDialog.initModality(Modality.APPLICATION_MODAL);
         saveDialog.showAndWait();
 
-        if(saveDialog.isComplete()){
+        if(saveDialog.isComplete()) {
             String filenameWithoutExtension;
             if (data.getName().indexOf(".") > 0) {
                 filenameWithoutExtension = data.getName().substring(0, data.getName().lastIndexOf("."));
@@ -231,46 +240,45 @@ public class Controller{
             }
             String savePath = SaveDialog.getDirectory() + File.separator + filenameWithoutExtension;
 
-            FileWriter fileWriter = null;
             try {
+                StringBuilder builder = new StringBuilder();
+                FileWriter fileWriter = null;
                 fileWriter = new FileWriter(savePath + ".log");
+                builder.append(savePath + ".log");
                 fileWriter.write(clusterer.toString());
                 fileWriter.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
 
-            CSVWriter writer = null;
-            String[] tuple;
+                CSVWriter writer = null;
+                String[] tuple;
 
-            DecimalFormat decimalFormat = new DecimalFormat();
-            DecimalFormatSymbols symbols = new DecimalFormatSymbols();
-            symbols.setDecimalSeparator(saveDialog.getDecimal());
-            decimalFormat.setGroupingUsed(false);
-            decimalFormat.setDecimalFormatSymbols(symbols);
+                DecimalFormat decimalFormat = new DecimalFormat();
+                DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+                symbols.setDecimalSeparator(saveDialog.getDecimal());
+                decimalFormat.setGroupingUsed(false);
+                decimalFormat.setDecimalFormatSymbols(symbols);
 
-            for(int i = 0; i < clusterer.numberOfClusters(); i++){
-                try {
+                for (int i = 0; i < clusterer.numberOfClusters(); i++) {
                     writer = new CSVWriter(new FileWriter(savePath + ".cl" + i + ".csv"),
                             saveDialog.getDelimiter(),
                             CSVWriter.NO_QUOTE_CHARACTER,
                             CSVWriter.NO_ESCAPE_CHARACTER);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                for (double[] doubleTuple : clusterer.getCluster(i)){
-                    tuple = new String[doubleTuple.length];
-                    for (int j = 0; j < doubleTuple.length; j++) {
-                        tuple[j] = decimalFormat.format(doubleTuple[j]);
+                    builder.append("\n" + savePath + ".cl" + i + ".csv");
+
+                    for (double[] doubleTuple : clusterer.getCluster(i)) {
+                        tuple = new String[doubleTuple.length];
+                        for (int j = 0; j < doubleTuple.length; j++) {
+                            tuple[j] = decimalFormat.format(doubleTuple[j]);
+                        }
+                        writer.writeNext(tuple);
                     }
 
-                    writer.writeNext(tuple);
-                }
-                try {
                     writer.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
                 }
+
+                informationDialog("Saved clusters", builder.toString());
+
+            } catch (IOException e) {
+                errorDialog("Error while saving", e.getMessage());
             }
         }
     }

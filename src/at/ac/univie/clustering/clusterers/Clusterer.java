@@ -7,7 +7,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author Florian Fritz
+ * Interface for managing and build a clustering model.
+ * Inserting tuples is done in incremental fashion.
+ * <p>
+ * To finish the clustering model method 'buildClusters' will be called.
+ *
+ * @author Florian Fritz (florian.fritzi@gmail.com)
+ * @version 1.0
  */
 public interface Clusterer {
 

@@ -4,48 +4,53 @@ import java.io.IOException;
 import java.text.ParseException;
 
 /**
- * @author Florian Fritz
+ * Interface for managing and reading a datasource.
+ * Reading from a datasource will be done in incremental fashion.
+ *
+ * @author Florian Fritz (florian.fritzi@gmail.com)
+ * @version 1.0
  */
 public interface DataWorker {
 
     /**
-     * Get name of current data source.
+     * Get the name of the currently selected datasource.
      *
-     * @return name the name of the data source
+     * @return  the name of the datasource
      */
     String getName();
 
     /**
-     * Get total count of tuples available in data source.
+     * Get total count of tuples available in the datasource.
      *
-     * @return tupleCount   number of tuples in data source
+     * @return  number of tuples in datasource
      */
     int numberOfTuples();
 
     /**
-     * Get number of dimensions in dataset.
+     * Get number of dimensions in the dataset.
      *
-     * @return dimensions   number of dimensions
+     * @return  number of dimensions
      */
     int numberOfDimensions();
 
     /**
-     * Reset to beginning of dataset.
-     * @throws IOException
+     * Reset 'cursor' to the beginning of the dataset.
+     *
+     * @throws Exception    If reset fails or is not possible
      */
-    void reset() throws IOException;
+    void reset() throws Exception;
 
     /**
-     * Get number of tuples read since last reset
+     * Get number of tuples read since beginning or last reset.
      *
-     * @return currentPosition  current position in dataset
+     * @return  current position in dataset
      */
     int getCurrentPosition();
 
     /**
-     * Read the next tuple from dataset
+     * Read the next tuple from the dataset.
      *
-     * @return tuple    next tuple in dataset
+     * @return  next tuple in dataset
      * @throws Exception  If next tuple in dataset cannot be read
      */
     double[] readTuple() throws Exception;

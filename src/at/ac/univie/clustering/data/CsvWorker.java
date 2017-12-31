@@ -13,7 +13,11 @@ import java.text.ParseException;
 import com.opencsv.CSVReader;
 
 /**
- * @author Florian Fritz
+ * Class to read from a file with CSV (comma-separated values) format in incremental fashion.
+ * Parses and converts lines of a file with customizable delimiter and decimal characters.
+ *
+ * @author Florian Fritz (florian.fritzi@gmail.com)
+ * @version 1.0
  */
 public class CsvWorker implements DataWorker {
 
@@ -30,10 +34,12 @@ public class CsvWorker implements DataWorker {
     CSVReader reader;
 
     /**
-     * @param filename
-     * @param delimiter
-     * @param header
-     * @throws IOException
+     *
+     * @param filename  full path to file
+     * @param delimiter delimiter separating values of a line(tuple)
+     * @param decimal   decimal symbol of numeric values
+     * @param header    true if first line contains header
+     * @throws IOException  If file content cannot be read.
      */
     public CsvWorker(String filename, char delimiter, char decimal, boolean header) throws IOException {
         this.filename = filename;
@@ -81,7 +87,8 @@ public class CsvWorker implements DataWorker {
 
     /**
      * Verify that file exists and is not a directory.
-     * @return boolean
+     *
+     * @return  true if file exists
      */
     private boolean fileExists() {
         File f = new File(filename);
@@ -90,7 +97,8 @@ public class CsvWorker implements DataWorker {
 
     /**
      * Verify that file is readable.
-     * @return boolean
+     *
+     * @return  true if file is readable
      */
     private boolean fileReadable() {
         File f = new File(filename);
@@ -98,9 +106,11 @@ public class CsvWorker implements DataWorker {
     }
 
     /**
-     * Read entire file and count tuples. Do not count header
-     * @return tupleCount
-     * @throws IOException
+     * Move to end of file and count lines.
+     * Ignore header if it exists.
+     *
+     * @return  number of tuples in file
+     * @throws IOException  If line cannot be read
      */
     private int countTuples() throws IOException {
         int tupleCount = 0;
@@ -123,9 +133,10 @@ public class CsvWorker implements DataWorker {
     }
 
     /**
-     * Count dimensions in file based on first data tuple.
-     * @return countDimensions
-     * @throws IOException
+     * Count dimensions of tuples in file based on first data tuple.
+     *
+     * @return  number of dimensions of tuples
+     * @throws IOException  If line cannot be read
      */
     private int countDimensions() throws IOException {
         int dimensions = 0;
@@ -165,7 +176,7 @@ public class CsvWorker implements DataWorker {
     }
 
     @Override
-    public void reset() throws IOException{
+    public void reset() throws Exception{
         current_position = 0;
         reader = new CSVReader(new FileReader(filename), delimiter);
         if (header) {

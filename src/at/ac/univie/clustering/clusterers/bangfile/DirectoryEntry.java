@@ -3,7 +3,11 @@ package at.ac.univie.clustering.clusterers.bangfile;
 import java.util.List;
 
 /**
- * @author Florian Fritz
+ * Manage the directory entry of a region within the grid.
+ * Keeps references to directory entries of preceding and succeeding regions.
+ *
+ * @author Florian Fritz (florian.fritzi@gmail.com)
+ * @version 1.0
  */
 public class DirectoryEntry {
 
@@ -105,7 +109,7 @@ public class DirectoryEntry {
     }
 
     /**
-     * Move region of directory down to succeeding right directory.
+     * Move region of directory down to succeeding right directory entry.
      */
     void moveToRight() {
         if (right == null) {
@@ -121,7 +125,7 @@ public class DirectoryEntry {
     }
 
     /**
-     * Move region of directory to down to succeeding left directory.
+     * Move region of directory to down to succeeding left directory entry.
      */
     void moveToLeft() {
         if (left == null) {
@@ -155,7 +159,7 @@ public class DirectoryEntry {
     }
 
     /**
-     * Clear either the left or the right directory.
+     * Clear either the left or the right directory entry.
      *
      * @param dirEntry  directory to be cleared
      */
@@ -168,10 +172,9 @@ public class DirectoryEntry {
     }
 
     /**
-     * Calculate density of all existing regions of all directories that succeed
-     * this directory.
-     * <p>
-     * The size of a region is calculated with: size = 1 / (2 ^ level)
+     * Calculate density of all existing regions of all directory entries that succeed
+     * this entry.
+     *
      */
     void calculateDensity() {
         if (region != null) {
@@ -208,7 +211,7 @@ public class DirectoryEntry {
     }
 
     /**
-     * Calculate size of region and size of regions in succeeding directories.
+     * Calculate size of region and size of regions in succeeding directory entries.
      * Size of root directory is 1.
      *
      * size = 1 / (2 ^ level)
@@ -268,10 +271,10 @@ public class DirectoryEntry {
     }
 
     /**
-     * Collect all regions within a directory and store them in a list.
+     * Collect all regions within a directory entry and store them in a list.
      * Collecting is done via depth first search.
      *
-     * @param regionArray   List used to store all regions
+     * @param regionArray   list used to store all regions
      */
     public void collectRegions(List<TupleRegion> regionArray) {
         if (left != null){
@@ -290,6 +293,13 @@ public class DirectoryEntry {
         return toStringHierarchy(0);
     }
 
+    /**
+     * Traverse through all succeeding directory entries and build string representation of directory,
+     * starting from current directory entry.
+     *
+     * @param level used for incremental indentation
+     * @return  string representation of directory
+     */
     public String toStringHierarchy(int level){
         StringBuilder builder = new StringBuilder();
         String tabs = "\n";
