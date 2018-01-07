@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.text.ParseException;
 
 /**
- * Interface for managing and reading a datasource.
- * Reading from a datasource will be done in incremental fashion.
+ * Interface for managing and reading a data source.
+ * Reading from a data source will be done in incremental fashion.
  *
  * @author Florian Fritz (florian.fritzi@gmail.com)
  * @version 1.0
@@ -13,16 +13,16 @@ import java.text.ParseException;
 public interface DataWorker {
 
     /**
-     * Get the name of the currently selected datasource.
+     * Get the name of the currently selected data source.
      *
-     * @return  the name of the datasource
+     * @return  the name of the data source
      */
     String getName();
 
     /**
-     * Get total count of tuples available in the datasource.
+     * Get total count of tuples available in the data source.
      *
-     * @return  number of tuples in datasource
+     * @return  number of tuples in data source
      */
     int numberOfTuples();
 

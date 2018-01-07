@@ -95,7 +95,7 @@ public class TupleRegion implements Comparable<TupleRegion> {
     /**
      * The size of a region is calculated with: size = 1 / (2 ^ level)
      * Size of root directory is 1.
-     * <p>
+     * <br>
      * (Note that the size of logical regions is calculated in DirectoryEntry)
      *
      * @return size of region
@@ -111,7 +111,7 @@ public class TupleRegion implements Comparable<TupleRegion> {
      * with the higher level (as in: above in the directory) to the one with
      * deeper level. The comparison is then done with the region resulting
      * from the transformation.
-     * <p>
+     * <br>
      * Default neighbourhood-condition is 1. In a 2 dimensional grid this equals to
      * region-edges touching. With neighbourhood-condition of 2 the region-corners touching
      * is enough for neighbourhood to be true.
@@ -168,7 +168,7 @@ public class TupleRegion implements Comparable<TupleRegion> {
     /**
      * Calculate the grid values of a region within its level.
      * These grid values are the value for each dimension and represent the location of the region in its level.
-     * <p>
+     * <br>
      * The first element of the array is set to the value of level.
      *
      * @param dimension

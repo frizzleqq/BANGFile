@@ -50,12 +50,12 @@ public class DirectoryEntry {
 
     /**
      * When a region is split, the 2 resulting regions are considered "buddies".
-     * <p>
+     * <br>
      * The region is split into 2 buddy-regions called "left" and "right". The
      * level of these new regions is increased by 1 compared to the old region.
      * The regionnumber of left is the same as the original region while the
      * regionnumber of right is increased via an added MSB.
-     * <p>
+     * <br>
      * left: r = region l = level + 1
      * right: r = region + 2 ^ level l = level + 1
      */
@@ -91,7 +91,7 @@ public class DirectoryEntry {
     /**
      * If the dense region of the new regions (from buddy split) has less tuples
      * than the enclosing one, we will revert the buddy split.
-     * <p>
+     * <br>
      * Note: This is done before the tuples are moved down.
      */
     void clearBuddySplit() {
@@ -197,7 +197,7 @@ public class DirectoryEntry {
 
     /**
      * The density of a region is the regions population divided by its size.
-     * <p>
+     * <br>
      * Enclosed regions within the region are subtracted from the regions size.
      *
      * @return regions population divided by its regions size

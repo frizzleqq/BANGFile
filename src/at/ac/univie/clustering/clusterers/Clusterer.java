@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Interface for managing and build a clustering model.
+ * Interface for managing and building a clustering model.
  * Inserting tuples is done in incremental fashion.
- * <p>
+ * <br>
  * To finish the clustering model method 'buildClusters' will be called.
  *
  * @author Florian Fritz (florian.fritzi@gmail.com)

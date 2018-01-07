@@ -131,7 +131,7 @@ public class BANGFileTest {
     public void testBuildClusters() throws Exception {
         CsvWorker csv = new CsvWorker(CSV_FILE_CLUSTERS, ';', ',', true);
         BANGFile bangFile = new BANGFile(csv.numberOfDimensions());
-        bangFile.setOptions(new String[] {"-c", "90"});
+        bangFile.setOptions(new String[] {"-c", "50"});
 
         double[] tuple;
         while ((tuple = csv.readTuple()) != null) {
@@ -141,12 +141,13 @@ public class BANGFileTest {
 
         for(double[] t : bangFile.getCluster(0)){
             for (double d : t){
-                assertTrue(d > 0.7 && d < 0.8);
+                assertTrue(d > 0.2 && d < 0.3);
             }
         }
+
         for(double[] t : bangFile.getCluster(1)){
             for (double d : t){
-                assertTrue(d > 0.2 && d < 0.3);
+                assertTrue(d > 0.7 && d < 0.8);
             }
         }
     }
@@ -155,7 +156,7 @@ public class BANGFileTest {
 	public void testClusterTuple() throws Exception  {
         CsvWorker csv = new CsvWorker(CSV_FILE_CLUSTERS, ';', ',', true);
         BANGFile bangFile = new BANGFile(csv.numberOfDimensions());
-        bangFile.setOptions(new String[] {"-c", "90"});
+        bangFile.setOptions(new String[] {"-c", "70"});
 
         double[] tuple;
         while ((tuple = csv.readTuple()) != null) {
@@ -188,7 +189,7 @@ public class BANGFileTest {
     public void testClusterSingleRegion() throws Exception {
         CsvWorker csv = new CsvWorker(CSV_FILE_NO_HEADER, ';', ',', false);
         BANGFile bangFile = new BANGFile(csv.numberOfDimensions());
-        bangFile.setOptions(new String[] {"-c", "90"});
+        bangFile.setOptions(new String[] {"-c", "50"});
 
         double[] tuple;
         while ((tuple = csv.readTuple()) != null) {

@@ -25,8 +25,6 @@ import org.apache.commons.cli.ParseException;
  */
 public class BANGFile implements Clusterer {
 
-    //TODO comments for class variables
-
     /* Total tuples inside directory */
     private int tuplesCount;
     /* Number of dimensions in data-set */
@@ -127,7 +125,7 @@ public class BANGFile implements Clusterer {
         if (cmdLine.hasOption("c")) {
             int c = Integer.parseInt(cmdLine.getOptionValue("c", "50"));
             if (c < 0 || c > 100) {
-                throw new ParseException("Cluster-Percent' must be between 0 and 100.");
+                throw new ParseException("Cluster-Percent must be between 0 and 100.");
             }
             clusterPercent = c;
         }
@@ -249,7 +247,7 @@ public class BANGFile implements Clusterer {
      * the coordinate on each dimensions scale.
      * With these scale values we determine the region-number of the region in the deepest level
      * (regardless if that region actually exists).
-     *  <p>
+     *  <br>
      * See BANGClustererTest for examples.
      *
      * @param tuple tuple to be mapped
@@ -330,7 +328,7 @@ public class BANGFile implements Clusterer {
 
     /**
      * Manage the split of a directory entries region and the following redistribution.
-     * <p/>
+     * <br>
      * The split of a region is done via a Buddy-Split. Afterwards we check
      * whether the region-tree is correct, in which we move regions down one or
      * more levels if they should be a buddy of a succeeding region.
@@ -363,7 +361,6 @@ public class BANGFile implements Clusterer {
      * Split region into 2 buddy regions.
      * Tuples are then moved from the original region to the new regions in the
      * new level.
-     * <p/>
      * If the region was in max depth, we increase level for dimensions we split in.
      *
      * @param dirEntry directory-entry to perform buddy-split on
@@ -391,7 +388,6 @@ public class BANGFile implements Clusterer {
 
     /**
      * Ensure correct buddy-positions of regions.
-     * <p/>
      * If a region only has one successor, make the region the buddy of it.
      * This will be done over multiple levels.
      *
@@ -431,14 +427,14 @@ public class BANGFile implements Clusterer {
     /**
      * To ensure a nicely balanced tree we perform redistribute after a
      * region split.
-     * <p/>
+     * <br>
      * Another buddy-split will be executed. If the denser region of the
      * resulting regions has a higher population than the enclosing
      * region, the enclosing region will be merged with the sparser
      * region.
      * If the denser region has a lower population, we undo the buddy
      * split.
-     * <p/>
+     * <br>
      * If the region was in max depth, we decrease level for dimensions where
      * we merge.
      *
@@ -546,7 +542,6 @@ public class BANGFile implements Clusterer {
     /**
      * Put region with highest density at first position of dendogram,
      * then find region's neighbours and add them to dendogram in descending order behind the region.
-     * <p>
      * Repeat this for every region added to the dendogram.
      *
      * @param sortedRegions regions sorted by density in descending order
@@ -624,6 +619,14 @@ public class BANGFile implements Clusterer {
         int diff = clusteredGoal - clusteredPop;
         if ((tupleReg.getPopulation() - diff) <= diff){
             clusteredRegions++;
+        }
+
+        System.out.println(clusteredRegions);
+        System.out.println();
+        for(TupleRegion t : dendogram){
+            System.out.println(t.getDensity());
+            System.out.println(t.getPosition());
+            System.out.println();
         }
 
         List<Cluster> clusters = new ArrayList<Cluster>();
