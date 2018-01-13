@@ -1,17 +1,19 @@
 package at.ac.univie.clustering.gui;
 
-import at.ac.univie.clustering.clusterers.bangfile.BANGFile;
+import at.ac.univie.clustering.clusterers.ClustererFactory;
 import at.ac.univie.clustering.clusterers.Clusterer;
 import at.ac.univie.clustering.data.CsvWorker;
 import at.ac.univie.clustering.data.DataWorker;
 import at.ac.univie.clustering.clusterers.bangfile.DirectoryEntry;
-import at.ac.univie.clustering.clusterers.bangfile.TupleRegion;
+import at.ac.univie.clustering.clusterers.bangfile.GridRegion;
 import at.ac.univie.clustering.gui.dialogs.FileDialog;
 import at.ac.univie.clustering.gui.dialogs.GridDialog;
 import at.ac.univie.clustering.gui.dialogs.SaveDialog;
 import at.ac.univie.clustering.gui.dialogs.Settings;
 import com.opencsv.CSVWriter;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
@@ -22,8 +24,12 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.Menu;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.Toggle;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
@@ -36,9 +42,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author Florian Fritz
@@ -78,9 +81,34 @@ public class Controller{
     @FXML
     private TextArea logArea;
 
+    @FXML
+    private Menu clustererMenu;
 
-    private static DataWorker data = null;
-    private static Clusterer clusterer = null;
+    private ToggleGroup clustererToggleGroup;
+
+    @FXML
+    public void initialize(){
+        clustererToggleGroup = new ToggleGroup();
+
+        for (String clusterer : ClustererFactory.getClusterers()){
+            RadioMenuItem radioMenuItem = new RadioMenuItem(clusterer);
+            radioMenuItem.setToggleGroup(clustererToggleGroup);
+            clustererMenu.getItems().add(radioMenuItem);
+        }
+
+        clustererToggleGroup.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
+            @Override
+            public void changed(ObservableValue<? extends Toggle> observable, Toggle oldValue, Toggle newValue) {
+                String selectedClusterer = ((RadioMenuItem)clustererToggleGroup.getSelectedToggle()).getText();
+                clusterer = ClustererFactory.createClusterer(selectedClusterer);
+            }
+        });
+
+        clustererToggleGroup.getToggles().get(0).setSelected(true);
+    }
+
+    private DataWorker data = null;
+    private Clusterer clusterer = null;
 
     private void informationDialog(String infoType, String infoMessage){
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -125,9 +153,6 @@ public class Controller{
                     throw new Exception("Could not determine amount of records in provided dataset.");
                 }
 
-                clusterer = new BANGFile(data.numberOfDimensions());
-                Settings.setSettings(clusterer.getOptions());
-
                 startButton.setDisable(false);
                 settingsButton.setDisable(false);
                 saveButton.setDisable(true);
@@ -148,13 +173,15 @@ public class Controller{
 
     @FXML
     public void onSettingsAction(ActionEvent event){
+        Settings.setSettings(clusterer.getOptions());
+
         Settings settings = new Settings(clusterer.listOptions());
         settings.initModality(Modality.APPLICATION_MODAL);
         settings.showAndWait();
 
         if(settings.isComplete()) {
             try {
-                clusterer.setOptions(settings.getSettings());
+                clusterer.setOptions(Settings.getSettings());
             } catch (org.apache.commons.cli.ParseException e) {
                 errorDialog("Error while setting options", e.getMessage());
             }
@@ -168,16 +195,7 @@ public class Controller{
                 data.reset();
             }
 
-            if(clusterer.numberOfTuples() > 0){
-                Map<String, String> currentOptions = clusterer.getOptions();
-                List<String> settings = new ArrayList<String>();
-                for (String s : currentOptions.keySet()){
-                    settings.add("--" + s);
-                    settings.add(currentOptions.get(s));
-                }
-                clusterer = new BANGFile(data.numberOfDimensions());
-                clusterer.setOptions(settings.toArray(new String[0]));
-            }
+            clusterer.prepareClusterer(data.numberOfDimensions());
 
             //reset ui elements
             dendogramChart.getData().clear();
@@ -192,14 +210,14 @@ public class Controller{
                     @Override
                     public void handle(WorkerStateEvent t)
                     {
-                        clusterer.buildClusters();
+                        clusterer.finishClusterer();
                         logArea.setText(clusterer.toString());
 
                         XYChart.Series dendogramSeries = new XYChart.Series();
                         dendogramSeries.setName("Dendogram");
-                        TupleRegion tupleReg;
+                        GridRegion tupleReg;
                         for (Object o : clusterer.getRegions()){
-                            tupleReg = (TupleRegion) o;
+                            tupleReg = (GridRegion) o;
                             dendogramSeries.getData().add(new XYChart.Data<String, Double>(tupleReg.getRegion() + "," + tupleReg.getLevel(), tupleReg.getDensity()));
                         }
                         dendogramChart.getData().add(dendogramSeries);

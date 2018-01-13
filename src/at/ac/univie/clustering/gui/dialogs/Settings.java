@@ -26,11 +26,22 @@ import java.util.Map;
  */
 public class Settings extends Stage {
 
+    private static Map<String, String> settings;
+
     public static void setSettings(Map<String, String> settings) {
         Settings.settings = settings;
     }
 
-    private static Map<String, String> settings;
+    public static String[] getSettings() {
+        List<String> settingsList = new ArrayList<String>();
+        for (String s : settings.keySet()){
+            if(!settings.get(s).equals("false")){
+                settingsList.add("--" + s);
+                settingsList.add(settings.get(s));
+            }
+        }
+        return settingsList.toArray(new String[0]);
+    }
 
     @FXML
     private VBox settingsVBox;
@@ -63,17 +74,6 @@ public class Settings extends Stage {
 
     public boolean isComplete() {
         return complete;
-    }
-
-    public String[] getSettings() {
-        List<String> settingsList = new ArrayList<String>();
-        for (String s : settings.keySet()){
-            if(!settings.get(s).equals("false")){
-                settingsList.add("--" + s);
-                settingsList.add(settings.get(s));
-            }
-        }
-        return settingsList.toArray(new String[0]);
     }
 
     public void createSettings(Options options, Map<String, String> optionArgs){

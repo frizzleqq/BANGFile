@@ -14,7 +14,7 @@ public class DirectoryEntry {
     private DirectoryEntry left = null;
     private DirectoryEntry right = null;
     private DirectoryEntry back = null;
-    private TupleRegion region = null;
+    private GridRegion region = null;
 
     public DirectoryEntry getLeft() {
         return left;
@@ -40,11 +40,11 @@ public class DirectoryEntry {
         this.back = back;
     }
 
-    public TupleRegion getRegion() {
+    public GridRegion getRegion() {
         return region;
     }
 
-    void setRegion(TupleRegion region) {
+    void setRegion(GridRegion region) {
         this.region = region;
     }
 
@@ -71,7 +71,7 @@ public class DirectoryEntry {
             left.setBack(this);
         }
 
-        left.setRegion(new TupleRegion(region.getRegion(), region.getLevel() + 1));
+        left.setRegion(new GridRegion(region.getRegion(), region.getLevel() + 1));
 
 		/*
          * right region of dirEntry, direntry is "Back" of right right
@@ -85,7 +85,7 @@ public class DirectoryEntry {
             right.setBack(this);
         }
 
-        right.setRegion(new TupleRegion(region.getRegion() + (1 << region.getLevel()), region.getLevel() + 1));
+        right.setRegion(new GridRegion(region.getRegion() + (1 << region.getLevel()), region.getLevel() + 1));
     }
 
     /**
@@ -117,7 +117,7 @@ public class DirectoryEntry {
             right.setBack(this);
         }
 
-        right.setRegion(new TupleRegion(region.getRegion() + (1 << region.getLevel()), region.getLevel() + 1));
+        right.setRegion(new GridRegion(region.getRegion() + (1 << region.getLevel()), region.getLevel() + 1));
         right.getRegion().setPopulation(region.getPopulation());
         right.getRegion().setTupleList(region.getTupleList());
 
@@ -133,7 +133,7 @@ public class DirectoryEntry {
             left.setBack(this);
         }
 
-        left.setRegion(new TupleRegion(region.getRegion(), region.getLevel() + 1));
+        left.setRegion(new GridRegion(region.getRegion(), region.getLevel() + 1));
         left.getRegion().setPopulation(region.getPopulation());
         left.getRegion().setTupleList(region.getTupleList());
 
@@ -237,13 +237,13 @@ public class DirectoryEntry {
         if (left != null) {
             buildAlias(left, region.getRegion(), region.getLevel() + 1);
         } else {
-            region.getAliases().add(new TupleRegion(region.getRegion(), region.getLevel() + 1));
+            region.getAliases().add(new GridRegion(region.getRegion(), region.getLevel() + 1));
         }
 
         if (right != null) {
             buildAlias(right, region.getRegion() + (1 << region.getLevel()), region.getLevel() + 1);
         } else {
-            region.getAliases().add(new TupleRegion(region.getRegion() + (1 << region.getLevel()), region.getLevel() + 1));
+            region.getAliases().add(new GridRegion(region.getRegion() + (1 << region.getLevel()), region.getLevel() + 1));
         }
     }
 
@@ -259,13 +259,13 @@ public class DirectoryEntry {
             if (left != null) {
                 buildAlias(left, region, level + 1);
             } else {
-                this.region.getAliases().add(new TupleRegion(region, level + 1));
+                this.region.getAliases().add(new GridRegion(region, level + 1));
             }
 
             if (right != null) {
                 buildAlias(right, region + (1 << level), level + 1);
             } else {
-                this.region.getAliases().add((new TupleRegion(region + (1 << level), level + 1)));
+                this.region.getAliases().add((new GridRegion(region + (1 << level), level + 1)));
             }
         }
     }
@@ -276,7 +276,7 @@ public class DirectoryEntry {
      *
      * @param regionArray   list used to store all regions
      */
-    public void collectRegions(List<TupleRegion> regionArray) {
+    public void collectRegions(List<GridRegion> regionArray) {
         if (left != null){
             left.collectRegions(regionArray);
         }

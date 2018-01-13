@@ -10,7 +10,7 @@ import java.util.List;
  * @author Florian Fritz (florian.fritzi@gmail.com)
  * @version 1.0
  */
-public class TupleRegion implements Comparable<TupleRegion> {
+public class GridRegion implements Comparable<GridRegion> {
 
     private int population = 0;
     private long region;
@@ -18,9 +18,9 @@ public class TupleRegion implements Comparable<TupleRegion> {
     private int position;
     private double density = 0;
     private List<double[]> tupleList = new ArrayList<double[]>();
-    private List<TupleRegion> aliases = new ArrayList<TupleRegion>();
+    private List<GridRegion> aliases = new ArrayList<GridRegion>();
 
-    TupleRegion(long region, int level) {
+    GridRegion(long region, int level) {
         this.region = region;
         this.level = level;
     }
@@ -65,11 +65,11 @@ public class TupleRegion implements Comparable<TupleRegion> {
         this.tupleList = tupleList;
     }
 
-    public List<TupleRegion> getAliases() {
+    public List<GridRegion> getAliases() {
         return aliases;
     }
 
-    void setAliases(List<TupleRegion> aliases) {
+    void setAliases(List<GridRegion> aliases) {
         this.aliases = aliases;
     }
 
@@ -105,23 +105,23 @@ public class TupleRegion implements Comparable<TupleRegion> {
     }
 
     /**
-     * Verifying neighbourhood of two regions is done via comparison of grid
+     * Verifying neighborhood of two regions is done via comparison of grid
      * values. If the level of the regions is equal, we can determine the
      * grid difference directly. If not, we have to transform the region
      * with the higher level (as in: above in the directory) to the one with
      * deeper level. The comparison is then done with the region resulting
      * from the transformation.
      * <br>
-     * Default neighbourhood-condition is 1. In a 2 dimensional grid this equals to
-     * region-edges touching. With neighbourhood-condition of 2 the region-corners touching
-     * is enough for neighbourhood to be true.
+     * Default neighborhood-condition is 1. In a 2 dimensional grid this equals to
+     * region-edges touching. With neighborhood-condition of 2 the region-corners touching
+     * is enough for neighborhood to be true.
      *
-     * @param other         tupleregion to test if neighbourhood
+     * @param other         tupleregion to test if neighborhood
      * @param dimension     dimension of grid
-     * @param condition     neighbourhood-condition: starting with 1, a higher value results in more lenient check
-     * @return true if neighbour, false if not
+     * @param condition     neighborhood-condition: starting with 1, a higher value results in more lenient check
+     * @return true if neighbor, false if not
      */
-    public boolean isNeighbour(TupleRegion other, int dimension, int condition){
+    public boolean isNeighbor(GridRegion other, int dimension, int condition){
         int[] grids = unmapRegion(dimension);
         int[] gridsOther = other.unmapRegion(dimension);
 
@@ -192,7 +192,7 @@ public class TupleRegion implements Comparable<TupleRegion> {
     }
 
     @Override
-    public int compareTo(TupleRegion o) {
+    public int compareTo(GridRegion o) {
         return (o.getDensity() < this.getDensity()) ? 1 : -1;
     }
 
@@ -213,7 +213,7 @@ public class TupleRegion implements Comparable<TupleRegion> {
         for (int i = 0; i < level; i++){
             tabs += "\t";
         }
-        builder.append(tabs + "TupleRegion:");
+        builder.append(tabs + "GridRegion:");
         builder.append(tabs + "Region: " + region);
         builder.append(tabs + "Population: " + population);
         builder.append(tabs + "Level: " + this.level);

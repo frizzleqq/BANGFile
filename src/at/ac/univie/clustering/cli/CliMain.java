@@ -13,7 +13,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import at.ac.univie.clustering.clusterers.bangfile.BANGFile;
+import at.ac.univie.clustering.clusterers.ClustererFactory;
 import com.opencsv.CSVWriter;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -189,13 +189,13 @@ public class CliMain {
             System.exit(ERR_EXCEPTION);
         }
 
-        int dimension = data.numberOfDimensions();
+        int dimensions = data.numberOfDimensions();
         int tuplesCount = data.numberOfTuples();
 
-        if (dimension == 0) {
+        if (dimensions == 0) {
             System.err.println("Could not determine amount of dimensions in provided dataset.");
             System.exit(ERR_EXCEPTION);
-        } else if (dimension < 2) {
+        } else if (dimensions < 2) {
             System.err.println("Could not determine minimum of 2 dimensions.");
             System.exit(ERR_EXCEPTION);
         }
@@ -204,29 +204,30 @@ public class CliMain {
             System.exit(1);
         }
 
-        Clusterer cluster;
-        cluster = new BANGFile(dimension);
+        Clusterer clusterer;
+        clusterer = ClustererFactory.createClusterer("BANGFile");
 
         try {
-            cluster.setOptions(cluster_args.toArray(new String[0]));
-        }catch (org.apache.commons.cli.ParseException e){
+            clusterer.setOptions(cluster_args.toArray(new String[0]));
+            clusterer.prepareClusterer(dimensions);
+        } catch (Exception e) {
             System.err.println("ERROR: " + e.getMessage());
             System.exit(ERR_PARAM);
         }
 
         System.out.println("Used options:");
         System.out.println("\t" + getOptions().toString());
-        System.out.println("\t" + cluster.getOptions().toString());
+        System.out.println("\t" + clusterer.getOptions().toString());
 
         try {
-            readData(cluster, data);
+            readData(clusterer, data);
         } catch (Exception e) {
             System.err.println("ERROR: Problem while reading file: " + e.getMessage());
             System.exit(ERR_EXCEPTION);
         }
 
-        cluster.buildClusters();
-        System.out.println("\n" + cluster);
+        clusterer.finishClusterer();
+        System.out.println("\n" + clusterer);
 
 
         String filenameWithoutExtension;
@@ -240,7 +241,7 @@ public class CliMain {
         FileWriter fileWriter = null;
         try {
             fileWriter = new FileWriter(savePath + ".log");
-            fileWriter.write(cluster.toString());
+            fileWriter.write(clusterer.toString());
             fileWriter.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -255,7 +256,7 @@ public class CliMain {
         decimalFormat.setGroupingUsed(false);
         decimalFormat.setDecimalFormatSymbols(symbols);
 
-        for(int i = 0; i < cluster.numberOfClusters(); i++){
+        for(int i = 0; i < clusterer.numberOfClusters(); i++){
             try {
                 writer = new CSVWriter(new FileWriter(savePath + ".cl" + i + ".csv"),
                         delimiter,
@@ -264,7 +265,7 @@ public class CliMain {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            for (double[] doubleTuple : cluster.getCluster(i)){
+            for (double[] doubleTuple : clusterer.getCluster(i)){
                 tuple = new String[doubleTuple.length];
                 for (int j = 0; j < doubleTuple.length; j++) {
                     tuple[j] = decimalFormat.format(doubleTuple[j]);

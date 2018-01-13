@@ -8,7 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author Florian Fritz
+ * @author Florian Fritz (florian.fritzi@gmail.com)
+ * @version 1.0
  */
 public class DirectoryEntryTest {
 
@@ -16,7 +17,7 @@ public class DirectoryEntryTest {
 	public void testCreateBuddySplitRoot() {
 		DirectoryEntry dirEntry = new DirectoryEntry();
 
-		dirEntry.setRegion(new TupleRegion(0, 0));
+		dirEntry.setRegion(new GridRegion(0, 0));
 
 		dirEntry.createBuddySplit();
 
@@ -31,7 +32,7 @@ public class DirectoryEntryTest {
 	public void testDoBuddySplitSub() {
 		DirectoryEntry dirEntry = new DirectoryEntry();
 
-		dirEntry.setRegion(new TupleRegion(3, 2));
+		dirEntry.setRegion(new GridRegion(3, 2));
 
 		dirEntry.createBuddySplit();
 
@@ -46,7 +47,7 @@ public class DirectoryEntryTest {
 	public void testClearBuddySplit(){
 		DirectoryEntry dirEntry = new DirectoryEntry();
 
-		dirEntry.setRegion(new TupleRegion(0, 0));
+		dirEntry.setRegion(new GridRegion(0, 0));
 
 		dirEntry.createBuddySplit();
 		
@@ -59,7 +60,7 @@ public class DirectoryEntryTest {
 	@Test
 	public void testMoveToRight() {
 		DirectoryEntry dirEntry = new DirectoryEntry();
-		dirEntry.setRegion(new TupleRegion(3, 2));
+		dirEntry.setRegion(new GridRegion(3, 2));
 
 		dirEntry.getRegion().insertTuple(new double[] { 0.1, 0.1 });
 		dirEntry.getRegion().insertTuple(new double[] { 0.2, 0.2 });
@@ -77,7 +78,7 @@ public class DirectoryEntryTest {
 	@Test
 	public void testMoveToLeft() {
 		DirectoryEntry dirEntry = new DirectoryEntry();
-		dirEntry.setRegion(new TupleRegion(3, 2));
+		dirEntry.setRegion(new GridRegion(3, 2));
 
 		dirEntry.getRegion().insertTuple(new double[] { 0.1, 0.1 });
 		dirEntry.getRegion().insertTuple(new double[] { 0.2, 0.2 });
@@ -95,7 +96,7 @@ public class DirectoryEntryTest {
 	@Test
 	public void testGetSparseEntry() {
 		DirectoryEntry dirEntry = new DirectoryEntry();
-		dirEntry.setRegion(new TupleRegion(0, 0));
+		dirEntry.setRegion(new GridRegion(0, 0));
 		dirEntry.createBuddySplit();
 
 		dirEntry.getLeft().getRegion().insertTuple(new double[] { 0.1, 0.1 });
@@ -111,7 +112,7 @@ public class DirectoryEntryTest {
 	@Test
 	public void testGetDenseEntry() {
 		DirectoryEntry dirEntry = new DirectoryEntry();
-		dirEntry.setRegion(new TupleRegion(0, 0));
+		dirEntry.setRegion(new GridRegion(0, 0));
 		dirEntry.createBuddySplit();
 
 		dirEntry.getLeft().getRegion().insertTuple(new double[] { 0.1, 0.1 });
@@ -127,7 +128,7 @@ public class DirectoryEntryTest {
 	@Test
 	public void testClearSucceedingEntry() {
 		DirectoryEntry dirEntry = new DirectoryEntry();
-		dirEntry.setRegion(new TupleRegion(0, 0));
+		dirEntry.setRegion(new GridRegion(0, 0));
 		dirEntry.createBuddySplit();
 
 		dirEntry.getLeft().getRegion().insertTuple(new double[] { 0.1, 0.1 });
@@ -140,12 +141,12 @@ public class DirectoryEntryTest {
 	@Test
 	public void testCalculateDensity() {
         DirectoryEntry dirEntry = new DirectoryEntry();
-        dirEntry.setRegion(new TupleRegion(0, 0));
+        dirEntry.setRegion(new GridRegion(0, 0));
 
         dirEntry.setLeft(new DirectoryEntry());
         dirEntry.getLeft().setLeft(new DirectoryEntry());
 
-        dirEntry.getLeft().getLeft().setRegion(new TupleRegion(0, 2));
+        dirEntry.getLeft().getLeft().setRegion(new GridRegion(0, 2));
 
         dirEntry.getRegion().insertTuple(new double[] { 0.1, 0.1 });
 
@@ -163,12 +164,12 @@ public class DirectoryEntryTest {
     @Test
     public void testGetRegionSize() {
         DirectoryEntry dirEntry = new DirectoryEntry();
-        dirEntry.setRegion(new TupleRegion(0, 0));
+        dirEntry.setRegion(new GridRegion(0, 0));
 
         dirEntry.setLeft(new DirectoryEntry());
         dirEntry.getLeft().setLeft(new DirectoryEntry());
 
-        dirEntry.getLeft().getLeft().setRegion(new TupleRegion(0, 2));
+        dirEntry.getLeft().getLeft().setRegion(new GridRegion(0, 2));
 
         dirEntry.getRegion().insertTuple(new double[] { 0.1, 0.1 });
 
@@ -182,12 +183,12 @@ public class DirectoryEntryTest {
     @Test
     public void testCollectRegions(){
         DirectoryEntry dirEntry = new DirectoryEntry();
-        dirEntry.setRegion(new TupleRegion(0, 0));
+        dirEntry.setRegion(new GridRegion(0, 0));
         dirEntry.createBuddySplit();
 
         dirEntry.getLeft().createBuddySplit();
 
-        List<TupleRegion> regionArray = new ArrayList<TupleRegion>();
+        List<GridRegion> regionArray = new ArrayList<GridRegion>();
         dirEntry.collectRegions(regionArray);
 
         assertEquals(5, regionArray.size());

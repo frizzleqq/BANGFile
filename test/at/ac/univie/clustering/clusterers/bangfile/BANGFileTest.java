@@ -2,15 +2,14 @@ package at.ac.univie.clustering.clusterers.bangfile;
 
 import static org.junit.Assert.*;
 
-import java.io.IOException;
-import java.text.ParseException;
 import java.util.ArrayList;
 
 import at.ac.univie.clustering.data.CsvWorker;
 import org.junit.Test;
 
 /**
- * @author Florian Fritz
+ * @author Florian Fritz (florian.fritzi@gmail.com)
+ * @version 1.0
  */
 public class BANGFileTest {
 
@@ -18,9 +17,10 @@ public class BANGFileTest {
     private static final String CSV_FILE_NO_HEADER = "test/resources/4d_noheader.csv";
 
 	@Test
-    public void testMapRegion() throws org.apache.commons.cli.ParseException {
-        BANGFile bangFile = new BANGFile(2);
-        bangFile.setOptions(new String[] {});
+    public void testMapRegion() throws Exception {
+        BANGFile bangFile = new BANGFile();
+        bangFile.prepareClusterer(2);
+        bangFile.setOptions(new String[] {"-s", "4"});
         bangFile.setDimensionLevels( new int[] {2, 1, 1});
         /*
             ---------
@@ -55,14 +55,15 @@ public class BANGFileTest {
     }
 
 	@Test
-	public void testInsertTuple() throws org.apache.commons.cli.ParseException {
+	public void testInsertTuple() throws Exception {
 		ArrayList<double[]> tuples = new ArrayList<>();
 		tuples.add(new double[] { 0.1, 0.2 });
 		tuples.add(new double[] { 0.2, 0.3 });
 		tuples.add(new double[] { 0.3, 0.4 });
 
-		BANGFile bangFile = new BANGFile(2);
-        bangFile.setOptions(new String[] {});
+		BANGFile bangFile = new BANGFile();
+		bangFile.prepareClusterer(2);
+        bangFile.setOptions(new String[] {"-s", "4"});
 
 		for (double[] tuple : tuples) {
 			bangFile.insertTuple(tuple);
@@ -75,9 +76,10 @@ public class BANGFileTest {
 	}
 
 	@Test
-	public void testNumberOfTuples() throws org.apache.commons.cli.ParseException {
-		BANGFile bangFile = new BANGFile(2);
-        bangFile.setOptions(new String[] {});
+	public void testNumberOfTuples() throws Exception {
+		BANGFile bangFile = new BANGFile();
+		bangFile.prepareClusterer(2);
+        bangFile.setOptions(new String[] {"-s", "4"});
 		assertEquals(0, bangFile.numberOfTuples());
 		double[] tuple;
 		for(int x = 0; x < 100; x++){
@@ -90,7 +92,7 @@ public class BANGFileTest {
 	}
 
 	@Test
-	public void testBuddySplit() throws org.apache.commons.cli.ParseException {
+	public void testBuddySplit() throws Exception {
 		ArrayList<double[]> tuples = new ArrayList<>();
 		tuples.add(new double[] { 0.1f, 0.1f });
 		tuples.add(new double[] { 0.2f, 0.1f });
@@ -99,8 +101,9 @@ public class BANGFileTest {
 		tuples.add(new double[] { 0.7f, 0.1f });
 		tuples.add(new double[] { 0.8f, 0.1f });
 
-		BANGFile bangFile = new BANGFile(2);
-        bangFile.setOptions(new String[] {});
+		BANGFile bangFile = new BANGFile();
+		bangFile.prepareClusterer(2);
+        bangFile.setOptions(new String[] {"-s", "4"});
 
 		for (double[] tuple : tuples) {
 			bangFile.insertTuple(tuple);
@@ -115,14 +118,15 @@ public class BANGFileTest {
 	@Test
 	public void testNumberOfClusters() throws Exception {
         CsvWorker csv = new CsvWorker(CSV_FILE_CLUSTERS, ';', ',', true);
-        BANGFile bangFile = new BANGFile(csv.numberOfDimensions());
-        bangFile.setOptions(new String[] {});
+        BANGFile bangFile = new BANGFile();
+        bangFile.prepareClusterer(csv.numberOfDimensions());
+        bangFile.setOptions(new String[] {"-s", "4"});
 
         double[] tuple;
         while ((tuple = csv.readTuple()) != null) {
             bangFile.insertTuple(tuple);
         }
-        bangFile.buildClusters();
+        bangFile.finishClusterer();
 
         assertEquals(2, bangFile.numberOfClusters());
 	}
@@ -130,14 +134,15 @@ public class BANGFileTest {
     @Test
     public void testBuildClusters() throws Exception {
         CsvWorker csv = new CsvWorker(CSV_FILE_CLUSTERS, ';', ',', true);
-        BANGFile bangFile = new BANGFile(csv.numberOfDimensions());
-        bangFile.setOptions(new String[] {"-c", "50"});
+        BANGFile bangFile = new BANGFile();
+        bangFile.prepareClusterer(csv.numberOfDimensions());
+        bangFile.setOptions(new String[] {"-s", "4", "-c", "50"});
 
         double[] tuple;
         while ((tuple = csv.readTuple()) != null) {
             bangFile.insertTuple(tuple);
         }
-        bangFile.buildClusters();
+        bangFile.finishClusterer();
 
         for(double[] t : bangFile.getCluster(0)){
             for (double d : t){
@@ -155,14 +160,15 @@ public class BANGFileTest {
 	@Test
 	public void testClusterTuple() throws Exception  {
         CsvWorker csv = new CsvWorker(CSV_FILE_CLUSTERS, ';', ',', true);
-        BANGFile bangFile = new BANGFile(csv.numberOfDimensions());
-        bangFile.setOptions(new String[] {"-c", "70"});
+        BANGFile bangFile = new BANGFile();
+        bangFile.prepareClusterer(csv.numberOfDimensions());
+        bangFile.setOptions(new String[] {"-s", "4", "-c", "70"});
 
         double[] tuple;
         while ((tuple = csv.readTuple()) != null) {
             bangFile.insertTuple(tuple);
         }
-        bangFile.buildClusters();
+        bangFile.finishClusterer();
 
         assertEquals(1, bangFile.clusterTuple(new double[] {0.23, 0.23, 0.23}));
         assertEquals(1, bangFile.clusterTuple(new double[] {0.25, 0.25, 0.25}));
@@ -188,14 +194,15 @@ public class BANGFileTest {
     @Test
     public void testClusterSingleRegion() throws Exception {
         CsvWorker csv = new CsvWorker(CSV_FILE_NO_HEADER, ';', ',', false);
-        BANGFile bangFile = new BANGFile(csv.numberOfDimensions());
-        bangFile.setOptions(new String[] {"-c", "50"});
+        BANGFile bangFile = new BANGFile();
+        bangFile.prepareClusterer(csv.numberOfDimensions());
+        bangFile.setOptions(new String[] {"-s", "4", "-c", "50"});
 
         double[] tuple;
         while ((tuple = csv.readTuple()) != null) {
             bangFile.insertTuple(tuple);
         }
-        bangFile.buildClusters();
+        bangFile.finishClusterer();
     }
 
 }
