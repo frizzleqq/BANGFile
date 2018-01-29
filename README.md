@@ -16,7 +16,11 @@ Inserted data has to be normalized to an interval [0, 1].
 * Save clustering result to files (Log of clustering system and Cluster-content)
 * Extensibility with new grid-based clustering systems or new data source types
 
+The Console of the application:
+
 ![GUI Console](/doc/gui_console.png?raw=true "Log of clustering system BANG file")
+
+Grid directory of the BANG file:
 
 ![GUI Grid Directory](/doc/gui_grid.png?raw=true "Grid directory of the BANG file")
 
