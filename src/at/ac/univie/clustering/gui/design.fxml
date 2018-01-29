@@ -19,11 +19,7 @@
                     <MenuItem fx:id="closeMenuItem" mnemonicParsing="false" onAction="#onCloseAction" text="Close" />
                   </items>
                 </Menu>
-                <Menu mnemonicParsing="false" text="Edit">
-                  <items>
-                    <MenuItem mnemonicParsing="false" onAction="#onSettingsAction" text="Settings" />
-                  </items>
-                </Menu>
+                <Menu fx:id="clustererMenu" mnemonicParsing="false" text="Clusterer" />
                 <Menu mnemonicParsing="false" text="Help">
                   <items>
                     <MenuItem mnemonicParsing="false" text="About" />

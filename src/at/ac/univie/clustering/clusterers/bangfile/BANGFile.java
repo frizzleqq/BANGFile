@@ -89,7 +89,7 @@ public class BANGFile extends Clusterer {
         options.addOption("s", "bucketsize", true, "The max population of a single " +
                 "data bucket can, if smaller, yield more accurate clusters for the cost of performance depending " +
                 "on the size of the dataset (default = 10)");
-        options.addOption("n", "neighborhood", true, "Provided neighborhood-margin " +
+        options.addOption("n", "neighborhood-margin", true, "Provided neighborhood-margin " +
                 "reduces number of touching dimensions required when expanding cluster with adjacent regions; " +
                 "strictest possible value is 1 (default = 1)");
         options.addOption("c", "cluster-percent", true, "Percentage of data and " +
@@ -110,7 +110,7 @@ public class BANGFile extends Clusterer {
             if (s < 4) {
                 throw new ParseException("Bucketsize may not be lower than 4");
             }
-            bucketsize = s;
+            this.bucketsize = s;
         }
 
         if (cmdLine.hasOption("n")){
@@ -118,7 +118,7 @@ public class BANGFile extends Clusterer {
             if (n < 1){
                 throw new ParseException("Neighborhood-Margin may not be smaller than 1");
             }
-            neighborMargin = n;
+            this.neighborMargin = n;
 
         }
 
@@ -127,7 +127,7 @@ public class BANGFile extends Clusterer {
             if (c < 0 || c > 100) {
                 throw new ParseException("Cluster-Percent must be between 0 and 100");
             }
-            clusterPercent = c;
+            this.clusterPercent = c;
         }
 
         /*
@@ -139,9 +139,9 @@ public class BANGFile extends Clusterer {
     @Override
     public Map<String, String> getOptions() {
         Map<String, String> options = new HashMap<String, String>();
-        options.put("bucketsize", "" + bucketsize);
-        options.put("neighborhood", "" + neighborMargin);
-        options.put("cluster-percent", "" + clusterPercent);
+        options.put("bucketsize", "" + this.bucketsize);
+        options.put("neighborhood-margin", "" + this.neighborMargin);
+        options.put("cluster-percent", "" + this.clusterPercent);
         return options;
     }
 

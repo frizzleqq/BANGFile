@@ -14,16 +14,15 @@ import java.util.List;
 import java.util.Map;
 
 import at.ac.univie.clustering.clusterers.ClustererFactory;
+import at.ac.univie.clustering.dataWorkers.DataWorkerFactory;
 import com.opencsv.CSVWriter;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 
-import at.ac.univie.clustering.data.CsvWorker;
-import at.ac.univie.clustering.data.DataWorker;
+import at.ac.univie.clustering.dataWorkers.DataWorker;
 import at.ac.univie.clustering.clusterers.Clusterer;
 
 /**
@@ -47,12 +46,7 @@ public class CliMain {
         Options options = new Options();
 
         options.addOption("h", "help", false, "show this help.");
-        options.addOption(Option.builder("f")
-                .longOpt("filename")
-                .hasArg(true)
-                .required(true)
-                .desc("filename")
-                .build());
+        options.addOption("f", "filename", true, "Path to CSV-File.");
         options.addOption("d", "delimiter", true, "Delimiter symbol used to seperate " +
                 "values in file. Defaults to '" + delimiter + "'.");
         options.addOption(null, "decimal", true, "Decimal symbol used in file. " +
@@ -71,7 +65,7 @@ public class CliMain {
         CommandLine cmdLine = parser.parse(listOptions(), args);
 
         if (cmdLine.hasOption("h") || cmdLine.hasOption("help")) {
-            help();
+            help(null);
         }
         if (cmdLine.hasOption("header")) {
             header = true;
@@ -85,6 +79,7 @@ public class CliMain {
         if (cmdLine.hasOption("decimal")){
             decimal = cmdLine.getOptionValue("decimal").charAt(0);
         }
+
         return cmdLine;
     }
 
@@ -107,11 +102,23 @@ public class CliMain {
         return options;
     }
 
-    private static void help() {
-        String header = "BANG-File Clusterer:\n\n";
-        String footer = "\nTODO: write more help.";
+    private static void help(Clusterer clusterer) {
+        String header = "File-options:\n";
+        String footer;
+        if (clusterer == null){
+             footer = "\nAvailable clustering-metods: " + ClustererFactory.getClusterers() + "\n" +
+                    "Call 'Cluster METHOD --method-help' to list available options of clustering method.";
+        }else {
+            footer = "";
+        }
+
         HelpFormatter formatter = new HelpFormatter();
-        formatter.printHelp("BANG", header, listOptions(), footer, true);
+        formatter.printHelp("Cluster [file-options] METHOD [method-options]", header, listOptions(), footer, false);
+
+        if (clusterer != null){
+            System.out.println();
+            formatter.printHelp("METHOD", "Method-options:\n", clusterer.listOptions(), "", true);
+        }
         System.exit(0);
     }
 
@@ -178,12 +185,32 @@ public class CliMain {
             parse_options(main_args.toArray(new String[0]));
         }catch (org.apache.commons.cli.ParseException e){
             System.err.println("ERROR: " + e.getMessage());
+            System.err.println("Call 'Cluster --help' for more information.");
             System.exit(ERR_PARAM);
+        }
+
+        String method = null;
+        Clusterer clusterer = null;
+        try{
+            method = cluster_args.remove(0);
+            clusterer = ClustererFactory.createClusterer(method);
+        }catch (IndexOutOfBoundsException e){
+            System.err.println("ERROR: Please provide clustering method.");
+            System.err.println("Call 'Cluster --help' for more information.");
+            System.exit(ERR_PARAM);
+        }catch (NullPointerException e){
+            System.err.println("ERROR: Clustering method '" + method + "' not found.");
+            System.err.println("Call 'Cluster --help' for more information.");
+            System.exit(ERR_PARAM);
+        }
+
+        if (cluster_args.contains("--method-help")){
+            help(clusterer);
         }
 
         DataWorker data = null;
         try {
-            data = new CsvWorker(filename, delimiter, decimal, header);
+            data = DataWorkerFactory.createCsvWorker(filename, delimiter, decimal, header);
         } catch (IOException e) {
             System.err.println(e.getMessage());
             System.exit(ERR_EXCEPTION);
@@ -193,19 +220,16 @@ public class CliMain {
         int tuplesCount = data.numberOfTuples();
 
         if (dimensions == 0) {
-            System.err.println("Could not determine amount of dimensions in provided dataset.");
+            System.err.println("ERROR: Could not determine amount of dimensions in provided dataset.");
             System.exit(ERR_EXCEPTION);
         } else if (dimensions < 2) {
-            System.err.println("Could not determine minimum of 2 dimensions.");
+            System.err.println("ERROR: Could not determine minimum of 2 dimensions.");
             System.exit(ERR_EXCEPTION);
         }
         if (tuplesCount == 0) {
-            System.err.println("Could not determine amount of records in provided dataset.");
+            System.err.println("ERROR: Could not determine amount of records in provided dataset.");
             System.exit(1);
         }
-
-        Clusterer clusterer;
-        clusterer = ClustererFactory.createClusterer("BANGFile");
 
         try {
             clusterer.setOptions(cluster_args.toArray(new String[0]));

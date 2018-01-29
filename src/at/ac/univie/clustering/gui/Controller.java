@@ -2,10 +2,10 @@ package at.ac.univie.clustering.gui;
 
 import at.ac.univie.clustering.clusterers.ClustererFactory;
 import at.ac.univie.clustering.clusterers.Clusterer;
-import at.ac.univie.clustering.data.CsvWorker;
-import at.ac.univie.clustering.data.DataWorker;
+import at.ac.univie.clustering.dataWorkers.DataWorker;
 import at.ac.univie.clustering.clusterers.bangfile.DirectoryEntry;
 import at.ac.univie.clustering.clusterers.bangfile.GridRegion;
+import at.ac.univie.clustering.dataWorkers.DataWorkerFactory;
 import at.ac.univie.clustering.gui.dialogs.FileDialog;
 import at.ac.univie.clustering.gui.dialogs.GridDialog;
 import at.ac.univie.clustering.gui.dialogs.SaveDialog;
@@ -136,7 +136,7 @@ public class Controller{
 
         if(fileDialog.isComplete()){
             try {
-                data = new CsvWorker(FileDialog.getFilename(), FileDialog.getDelimiter(), FileDialog.getDecimal(), FileDialog.getHeader());
+                data = DataWorkerFactory.createCsvWorker(FileDialog.getFilename(), FileDialog.getDelimiter(), FileDialog.getDecimal(), FileDialog.getHeader());
 
                 int tuplesCount = data.numberOfTuples();
                 dataLabel.setText(data.getName());

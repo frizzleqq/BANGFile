@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 
-import at.ac.univie.clustering.data.CsvWorker;
+import at.ac.univie.clustering.dataWorkers.CsvWorker;
 import org.junit.Test;
 
 /**

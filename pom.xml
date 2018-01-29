@@ -3,7 +3,7 @@
   <groupId>at.ac.univie.clustering</groupId>
   <artifactId>BANGFileClustering</artifactId>
   <packaging>jar</packaging>
-  <version>0.0.1</version>
+  <version>1.0.0</version>
   <build>
     <sourceDirectory>src</sourceDirectory>
     <testSourceDirectory>test</testSourceDirectory>
