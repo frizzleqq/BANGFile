@@ -9,7 +9,7 @@
     <testSourceDirectory>test</testSourceDirectory>
     <resources>
       <resource>
-        <directory>src</directory>
+        <directory>src/resources</directory>
         <excludes>
           <exclude>**/*.java</exclude>
         </excludes>
