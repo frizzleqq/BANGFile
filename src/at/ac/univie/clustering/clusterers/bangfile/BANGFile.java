@@ -689,27 +689,38 @@ public class BANGFile extends Clusterer {
         StringBuilder builder = new StringBuilder();
         builder.append("BANG-File:");
 
-        builder.append("\n\tDimension: " + dimensions);
-        builder.append("\n\tNeighborhood-Margin: " + neighborMargin);
-        builder.append("\n\tBucketsize: " + bucketsize);
-        builder.append("\n\tCluster-Percent: " + clusterPercent);
-        builder.append("\n\tTuples: " + tuplesCount);
+        builder.append(String.format("%n    %-21s %10d", "Dimension:", dimensions));
+        builder.append(String.format("%n    %-21s %10d", "Neighborhood-Margin:", neighborMargin));
+        builder.append(String.format("%n    %-21s %10d", "Bucketsize:", bucketsize));
+        builder.append(String.format("%n    %-21s %10d", "Cluster-Percent:", clusterPercent));
+        builder.append(String.format("%n    %-21s %10d", "Tuples:", tuplesCount));
 
-        builder.append("\n\nClusters: " + clusters.size());
-        builder.append("\n\t\t\tPopulation\t\tof Total %\t\tof Clustered");
+        builder.append(String.format("%n%nClusters: %3d%n", clusters.size()));
+
+        String line = new String(new char[61]).replace('\0', '-');
+
+        builder.append(line + "\n");
+        builder.append(String.format("| %-12s | %12s | %12s | %12s |%n",
+                "Cluster ID",
+                "Population",
+                "Of Total",
+                "Of Clustered"));
+        builder.append(line + "\n");
 
         int population;
-        int populationToTotal;
-        int populationToClustered;
+        double populationToTotal;
+        double populationToClustered;
         for (Cluster c : clusters){
-            builder.append("\nCluster " + clusters.indexOf(c) + ":");
             population = c.getPopulation();
-            populationToTotal = (population * 100 / tuplesCount);
-            populationToClustered = (population * clusterPercent / tuplesCount);
-            builder.append("\t" + population);
-            builder.append("\t\t\t\t( " + populationToTotal + "%)");
-            builder.append("\t\t\t( " + populationToClustered + "%)");
+            populationToTotal = (double) population * 100 / tuplesCount;
+            populationToClustered = (double) population * 100 / (tuplesCount * clusterPercent / 100);
+            builder.append(String.format("| %-12s | %12d | %10.1f %% | %10.1f %% |%n",
+                    String.format("Cluster %2d", clusters.indexOf(c)),
+                    population,
+                    populationToTotal,
+                    populationToClustered));
         }
+        builder.append(line);
 
         return builder.toString();
     }

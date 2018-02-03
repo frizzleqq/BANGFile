@@ -117,7 +117,10 @@
                      <content>
                         <BorderPane prefHeight="200.0" prefWidth="200.0">
                            <center>
-                              <TextArea fx:id="logArea" editable="false" BorderPane.alignment="CENTER" />
+                              <TextArea fx:id="logArea" editable="false" BorderPane.alignment="CENTER">
+                                 <font>
+                                    <Font name="Monospaced Regular" size="12.0" />
+                                 </font></TextArea>
                            </center>
                            <left>
                               <Region prefWidth="5.0" BorderPane.alignment="CENTER" />
@@ -130,6 +133,9 @@
                                  <children>
                                     <Button fx:id="saveButton" disable="true" mnemonicParsing="false" onAction="#onSaveAction" prefWidth="70.0" text="Save" />
                                  </children>
+                                 <padding>
+                                    <Insets top="10.0" />
+                                 </padding>
                               </VBox>
                            </right></BorderPane>
                      </content>
