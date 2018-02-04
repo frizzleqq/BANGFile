@@ -16,7 +16,7 @@
          <children>
             <HBox>
                <children>
-                  <Label fx:id="infoLabel" prefWidth="358.0" textFill="#fc0000" />
+                  <Label fx:id="infoLabel" prefWidth="300.0" textFill="#fc0000" />
                </children>
             </HBox>
             <HBox alignment="CENTER_RIGHT" spacing="8.0">

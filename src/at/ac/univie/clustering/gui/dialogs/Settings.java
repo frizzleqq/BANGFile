@@ -89,7 +89,7 @@ public class Settings extends Stage {
             optionHBox.getChildren().add(optionLabel);
             if(o.hasArg()){
                 optionTextField = new TextField();
-                optionTextField.setPrefColumnCount(2);
+                optionTextField.setPrefColumnCount(4);
                 optionTextField.setText(optionArgs.get(optionLabel.getText()));
                 optionHBox.getChildren().add(optionTextField);
             } else{

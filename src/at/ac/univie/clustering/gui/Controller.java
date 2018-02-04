@@ -198,6 +198,9 @@ public class Controller{
             clusterer.prepareClusterer(data.numberOfDimensions());
 
             //reset ui elements
+            progressBar.progressProperty().unbind();
+            progressBar.setProgress(0);
+
             dendogramChart.getData().clear();
             dendogramChart.layout();
 
@@ -344,7 +347,7 @@ public class Controller{
                     }
 
                     clusterer.insertTuple(tuple);
-                    updateProgress(data.getCurrentPosition() * 1 / data.numberOfTuples(), data.numberOfTuples());
+                    updateProgress((double) data.getCurrentPosition() / data.numberOfTuples(), 1);
                 }
                 return result;
             }
