@@ -26,15 +26,15 @@ Grid directory of the BANG file:
 
 ## How to build
 
-The Clustering System uses the maven framework.
+The Clustering System uses the Maven framework.
 
-#### pre-requisites for building the project:
-* Maven version 3+
-* Java JRE 1.8
+#### Prerequisites for building the project:
+* Maven 3+
+* Java JDK 1.8
 
 #### Bulding it
 
-Use the following Maven commands to build it
+Use the following Maven commands to build it:
 
 ```
 $ mvn clean install
@@ -46,8 +46,16 @@ The result of the build will be BANG file clustering package located in ```targe
 
 #### Running the tests
 
-This will run all unit tests in the project (and sub-modules).
+This will run all unit tests in the project (and sub-modules):
 
 ```
 $ mvn test
 ```
+
+### Creating standalone JAR
+
+Use the following command to create a standalone executable JAR with all dependencies included:
+
+````
+$ mvn clean compile assembly:single
+````

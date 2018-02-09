@@ -126,8 +126,6 @@ public class CliMain {
      * Read dataset line by line and inserting it into our cluster model.
      * Performs checks if data-tuple has correct amount of values and all values are between 0 and 1.
      *
-     * TODO: checks may be unnecessary performance impact
-     *
      * @param cluster
      * @param data
      * @throws IOException
