@@ -30,13 +30,15 @@ public class BANGFile extends Clusterer {
     /* Number of dimensions in data-set */
     private int dimensions;
     /* Max number of tuples within a single region */
-    private int bucketsize = 10;
+    private int bucketsize = 100;
     /* Reduces number of touching dimensions required when expanding cluster */
     private int neighborMargin = 1;
     /* Degree of neighborhood necessary to determine neighborhood */
     private int neighborCondition = 1;
     /* Amount of tuples to be included in clusters */
     private int clusterPercent = 50;
+    /* TODO */
+    private boolean alias;
 
      /* Number of splits(levels of granularity) in dimension x. (0 is the sum of all dimensions) */
     private int[] dimensionLevels = null;
@@ -48,7 +50,6 @@ public class BANGFile extends Clusterer {
     private List<GridRegion> dendogram;
     /* List of clusters */
     private List<Cluster> clusters;
-    private int nAlias;
 
     /**
      * Create clusters with references to contained regions.
@@ -88,7 +89,7 @@ public class BANGFile extends Clusterer {
         Options options = new Options();
         options.addOption("s", "bucketsize", true, "The max population of a single " +
                 "data bucket can, if smaller, yield more accurate clusters for the cost of performance depending " +
-                "on the size of the dataset (default = 10)");
+                "on the size of the dataset (default = 100)");
         options.addOption("n", "neighborhood-margin", true, "Provided neighborhood-margin " +
                 "reduces number of touching dimensions required when expanding cluster with adjacent regions; " +
                 "strictest possible value is 1 (default = 1)");
@@ -578,6 +579,7 @@ public class BANGFile extends Clusterer {
         for (Iterator<GridRegion> it = remaining.iterator(); it.hasNext(); ){
             GridRegion tupleReg = it.next();
             if (dendogram.get(dendoPos).isNeighbor(tupleReg, dimensions, neighborCondition)) {
+
                 // determine position in dendogram
                 int insertPos = startSearchPos;
                 while (insertPos < dendogram.size() &&  dendogram.get(insertPos).getDensity() > tupleReg.getDensity()){
@@ -621,15 +623,6 @@ public class BANGFile extends Clusterer {
         if ((tupleReg.getPopulation() - diff) <= diff){
             clusteredRegions++;
         }
-
-        /*
-        System.out.println(clusteredRegions);
-        System.out.println();
-        for(GridRegion t : dendogram){
-            System.out.println(t.getDensity());
-            System.out.println(t.getPosition());
-            System.out.println();
-        }*/
 
         List<Cluster> clusters = new ArrayList<Cluster>();
         if (clusteredRegions == 0){
@@ -689,11 +682,17 @@ public class BANGFile extends Clusterer {
         StringBuilder builder = new StringBuilder();
         builder.append("BANG-File:");
 
+        int tuplesClustered = 0;
+        for (Cluster c : clusters) {
+             tuplesClustered += c.getPopulation();
+        }
+
         builder.append(String.format("%n    %-21s %10d", "Dimension:", dimensions));
         builder.append(String.format("%n    %-21s %10d", "Neighborhood-Margin:", neighborMargin));
         builder.append(String.format("%n    %-21s %10d", "Bucketsize:", bucketsize));
         builder.append(String.format("%n    %-21s %10d", "Cluster-Percent:", clusterPercent));
         builder.append(String.format("%n    %-21s %10d", "Tuples:", tuplesCount));
+        builder.append(String.format("%n    %-21s %10d", "Tuples Clustered:", tuplesClustered));
 
         builder.append(String.format("%n%nClusters: %3d%n", clusters.size()));
 

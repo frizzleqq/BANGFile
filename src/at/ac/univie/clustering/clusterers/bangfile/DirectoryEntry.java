@@ -255,15 +255,15 @@ public class DirectoryEntry {
      * @param level
      */
     void buildAlias(DirectoryEntry dirEntry, long region, int level) {
-        if (this.region == null) {
-            if (left != null) {
-                buildAlias(left, region, level + 1);
+        if (dirEntry.getRegion() == null) {
+            if (dirEntry.getLeft() != null) {
+                buildAlias(dirEntry.getLeft(), region, level + 1);
             } else {
                 this.region.getAliases().add(new GridRegion(region, level + 1));
             }
 
-            if (right != null) {
-                buildAlias(right, region + (1 << level), level + 1);
+            if (dirEntry.getRight() != null) {
+                buildAlias(dirEntry.getRight(), region + (1 << level), level + 1);
             } else {
                 this.region.getAliases().add((new GridRegion(region + (1 << level), level + 1)));
             }

@@ -195,6 +195,8 @@ public class Controller{
                 data.reset();
             }
 
+            logArea.setText("");
+
             clusterer.prepareClusterer(data.numberOfDimensions());
 
             //reset ui elements
