@@ -1,4 +1,4 @@
-# BANG file Clustering System
+# BANG-file Clustering System
 
 BANG file is a multidimensional structure of the grid file type.
 It organizes the value space surrounding the data values, instead of comparing the data values themselves.
